@@ -25,6 +25,7 @@
 
 #include "common/resourcemanager.h"
 
+#include "game-server/mapmanager.h"
 #include "game-server/attributemanager.h"
 #include "game-server/skillmanager.h"
 #include "game-server/specialmanager.h"
@@ -41,6 +42,7 @@
 void SettingsManager::initialize()
 {
     // initialize all managers in correct order
+    MapManager::initialize();
     attributeManager->initialize();
     skillManager->initialize();
     specialManager->initialize();
@@ -61,6 +63,7 @@ void SettingsManager::initialize()
  */
 void SettingsManager::reload()
 {
+    MapManager::reload();
     attributeManager->reload();
     skillManager->reload();
     specialManager->reload();
@@ -125,6 +128,11 @@ void SettingsManager::loadFile(const std::string &filename)
                 }
             }
         }
+        else if (xmlStrEqual(childNode->name, BAD_CAST "map"))
+        {
+            // map config
+            MapManager::readMapNode(childNode);
+        }
         else if (xmlStrEqual(childNode->name, BAD_CAST "attribute"))
         {
             // attribute config
@@ -181,6 +189,7 @@ void SettingsManager::loadFile(const std::string &filename)
  */
 void SettingsManager::checkStatus()
 {
+    MapManager::checkStatus();
     attributeManager->checkStatus();
     skillManager->checkStatus();
     specialManager->checkStatus();

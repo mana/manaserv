@@ -22,10 +22,10 @@
 #include "game-server/mapmanager.h"
 
 #include "common/resourcemanager.h"
+#include "common/defines.h"
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "utils/logger.h"
-#include "utils/xml.h"
 
 #include <cassert>
 
@@ -39,73 +39,14 @@ const MapManager::Maps &MapManager::getMaps()
     return maps;
 }
 
-int MapManager::initialize(const std::string &mapReferenceFile)
+void MapManager::initialize()
 {
-    // Indicates the number of maps loaded successfully
-    int loadedMaps = 0;
 
-    XML::Document doc(mapReferenceFile);
-    xmlNodePtr rootNode = doc.rootNode();
-
-    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "maps"))
-    {
-        LOG_ERROR("Item Manager: Error while parsing map database ("
-                  << mapReferenceFile << ")!");
-        return loadedMaps;
-    }
-
-    LOG_INFO("Loading map reference: " << mapReferenceFile);
-    for_each_xml_child_node(node, rootNode)
-    {
-        if (!xmlStrEqual(node->name, BAD_CAST "map"))
-            continue;
-
-        int id = XML::getProperty(node, "id", 0);
-        std::string name = XML::getProperty(node, "name", std::string());
-
-        // Test id and map name
-        if (id > 0 && !name.empty())
-        {
-            // Testing if the file is actually in the maps folder
-            std::string file = std::string("maps/") + name + ".tmx";
-            bool mapFileExists = ResourceManager::exists(file);
-
-            // Try to fall back on fully compressed map
-            if (!mapFileExists)
-            {
-                file += ".gz";
-                mapFileExists = ResourceManager::exists(file);
-            }
-
-            if (mapFileExists)
-            {
-                maps[id] = new MapComposite(id, name);
-                if (!maps[id]->readMap())
-                    LOG_FATAL("Failed to load map \"" << name << "\"!");
-
-                ++loadedMaps;
-            }
-        }
-        else
-        {
-            if (name.empty())
-            {
-                LOG_WARN("Invalid unnamed map Id: " << id << '.');
-            }
-            else
-            {
-                LOG_WARN("Invalid map Id: " << id << " for map: "
-                         << name << '.');
-            }
-        }
-    }
-
-    if (loadedMaps > 0)
-        LOG_INFO(loadedMaps << " valid map file references were loaded.");
-
-    return loadedMaps;
 }
 
+/**
+ * Destroys all maps.
+ */
 void MapManager::deinitialize()
 {
     for (Maps::iterator i = maps.begin(), i_end = maps.end(); i != i_end; ++i)
@@ -113,6 +54,72 @@ void MapManager::deinitialize()
         delete i->second;
     }
     maps.clear();
+}
+
+/**
+ * Prepare map manager for a reload.
+ */
+void MapManager::reload()
+{
+    // TODO: this method needs proper map reloading
+    LOG_ERROR("MapManager::reload() not implemented yet");
+}
+
+/**
+ * Read a <map> node from settings
+ */
+void MapManager::readMapNode(xmlNodePtr node)
+{
+    int id = XML::getProperty(node, "id", 0);
+    std::string name = XML::getProperty(node, "name", std::string());
+
+
+    if (id <= 0)
+    {
+        LOG_WARN("Invalid map Id: " << id << " for map: "
+                 << name << '.');
+    }
+    else if (name.empty())
+    {
+        LOG_WARN("Invalid unnamed map Id: " << id << '.');
+    }
+    else
+    {
+        // Testing if the file is actually in the maps folder
+        std::string file = std::string("maps/") + name + ".tmx";
+        bool mapFileExists = ResourceManager::exists(file);
+
+        // Try to fall back on fully compressed map
+        if (!mapFileExists)
+        {
+            file += ".gz";
+            mapFileExists = ResourceManager::exists(file);
+        }
+
+        if (mapFileExists)
+        {
+            maps[id] = new MapComposite(id, name);
+            if (!maps[id]->readMap())
+                LOG_FATAL("Failed to load map \"" << name << "\"!");
+        }
+    }
+}
+
+/**
+ * Check the status of recently loaded configuration.
+ */
+void MapManager::checkStatus()
+{
+    int loadedMaps = maps.size();
+    if (loadedMaps > 0)
+    {
+        LOG_INFO(loadedMaps << " valid map file references were loaded.");
+    }
+    else
+    {
+        LOG_FATAL("The Game Server can't find any valid/available maps.");
+        exit(EXIT_MAP_FILE_NOT_FOUND);
+    }
 }
 
 MapComposite *MapManager::getMap(int mapId)
