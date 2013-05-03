@@ -33,14 +33,8 @@ namespace MapManager
 {
     typedef std::map< int, MapComposite * > Maps;
 
-    /**
-     * Loads map reference file and prepares maps.
-     */
     void initialize();
 
-    /**
-     * Destroy loaded maps.
-     */
     void deinitialize();
 
     void reload();

@@ -44,6 +44,9 @@ void MapManager::initialize()
 
 }
 
+/**
+ * Destroys all maps.
+ */
 void MapManager::deinitialize()
 {
     for (Maps::iterator i = maps.begin(), i_end = maps.end(); i != i_end; ++i)
@@ -59,8 +62,7 @@ void MapManager::deinitialize()
 void MapManager::reload()
 {
     // TODO: this method needs proper map reloading
-    deinitialize();
-    initialize();
+    LOG_ERROR("MapManager::reload() not implemented yet");
 }
 
 /**
