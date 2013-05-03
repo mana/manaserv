@@ -213,12 +213,11 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 // transmit global world state variables
                 std::map<std::string, std::string> variables;
                 variables = storage->getAllWorldStateVars(Storage::WorldMap);
-                for (std::map<std::string, std::string>::iterator i = variables.begin();
-                     i != variables.end();
-                     i++)
+
+                for (auto &variableIt : variables)
                 {
-                    outMsg.writeString(i->first);
-                    outMsg.writeString(i->second);
+                    outMsg.writeString(variableIt.first);
+                    outMsg.writeString(variableIt.second);
                 }
 
                 comp->send(outMsg);
@@ -256,12 +255,10 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                      // Map vars number
                     outMsg.writeInt16(variables.size());
 
-                    for (std::map<std::string, std::string>::iterator i = variables.begin();
-                         i != variables.end();
-                         i++)
+                    for (auto &variableIt : variables)
                     {
-                        outMsg.writeString(i->first);
-                        outMsg.writeString(i->second);
+                        outMsg.writeString(variableIt.first);
+                        outMsg.writeString(variableIt.second);
                     }
 
                     // Persistent Floor Items
@@ -393,14 +390,12 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             // save the new value to the database
             storage->setWorldStateVar(name, value, Storage::WorldMap);
             // relay the new value to all gameservers
-            for (ServerHandler::NetComputers::iterator i = clients.begin();
-                i != clients.end();
-                i++)
+            for (NetComputer *netComputer : clients)
             {
                 MessageOut varUpdateMessage(AGMSG_SET_VAR_WORLD);
                 varUpdateMessage.writeString(name);
                 varUpdateMessage.writeString(value);
-                (*i)->send(varUpdateMessage);
+                netComputer->send(varUpdateMessage);
             }
         } break;
 

@@ -36,6 +36,9 @@ class Account
     public:
         Account(int id = -1)
             : mID(id)
+            , mLevel(0)
+            , mRegistrationDate(0)
+            , mLastLogin(0)
         {}
 
         ~Account();

@@ -40,7 +40,7 @@ class NetComputer
         /**
          * Returns <code>true</code> if this computer is connected.
          */
-        bool isConnected();
+        bool isConnected() const;
 
         /**
          * Disconnects the computer from the server, after sending a message.

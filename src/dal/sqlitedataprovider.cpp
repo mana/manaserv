@@ -43,6 +43,7 @@ const std::string SqLiteDataProvider::CFGPARAM_SQLITE_DB_DEF = "mana.db";
 SqLiteDataProvider::SqLiteDataProvider()
     throw()
         : mDb(0)
+        , mStmt(0)
 {
 }
 

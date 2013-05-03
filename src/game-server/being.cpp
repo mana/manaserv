@@ -234,12 +234,11 @@ void BeingComponent::move(Entity &entity)
      * class has been used, because that seems to be the most logical
      * place extra functionality will be added.
      */
-    for (Path::iterator pathIterator = mPath.begin();
-            pathIterator != mPath.end(); pathIterator++)
+    for (Point &point : mPath)
     {
         const unsigned char walkmask =
                 entity.getComponent<ActorComponent>()->getWalkMask();
-        if (!map->getWalk(pathIterator->x, pathIterator->y, walkmask))
+        if (!map->getWalk(point.x, point.y, walkmask))
         {
             mPath.clear();
             break;
@@ -498,12 +497,10 @@ void BeingComponent::removeStatusEffect(int id)
 
 bool BeingComponent::hasStatusEffect(int id) const
 {
-    StatusEffects::const_iterator it = mStatus.begin();
-    while (it != mStatus.end())
+    for (auto &statusIt : mStatus)
     {
-        if (it->second.status->getId() == id)
+        if (statusIt.second.status->getId() == id)
             return true;
-        it++;
     }
     return false;
 }
@@ -566,12 +563,12 @@ void BeingComponent::update(Entity &entity)
         if (it->second.time <= 0 || mAction == DEAD)
         {
             StatusEffects::iterator removeIt = it;
-            it++; // bring this iterator to the safety of the next element
+            ++it; // bring this iterator to the safety of the next element
             mStatus.erase(removeIt);
         }
         else
         {
-            it++;
+            ++it;
         }
     }
 

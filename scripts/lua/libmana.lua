@@ -367,27 +367,27 @@ end
 
 -- Below are some convenience methods added to the engine API
 
---- LUA chr_money_change (inventory)
--- chr_money_change(handle character, int amount)
+--- LUA entity:change_money (inventory)
+-- entity:change_money(int amount)
 ---
--- Changes the money currently owned by ''character'' by ''amount''.
+-- Valid only for character entities.
+--
+-- Changes the money currently owned by this character by ''amount''.
 --
 -- **Warning:** Before reducing the money make sure to check if the character
--- owns enough money using chr_money.
-chr_money_change = function(ch, amount)
-  ch:set_base_attribute(ATTR_GP,
-                        ch:base_attribute(ATTR_GP) + amount)
+-- owns enough money using entity:money.
+function Entity:change_money(amount)
+  self:set_base_attribute(ATTR_GP, self:base_attribute(ATTR_GP) + amount)
 end
 
---- LUA chr_money (inventory)
--- chr_money(handle character)
+--- LUA entity:money (inventory)
+-- entity:money()
 ---
--- Changes the money currently owned by ''character'' by ''amount''.
+-- Valid only for character entities.
 --
--- **Warning:** Before reducing the money make sure to check if the character
--- owns enough money using chr_money.
-chr_money = function(ch)
-  return ch:base_attribute(ATTR_GP)
+-- Returns the money currently owned by this character.
+function Entity:money()
+    return self:base_attribute(ATTR_GP)
 end
 
 -- Register callbacks

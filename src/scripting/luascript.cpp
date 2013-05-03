@@ -101,14 +101,12 @@ void LuaScript::push(const std::list<InventoryItem> &itemList)
     lua_createtable(mCurrentState, itemList.size(), 0);
     int itemTable = lua_gettop(mCurrentState);
 
-    for (std::list<InventoryItem>::const_iterator i = itemList.begin();
-         i != itemList.end();
-         i++)
+    for (const InventoryItem &inventoryItem : itemList)
     {
         // create the item structure
         std::map<std::string, int> item;
-        item["id"] = i->itemId;
-        item["amount"] = i->amount;
+        item["id"] = inventoryItem.itemId;
+        item["amount"] = inventoryItem.amount;
         pushSTLContainer<std::string, int>(mCurrentState, item);
         lua_rawseti(mCurrentState, itemTable, ++position);
     }

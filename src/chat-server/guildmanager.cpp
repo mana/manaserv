@@ -29,10 +29,9 @@
 
 using namespace ManaServ;
 
-GuildManager::GuildManager()
+GuildManager::GuildManager():
+        mGuilds(storage->getGuildList())
 {
-    // Load stored guilds from db
-    mGuilds = storage->getGuildList();
 }
 
 GuildManager::~GuildManager()

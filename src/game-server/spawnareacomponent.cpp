@@ -58,7 +58,6 @@ void SpawnAreaComponent::update(Entity &entity)
         }
 
         // Find a free spawn location. Give up after 10 tries
-        int triesLeft = 10;
         Point position;
         const int x = mZone.x;
         const int y = mZone.y;
@@ -81,6 +80,7 @@ void SpawnAreaComponent::update(Entity &entity)
 
         if (being)
         {
+            int triesLeft = 10;
             do
             {
                 position = Point(x + rand() % width, y + rand() % height);
