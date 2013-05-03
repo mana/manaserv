@@ -106,6 +106,11 @@ public:
 #else
         luaL_setfuncs(s, members, 0);
 #endif
+
+        // Make the functions table available as a global
+        lua_pushvalue(s, -1);                   // metatable, "__index", {}, {}
+        lua_setglobal(s, mTypeName);            // metatable, "__index", {}
+
         lua_rawset(s, -3);                      // metatable
         lua_pop(s, 1);                          // -empty-
     }
