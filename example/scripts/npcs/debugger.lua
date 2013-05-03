@@ -50,8 +50,8 @@ function npc1_talk(npc, ch)
     end
 
   elseif v == 3 then
-    if chr_money_change(ch, -100) then
-      say(string.format("Thank you for you patronage! You are left with %d GP.", chr_money(ch)))
+    if ch:change_money(-100) then
+      say(string.format("Thank you for you patronage! You are left with %d GP.", ch:money()))
       local g = tonumber(chr_get_quest(ch, "001_donation"))
       if not g then g = 0 end
       g = g + 100

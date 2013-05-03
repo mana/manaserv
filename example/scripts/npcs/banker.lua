@@ -37,16 +37,16 @@ function Banker(npc, ch)
         result = 1
         while (result < 3) do --While they've choosen a valid option that isn't "Never mind"
             account = tonumber(chr_get_quest(ch, "BankAccount")) --Why do I need to convert this?
-            say("Your balance: " .. account .. ".\nYour money: " .. chr_money(ch) .. ".")
+            say("Your balance: " .. account .. ".\nYour money: " .. ch:money() .. ".")
             result = ask("Deposit", "Withdraw", "Never mind")
             if (result == 1) then --Deposit
-                money = chr_money(ch);
+                money = ch:money();
                 if (money > 0) then --Make sure they have money to deposit
                     say("How much would you like to deposit? (0 will cancel)")
-                    input = ask_integer(0, money, 1)
-                    money = chr_money(ch)
+                    input = ask_number(0, money, 1)
+                    money = ch:money()
                     if (input > 0 and input <= money) then --Make sure something weird doesn't happen and they try to deposit more than they have
-                        chr_money_change(ch, -input)
+                        ch:change_money(-input)
                         chr_set_quest(ch, "BankAccount", account + input)
                         say(input .. " GP deposited.")
                     elseif (input > money) then --Chosen more than they have
@@ -58,9 +58,9 @@ function Banker(npc, ch)
             elseif (result == 2) then --Withdraw
                 if (account > 0) then --Make sure they have money to withdraw
                     say("How much would you like to withdraw? (0 will cancel)")
-                    input = ask_integer(0, account, 1)
+                    input = ask_number(0, account, 1)
                     if (input > 0 and input <= account) then --Make sure something weird doesn't happen and they try to withdraw more than they have
-                        chr_money_change(ch, input)
+                        ch:change_money(input)
                         chr_set_quest(ch, "BankAccount", account - input)
                         say(input .. " GP withdrawn.")
                     elseif (input > account) then --Chosen more than they have

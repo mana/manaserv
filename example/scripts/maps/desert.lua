@@ -79,8 +79,8 @@ function Harmony(npc, ch, list)
     --- Give the player 100 units of money the first time.
     if  harmony_have_talked_to_someone == false then
         say("Here is some money for you to find some toys to play with.\nEh Eh!")
-        chr_money_change(ch, 100)
-        say(string.format("You now have %d shiny coins!", chr_money(ch)))
+        ch:change_money(100)
+        say(string.format("You now have %d shiny coins!", ch:money()))
         harmony_have_talked_to_someone = true
         say(string.format("Try to come back with a better level than %i.", ch:level()))
     else
