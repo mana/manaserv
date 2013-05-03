@@ -128,11 +128,6 @@ static void initializeServer()
 
     ResourceManager::initialize();
     ScriptManager::initialize();   // Depends on ResourceManager
-    if (MapManager::initialize(DEFAULT_MAPSDB_FILE) < 1)
-    {
-        LOG_FATAL("The Game Server can't find any valid/available maps.");
-        exit(EXIT_MAP_FILE_NOT_FOUND);
-    }
 
     // load game settings files
     settingsManager->initialize();

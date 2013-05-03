@@ -25,6 +25,8 @@
 #include <map>
 #include <string>
 
+#include "utils/xml.h"
+
 class MapComposite;
 
 namespace MapManager
@@ -33,14 +35,19 @@ namespace MapManager
 
     /**
      * Loads map reference file and prepares maps.
-     * @return the number of maps loaded succesfully
      */
-    int initialize(const std::string &mapReferenceFile);
+    void initialize();
 
     /**
      * Destroy loaded maps.
      */
     void deinitialize();
+
+    void reload();
+
+    void readMapNode(xmlNodePtr node);
+
+    void checkStatus();
 
     /**
      * Returns the requested map.

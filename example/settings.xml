@@ -1,4 +1,5 @@
 <settings>
+	<include file="maps.xml" />
 	<include file="attributes.xml" />
 	<include file="skills.xml" />
 	<include file="specials.xml" />
