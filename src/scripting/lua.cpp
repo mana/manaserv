@@ -1381,6 +1381,23 @@ static int entity_walk(lua_State *s)
     return 0;
 }
 
+/** LUA entity:destination (being)
+ * local x, y = entity:destination()
+ **
+ * Valid only for being entities.
+ *
+ * **Return value:** The x and y coordinates of the destination.
+ */
+static int entity_destination(lua_State *s)
+{
+    Entity *being = checkBeing(s, 1);
+    auto *beingComponent = being->getComponent<BeingComponent>();
+    const Point &point = beingComponent->getDestination();
+    lua_pushinteger(s, point.x);
+    lua_pushinteger(s, point.y);
+    return 2;
+}
+
 /** LUA entity:heal (being)
  * entity:heal([int value])
  **
@@ -3366,6 +3383,7 @@ LuaScript::LuaScript():
         { "ability_mana",                   entity_get_ability_mana           },
         { "cooldown_ability",               entity_cooldown_ability           },
         { "walk",                           entity_walk                       },
+        { "destination",                    entity_destination                },
         { "heal",                           entity_heal                       },
         { "name",                           entity_get_name                   },
         { "type",                           entity_get_type                   },
