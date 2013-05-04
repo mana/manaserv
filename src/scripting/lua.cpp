@@ -1531,15 +1531,8 @@ static int entity_set_direction(lua_State *s)
 static int entity_set_walkmask(lua_State *s)
 {
    Entity *being = checkActor(s, 1);
-   const char *stringMask = luaL_checkstring(s, 2);
-   unsigned char mask = 0x00;
-   if (strchr(stringMask, 'w'))
-       mask |= Map::BLOCKMASK_WALL;
-   else if (strchr(stringMask, 'c'))
-       mask |= Map::BLOCKMASK_CHARACTER;
-   else if (strchr(stringMask, 'm'))
-       mask |= Map::BLOCKMASK_MONSTER;
-   being->getComponent<ActorComponent>()->setWalkMask(mask);
+   unsigned char walkmask = checkWalkMask(s, 2);
+   being->getComponent<ActorComponent>()->setWalkMask(walkmask);
    return 0;
 }
 
@@ -2492,6 +2485,40 @@ static int is_walkable(lua_State *s)
     return 1;
 }
 
+/** LUA get_path_length (mapinformation)
+ * get_path_lenght(int startX, int startY, int destX, int destY, int maxRange)
+ * get_path_lenght(int startX, int startY, int destX, int destY, int maxRange,
+ *                 string walkmask)
+ **
+ * Tries to find a path from the start coordinates to the target ones with a
+ * maximum of ''maxRange'' steps (in tiles).
+ *
+ * If no ''walkmask'' is passed '''w''' is used.
+ *
+ * **Return value:** The number of steps (in tiles) are required to reach
+ * the target or 0 if no path was found.
+ */
+static int get_path_length(lua_State *s)
+{
+    const int startX = luaL_checkint(s, 1);
+    const int startY = luaL_checkint(s, 2);
+    const int destX = luaL_checkint(s, 3);
+    const int destY = luaL_checkint(s, 4);
+    unsigned maxRange = luaL_checkint(s, 5);
+    unsigned char walkmask = BLOCKTYPE_WALL;
+    if (lua_gettop(s) > 5)
+        walkmask = checkWalkMask(s, 6);
+
+    Map *map = checkCurrentMap(s)->getMap();
+    Path path = map->findPath(startX / map->getTileWidth(),
+                              startY / map->getTileHeight(),
+                              destX / map->getTileWidth(),
+                              destY / map->getTileHeight(),
+                              walkmask, maxRange);
+    lua_pushinteger(s, path.size());
+    return 1;
+}
+
 /** LUA map_get_pvp (mapinformation)
  * map_get_pvp()
  **
@@ -3304,6 +3331,7 @@ LuaScript::LuaScript():
         { "get_map_id",                     get_map_id                        },
         { "get_map_property",               get_map_property                  },
         { "is_walkable",                    is_walkable                       },
+        { "get_path_length",                get_path_length                   },
         { "map_get_pvp",                    map_get_pvp                       },
         { "item_drop",                      item_drop                         },
         { "log",                            log                               },
