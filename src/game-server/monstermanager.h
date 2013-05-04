@@ -29,6 +29,8 @@
 
 class MonsterClass;
 
+typedef std::map< int, MonsterClass * > MonsterClasses;
+
 class MonsterManager
 {
     public:
@@ -66,16 +68,21 @@ class MonsterManager
          */
         MonsterClass *getMonsterByName(const std::string &name) const;
 
+        const MonsterClasses &getMonsterClasses() const;
+
         void readMonsterNode(xmlNodePtr node, const std::string &filename);
 
         void checkStatus();
 
     private:
-
-        typedef std::map< int, MonsterClass * > MonsterClasses;
         MonsterClasses mMonsterClasses; /**< Monster reference */
         utils::NameMap<MonsterClass*> mMonsterClassesByName;
 };
+
+inline const MonsterClasses &MonsterManager::getMonsterClasses() const
+{
+    return mMonsterClasses;
+}
 
 extern MonsterManager *monsterManager;
 

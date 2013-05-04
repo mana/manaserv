@@ -2955,6 +2955,19 @@ static int get_monster_class(lua_State *s)
     return 1;
 }
 
+/** LUA get_monster_classes (monsterclass)
+ * get_monster_classes()
+ **
+ * **Return value:** A Table with all monster classes. The id of the monster
+ * is the key. The monster class itself the value. See below for the usage of
+ * this object.
+ */
+static int get_monster_classes(lua_State *s)
+{
+    pushSTLContainer(s, monsterManager->getMonsterClasses());
+    return 1;
+}
+
 /** LUA monsterclass:on_update (monsterclass)
  * monsterclass:on_update(function callback)
  **
@@ -3260,6 +3273,7 @@ LuaScript::LuaScript():
         { "on_mapupdate",                   on_mapupdate                      },
         { "get_item_class",                 get_item_class                    },
         { "get_monster_class",              get_monster_class                 },
+        { "get_monster_classes",            get_monster_classes               },
         { "get_status_effect",              get_status_effect                 },
         { "npc_create",                     npc_create                        },
         { "say",                            say                               },

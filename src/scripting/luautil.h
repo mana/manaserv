@@ -212,6 +212,11 @@ inline void push(lua_State *s, MapObject *val)
     LuaMapObject::push(s, val);
 }
 
+inline void push(lua_State *s, MonsterClass *val)
+{
+    LuaMonsterClass::push(s, val);
+}
+
 
 /*  Pushes an STL LIST */
 template <typename T>
