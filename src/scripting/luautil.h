@@ -179,6 +179,7 @@ MonsterClass *               checkMonsterClass(lua_State *s, int p);
 Entity *                     checkNpc(lua_State *s, int p);
 int                          checkSkill(lua_State *s, int p);
 AbilityManager::AbilityInfo *checkAbility(lua_State *s, int p);
+unsigned char                checkWalkMask(lua_State *s, int p);
 
 MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
 Script::Thread* checkCurrentThread(lua_State *s, Script *script = 0);

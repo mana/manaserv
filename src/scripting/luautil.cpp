@@ -21,6 +21,8 @@
 
 #include "luautil.h"
 
+#include <string.h>
+
 #include "game-server/character.h"
 #include "game-server/itemmanager.h"
 #include "game-server/monster.h"
@@ -233,6 +235,20 @@ AbilityManager::AbilityInfo *checkAbility(lua_State *s, int p)
 
     luaL_argcheck(s, abilityInfo != nullptr, p, "invalid ability");
     return abilityInfo;
+}
+
+unsigned char checkWalkMask(lua_State *s, int p)
+{
+    const char *stringMask = luaL_checkstring(s, p);
+    unsigned char mask = 0x00;
+    if (strchr(stringMask, 'w'))
+        mask |= Map::BLOCKMASK_WALL;
+    if (strchr(stringMask, 'c'))
+        mask |= Map::BLOCKMASK_CHARACTER;
+    if (strchr(stringMask, 'm'))
+        mask |= Map::BLOCKMASK_MONSTER;
+
+    return mask;
 }
 
 
