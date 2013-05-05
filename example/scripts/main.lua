@@ -5,6 +5,9 @@
 
 --]]
 
+-- Global functions:
+require "scripts/callbacks"
+
 -- At the moment the event handlers are split up over the following files:
 require "scripts/global_events"
 require "scripts/abilities"
@@ -12,6 +15,8 @@ require "scripts/crafting"
 require "scripts/attributes"
 
 require "scripts/items/candy"
+
+require "scripts/monster/basic_ai"
 require "scripts/monster/testmonster"
 
 require "scripts/status/jump"

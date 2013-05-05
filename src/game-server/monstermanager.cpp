@@ -170,21 +170,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
             }
 
             bool attributesComplete = true;
-            const AttributeManager::AttributeScope &mobAttr =
-                        attributeManager->getAttributeScope(MonsterScope);
-
-            for (AttributeManager::AttributeScope::const_iterator it =
-                mobAttr.begin(), it_end = mobAttr.end(); it != it_end; ++it)
-            {
-                if (!monster->mAttributes.count(it->first))
-                {
-                    LOG_WARN(filename << ": No attribute "
-                             << it->first << " for monster Id: "
-                             << id << ". Defaulted to 0.");
-                    attributesComplete = false;
-                    monster->setAttribute(it->first, 0);
-                }
-            }
 
             if (monster->getSize() == -1)
             {
