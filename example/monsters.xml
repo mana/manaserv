@@ -111,6 +111,9 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             magical-defence="0"
             gender="female"
             />
+        <attribute id="21" value="10" />
+        <attribute id="22" value="10" />
+        <ability id="2" />
     </monster>
 
     <monster id="4" name="Green Slime">

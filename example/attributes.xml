@@ -179,4 +179,15 @@
         minimum="0"
         maximum="100" />
     <!-- End of core-attributes definition -->
+    <attribute id="21" name="Monster attack speed"
+        desc="Attackspeed of the monster. 0 = no attacks, 100 = one per tick, 10 = one per second"
+        modifiable="false"
+        scope="monster"
+        minimum="0"
+        maximum="100" />
+    <attribute id="22" name="Monster attack damage"
+        desc="damage the monster deals per hit"
+        modifiable="false"
+        scope="monster"
+        minimum="0" />
 </attributes>

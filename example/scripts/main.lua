@@ -12,6 +12,8 @@ require "scripts/crafting"
 require "scripts/attributes"
 
 require "scripts/items/candy"
+
+require "scripts/monster/basic_ai"
 require "scripts/monster/testmonster"
 
 require "scripts/status/jump"
