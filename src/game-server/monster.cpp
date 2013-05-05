@@ -40,8 +40,6 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
 {
     LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
 
-    auto *beingComponent = entity.getComponent<BeingComponent>();
-
     auto *actorComponent = entity.getComponent<ActorComponent>();
     actorComponent->setWalkMask(Map::BLOCKMASK_WALL |
                                 Map::BLOCKMASK_CHARACTER);
@@ -51,6 +49,7 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
     /*
      * Initialise the attribute structures.
      */
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
     for (auto attrInfo : attributeManager->getAttributeScope(MonsterScope))
     {
@@ -76,6 +75,7 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
     }
 
     beingComponent->setGender(specy->getGender());
+    beingComponent->setName(specy->getName());
 
     AbilityComponent *abilityComponent = new AbilityComponent(entity);
     entity.addComponent(abilityComponent);
