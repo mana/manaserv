@@ -12,4 +12,15 @@
             useaction="attack"
         />
     </ability-category>
+    <ability-category name="Monster attack">
+        <ability
+            id="2"
+            name="Basic Monster strike"
+            rechargeable="true"
+            needed="100"
+            rechargeattribute="21"
+            target="being"
+            useaction="attack"
+        />
+    </ability-category>
 </abilities>
