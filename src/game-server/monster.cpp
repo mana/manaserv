@@ -105,6 +105,7 @@ void MonsterComponent::update(Entity &entity)
         Script *script = ScriptManager::currentState();
         script->prepare(mSpecy->getUpdateCallback());
         script->push(&entity);
+        script->push(GameState::getCurrentTick());
         script->execute(entity.getMap());
     }
 }
