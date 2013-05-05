@@ -107,7 +107,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
 
     MonsterDrops drops;
     bool attributesSet = false;
-    bool behaviorSet = false;
 
     for_each_xml_child_node(subnode, node)
     {
@@ -266,26 +265,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
             monster->setExp(atoi((const char*)exp));
             monster->setOptimalLevel(XML::getProperty(subnode, "level", 0));
         }
-        else if (xmlStrEqual(subnode->name, BAD_CAST "behavior"))
-        {
-            behaviorSet = true;
-            if (XML::getBoolProperty(subnode, "aggressive", false))
-                monster->setAggressive(true);
-
-            monster->setTrackRange(
-                           XML::getProperty(subnode, "track-range", 1));
-            monster->setStrollRange(
-                           XML::getProperty(subnode, "stroll-range", 0));
-            monster->setAttackDistance(
-                           XML::getProperty(subnode, "attack-distance", 0));
-        }
-        else if (xmlStrEqual(subnode->name, BAD_CAST "vulnerability"))
-        {
-            Element element = elementFromString(
-                    XML::getProperty(subnode, "element", std::string()));
-            double factor =  XML::getFloatProperty(subnode, "factor", 1.0);
-            monster->setVulnerability(element, factor);
-        }
     }
 
     monster->setDrops(drops);
@@ -294,12 +273,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
         LOG_WARN(filename
                  << ": No attributes defined for monster Id:" << id
                  << " (" << name << ")");
-    }
-    if (!behaviorSet)
-    {
-        LOG_WARN(filename
-            << ": No behavior defined for monster Id:" << id
-            << " (" << name << ")");
     }
     if (monster->getExp() == -1)
     {

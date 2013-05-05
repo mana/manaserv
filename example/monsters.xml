@@ -23,7 +23,6 @@ attributes <TAG>:  Tells all the monsters attribute. These attribute, as for ite
                        (A tile is the smallest square map unit: by default, a tile is 32 pixel long.)
   mutation[integer]:      The mutation indicates the amplitude in percent where attributes get modified with.
                           For instance, with a mutation of 50, each attribute can be altered to become 100% to 149% of what they are.
-vulnerability<TAG>:       Tells the monster specific vulnerability to an element.
   element[string]:        Tells to which element the weakness is. ('fire', 'earth', 'ice', 'metal' are some examples.)
   factor[float]:          Tells the defense against an element is reduced in percent. (A value of 0.7 indicates that the defense is lowered by 30%).
 exp<TAG>:                 Tells how much experience point a monster is giving upon victory.
@@ -52,17 +51,8 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             magical-defence="0"
             mutation="50"
             />
-        <vulnerability element="fire" factor="10"/>
-        <vulnerability element="earth" factor="0.7"/>
         <exp>10</exp>
         <!-- average stroll- and track range-->
-        <behavior
-            aggressive="false"
-            cowardly="false"
-            track-range="5"
-            stroll-range="32"
-            attack-distance="32"
-            />
     </monster>
 
     <monster id="2" name="Scorpion">
@@ -121,15 +111,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             magical-defence="0"
             gender="female"
             />
-        <!-- also quite lazy when unprovoked but much more territorial
-        than the normal one-->
-        <behavior
-            aggressive="true"
-            cowardly="false"
-            track-range="6"
-            stroll-range="32"
-            attack-distance="64"
-            />
     </monster>
 
     <monster id="4" name="Green Slime">
@@ -153,15 +134,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             physical-defence="0"
             magical-defence="0"
             />
-        <!-- Is fulfilling some unknown purpose that requires it to move around
-        a lot and leaves no time for pursing attackers -->
-        <behavior
-            aggressive="false"
-            cowardly="false"
-            track-range="4"
-            stroll-range="24"
-            />
     </monster>
-
 </monsters>
 

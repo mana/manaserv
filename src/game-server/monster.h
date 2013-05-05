@@ -68,11 +68,7 @@ class MonsterClass
             mSpeed(1),
             mSize(16),
             mExp(-1),
-            mAggressive(false),
-            mTrackRange(1),
-            mStrollRange(0),
             mMutation(0),
-            mAttackDistance(0),
             mOptimalLevel(0)
         {}
 
@@ -146,45 +142,11 @@ class MonsterClass
         /** Sets maximum skill level after which exp reward is reduced. */
         int getOptimalLevel() const { return mOptimalLevel; }
 
-        /** Sets if the monster attacks without being attacked first. */
-        void setAggressive(bool aggressive) { mAggressive = aggressive; }
-
-        /** Returns if the monster attacks without being attacked first. */
-        bool isAggressive() const { return mAggressive; }
-
-        /** Sets range in tiles in which the monster searches for enemies. */
-        void setTrackRange(unsigned range){ mTrackRange = range; }
-
-        /**
-         * Returns range in tiles in which the monster searches for enemies.
-         */
-        unsigned getTrackRange() const { return mTrackRange; }
-
-        /** Sets range in pixels in which the monster moves around when idle. */
-        void setStrollRange(unsigned range) { mStrollRange = range; }
-
-        /**
-         * Returns range in pixels in which the monster moves around when idle.
-         */
-        unsigned getStrollRange() const { return mStrollRange; }
-
         /** Sets mutation factor in percent. */
         void setMutation(unsigned factor) { mMutation = factor; }
 
         /** Returns mutation factor in percent. */
         unsigned getMutation() const { return mMutation; }
-
-        /** Sets preferred combat distance in pixels. */
-        void setAttackDistance(unsigned distance)
-        { mAttackDistance = distance; }
-
-        /** Returns preferred combat distance in pixels. */
-        unsigned getAttackDistance() const { return mAttackDistance; }
-
-        void setVulnerability(Element element, double factor)
-        { mVulnerabilities[element] = factor; }
-
-        double getVulnerability(Element element) const;
 
         void addAbility(AbilityManager::AbilityInfo *info);
         const std::set<AbilityManager::AbilityInfo *> &getAbilities() const;
@@ -192,14 +154,8 @@ class MonsterClass
         void setUpdateCallback(Script *script)
         { script->assignCallback(mUpdateCallback); }
 
-        void setDamageCallback(Script *script)
-        { script->assignCallback(mDamageCallback); }
-
         Script::Ref getUpdateCallback() const
         { return mUpdateCallback; }
-
-        Script::Ref getDamageCallback() const
-        { return mDamageCallback; }
 
     private:
         unsigned short mId;
@@ -213,23 +169,13 @@ class MonsterClass
         int mSize;
         int mExp;
 
-        bool mAggressive;
-        int mTrackRange;
-        int mStrollRange;
         int mMutation;
-        int mAttackDistance;
         int mOptimalLevel;
-        Vulnerabilities mVulnerabilities;
 
         /**
          * A reference to the script function that is called each update.
          */
         Script::Ref mUpdateCallback;
-
-        /**
-         * A reference to the script that is called when a mob takes damage.
-         */
-        Script::Ref mDamageCallback;
 
         friend class MonsterManager;
         friend class MonsterComponent;
@@ -243,11 +189,7 @@ class MonsterComponent : public Component
     public:
         static const ComponentType type = CT_Monster;
 
-        /** Time in game ticks until ownership of a monster can change. */
-        static const int KILLSTEAL_PROTECTION_TIME = 100;
-
         MonsterComponent(Entity &entity, MonsterClass *);
-        ~MonsterComponent();
 
         /**
          * Returns monster specy.
@@ -265,53 +207,11 @@ class MonsterComponent : public Component
          */
         void monsterDied(Entity *monster);
 
-        /**
-         * Alters hate for the monster
-         */
-        void changeAnger(Entity *target, int amount);
-
-        std::map<Entity *, int> getAngerList() const;
-
-        /**
-         * Removes a being from the anger list.
-         */
-        void forgetTarget(Entity *entity);
-
     private:
         static const int DECAY_TIME = 50;
 
-        int calculatePositionPriority(Entity &entity,
-                                      Point position,
-                                      int targetPriority);
-
         MonsterClass *mSpecy;
 
-        /** Aggression towards other beings. */
-        struct AggressionInfo {
-            AggressionInfo()
-                : anger(0)
-            {}
-
-            int anger;
-            sigc::connection removedConnection;
-            sigc::connection diedConnection;
-        };
-
-        /**
-         * Character who currently owns this monster (killsteal protection).
-         */
-        Entity *mOwner;
-
-        /**
-         * List of characters who are entitled to receive exp (killsteal
-         * protection).
-         */
-        std::set<Entity *> mLegalExpReceivers;
-
-        /** Time until monster strolls to new location */
-        Timeout mStrollTimeout;
-        /** Kill steal protection time */
-        Timeout mKillStealProtectedTimeout;
         /** Time until dead monster is removed */
         Timeout mDecayTimeout;
 };
