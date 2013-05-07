@@ -1398,6 +1398,38 @@ static int entity_destination(lua_State *s)
     return 2;
 }
 
+/** LUA entity:entity_look_at (being)
+ * local x, y = entity:entity_look_at(entity other)
+ * local x, y = entity:entity_look_at(int x, int y)
+ **
+ * Valid only for being entities.
+ *
+ * Makes the being looking at another being or a point.
+ */
+static int entity_look_at(lua_State *s)
+{
+    Entity *being = checkBeing(s, 1);
+
+    auto &ownPosition = being->getComponent<ActorComponent>()->getPosition();
+
+    Point otherPoint;
+    if (lua_gettop(s) > 2)
+    {
+        otherPoint.x = luaL_checkint(s, 2);
+        otherPoint.y = luaL_checkint(s, 3);
+    }
+    else
+    {
+        Entity *other = checkBeing(s, 2);
+        otherPoint = other->getComponent<ActorComponent>()->getPosition();
+    }
+
+    being->getComponent<BeingComponent>()->updateDirection(*being, ownPosition,
+                                                           otherPoint);
+
+    return 0;
+}
+
 /** LUA entity:heal (being)
  * entity:heal([int value])
  **
@@ -3384,6 +3416,7 @@ LuaScript::LuaScript():
         { "cooldown_ability",               entity_cooldown_ability           },
         { "walk",                           entity_walk                       },
         { "destination",                    entity_destination                },
+        { "look_at",                        entity_look_at                    },
         { "heal",                           entity_heal                       },
         { "name",                           entity_get_name                   },
         { "type",                           entity_get_type                   },
