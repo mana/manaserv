@@ -216,6 +216,50 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
             }
 
         }
+        else if (xmlStrEqual(subnode->name, BAD_CAST "attribute"))
+        {
+            const int id = XML::getProperty(subnode, "id", 0);
+            auto *attributeInfo = attributeManager->getAttributeInfo(id);
+
+            if (!attributeInfo)
+            {
+                LOG_WARN(filename
+                         << ": Invalid attribute id " << id
+                         << " for monster Id: " << id
+                         << ". Skipping!");
+                continue;
+            }
+
+            const double value = XML::getFloatProperty(subnode, "value", 0.0);
+
+            monster->setAttribute(id, value);
+        }
+        else if (xmlStrEqual(subnode->name, BAD_CAST "ability"))
+        {
+            const std::string idText = XML::getProperty(subnode, "id",
+                                                        std::string());
+            AbilityManager::AbilityInfo *info = 0;
+            if (utils::isNumeric(idText))
+            {
+                const int id = utils::stringToInt(idText);
+                info = abilityManager->getAbilityInfo(id);
+            }
+            else
+            {
+                info = abilityManager->getAbilityInfo(idText);
+            }
+
+            if (!info)
+            {
+                LOG_WARN(filename
+                         << ": Invalid ability id " << idText
+                         << " for monster id: " << id
+                         << " Skipping!");
+                continue;
+            }
+
+            monster->addAbility(info);
+        }
         else if (xmlStrEqual(subnode->name, BAD_CAST "exp"))
         {
             xmlChar *exp = subnode->xmlChildrenNode->content;

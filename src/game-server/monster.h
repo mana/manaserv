@@ -21,9 +21,13 @@
 #ifndef MONSTER_H
 #define MONSTER_H
 
+#include "game-server/abilitymanager.h"
 #include "game-server/being.h"
+
 #include "common/defines.h"
+
 #include "scripting/script.h"
+
 #include "utils/string.h"
 
 #include <map>
@@ -182,6 +186,9 @@ class MonsterClass
 
         double getVulnerability(Element element) const;
 
+        void addAbility(AbilityManager::AbilityInfo *info);
+        const std::set<AbilityManager::AbilityInfo *> &getAbilities() const;
+
         void setUpdateCallback(Script *script)
         { script->assignCallback(mUpdateCallback); }
 
@@ -201,6 +208,7 @@ class MonsterClass
 
         MonsterDrops mDrops;
         std::map<int, double> mAttributes; /**< Base attributes of the monster. */
+        std::set<AbilityManager::AbilityInfo *> mAbilities;
         float mSpeed; /**< The monster class speed in tiles per second */
         int mSize;
         int mExp;
@@ -307,5 +315,16 @@ class MonsterComponent : public Component
         /** Time until dead monster is removed */
         Timeout mDecayTimeout;
 };
+
+inline void MonsterClass::addAbility(AbilityManager::AbilityInfo *info)
+{
+    mAbilities.insert(info);
+}
+
+inline const std::set<AbilityManager::AbilityInfo *>
+&MonsterClass::getAbilities() const
+{
+    return mAbilities;
+}
 
 #endif // MONSTER_H
