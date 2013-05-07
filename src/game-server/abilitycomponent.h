@@ -56,10 +56,12 @@ public:
 
     void update(Entity &entity);
 
-    void useAbilityOnBeing(Entity &user, int id, Entity *b);
-    void useAbilityOnPoint(Entity &user, int id, int x, int y);
+    bool useAbilityOnBeing(Entity &user, int id, Entity *b);
+    bool useAbilityOnPoint(Entity &user, int id, int x, int y);
 
     bool giveAbility(int id, int currentMana = 0);
+    bool giveAbility(const AbilityManager::AbilityInfo *info,
+                     int currentMana = 0);
     bool hasAbility(int id) const;
     bool takeAbility(int id);
     AbilityMap::iterator findAbility(int id);

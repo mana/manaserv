@@ -2242,18 +2242,18 @@ static int entity_show_text_particle(lua_State *s)
 /** LUA entity:give_ability (being)
  * entity:give_ability(int ability)
  **
- * Valid only for character entities.
+ * Valid only for character and monster entities.
  *
  * Enables a ability for a character.
  */
 static int entity_give_ability(lua_State *s)
 {
     // cost_type is ignored until we have more than one cost type
-    Entity *c = checkCharacter(s, 1);
+    Entity *b = checkBeing(s, 1);
     auto *abilityInfo = checkAbility(s, 2);
     const int currentMana = luaL_optint(s, 3, 0);
 
-    c->getComponent<AbilityComponent>()->giveAbility(abilityInfo->id,
+    b->getComponent<AbilityComponent>()->giveAbility(abilityInfo->id,
                                                      currentMana);
     return 0;
 }
@@ -2261,37 +2261,71 @@ static int entity_give_ability(lua_State *s)
 /** LUA entity:has_ability (being)
  * entity:has_ability(int ability)
  **
- * Valid only for character entities.
+ * Valid only for character and monster entities.
  *
  * **Return value:** True if the character has the ability, false otherwise.
  */
 static int entity_has_ability(lua_State *s)
 {
-    Entity *c = checkCharacter(s, 1);
+    Entity *b = checkBeing(s, 1);
     const int ability = luaL_checkint(s, 2);
 
-    lua_pushboolean(s, c->getComponent<AbilityComponent>()->hasAbility(ability));
+    lua_pushboolean(s, b->getComponent<AbilityComponent>()->hasAbility(ability));
     return 1;
 }
 
 /** LUA entity:take_ability (being)
  * entity:take_ability(int ability)
  **
- * Valid only for character entities.
+ * Valid only for character and monster entities.
  *
- * Removes a ability from a character.
+ * Removes a ability from a entity.
  *
  * **Return value:** True if removal was successful, false otherwise (in case
  * the character did not have the ability).
  */
 static int entity_take_ability(lua_State *s)
 {
-    Entity *c = checkCharacter(s, 1);
+    Entity *b = checkBeing(s, 1);
     const int ability = luaL_checkint(s, 2);
 
-    auto *abilityComponent = c->getComponent<AbilityComponent>();
+    auto *abilityComponent = b->getComponent<AbilityComponent>();
     lua_pushboolean(s, abilityComponent->hasAbility(ability));
     abilityComponent->takeAbility(ability);
+    return 1;
+}
+
+/** LUA entity:use_ability (being)
+ * entity:use_ability(int ability)
+ **
+ * Valid only for character and monster entities.
+ *
+ * Makes the entity using the given ability if it is available and recharged.
+ *
+ * **Return value:** True if the ability was used successfully. False otherwise
+ * (if the ability is not available for the entity or was not recharged).
+ */
+static int entity_use_ability(lua_State *s)
+{
+    Entity *b = checkBeing(s, 1);
+    const int ability = luaL_checkint(s, 2);
+    bool targetIsBeing = lua_gettop(s) == 3;
+
+    auto *abilityComponent = b->getComponent<AbilityComponent>();
+    if (targetIsBeing)
+    {
+        Entity *target = checkBeing(s, 3);
+        lua_pushboolean(s, abilityComponent->useAbilityOnBeing(*b, ability,
+                                                               target));
+    }
+    else
+    {
+        const int x = luaL_checkint(s, 3);
+        const int y = luaL_checkint(s, 4);
+        lua_pushboolean(s, abilityComponent->useAbilityOnPoint(*b, ability,
+                                                               x, y));
+    }
+
     return 1;
 }
 
@@ -3327,6 +3361,7 @@ LuaScript::LuaScript():
         { "give_ability",                   entity_give_ability               },
         { "has_ability",                    entity_has_ability                },
         { "take_ability",                   entity_take_ability               },
+        { "use_ability",                    entity_use_ability                },
         { "monster_id",                     entity_get_monster_id             },
         { "apply_status",                   entity_apply_status               },
         { "remove_status",                  entity_remove_status              },

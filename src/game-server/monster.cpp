@@ -86,6 +86,13 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
 
     beingComponent->setGender(specy->getGender());
 
+    AbilityComponent *abilityComponent = new AbilityComponent(entity);
+    entity.addComponent(abilityComponent);
+    for (auto *abilitiyInfo : specy->getAbilities())
+    {
+        abilityComponent->giveAbility(abilitiyInfo);
+    }
+
     beingComponent->signal_died.connect(sigc::mem_fun(this,
                                             &MonsterComponent::monsterDied));
 }

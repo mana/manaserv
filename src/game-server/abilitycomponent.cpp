@@ -84,7 +84,7 @@ bool AbilityComponent::abilityUseCheck(AbilityMap::iterator it)
 
     if (it == mAbilities.end())
     {
-        LOG_INFO("Character uses ability " << it->first
+        LOG_INFO("Entity uses ability " << it->first
                  << " without authorization.");
         return false;
     }
@@ -115,15 +115,15 @@ bool AbilityComponent::abilityUseCheck(AbilityMap::iterator it)
  * makes the character perform a ability on a being
  * when it is allowed to do so
  */
-void AbilityComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
+bool AbilityComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
 {
     AbilityMap::iterator it = mAbilities.find(id);
     if (!abilityUseCheck(it))
-            return;
+            return false;
     AbilityValue &ability = it->second;
 
     if (ability.abilityInfo->target != AbilityManager::TARGET_BEING)
-        return;
+        return false;
 
     if (ability.abilityInfo->autoconsume) {
         ability.currentPoints = 0;
@@ -146,21 +146,22 @@ void AbilityComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
         mLastTargetBeingId = 0;
     user.getComponent<ActorComponent>()->raiseUpdateFlags(
             UPDATEFLAG_ABILITY_ON_BEING);
+    return true;
 }
 
 /**
  * makes the character perform a ability on a map point
  * when it is allowed to do so
  */
-void AbilityComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
+bool AbilityComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
 {
     AbilityMap::iterator it = mAbilities.find(id);
     if (!abilityUseCheck(it))
-            return;
+            return false;
     AbilityValue &ability = it->second;
 
     if (ability.abilityInfo->target != AbilityManager::TARGET_POINT)
-        return;
+        return false;
 
     if (ability.abilityInfo->autoconsume) {
         ability.currentPoints = 0;
@@ -181,6 +182,7 @@ void AbilityComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
     mLastTargetPoint = Point(x, y);
     user.getComponent<ActorComponent>()->raiseUpdateFlags(
             UPDATEFLAG_ABILITY_ON_POINT);
+    return true;
 }
 
 /**
@@ -190,20 +192,25 @@ bool AbilityComponent::giveAbility(int id, int currentPoints)
 {
     if (mAbilities.find(id) == mAbilities.end())
     {
-        const AbilityManager::AbilityInfo *abilityInfo =
-                abilityManager->getAbilityInfo(id);
+        auto *abilityInfo = abilityManager->getAbilityInfo(id);
         if (!abilityInfo)
         {
             LOG_ERROR("Tried to give not existing ability id " << id << ".");
             return false;
         }
-        mAbilities.insert(std::pair<int, AbilityValue>(
-                             id, AbilityValue(currentPoints, abilityInfo)));
-
-        signal_ability_changed.emit(id);
-        return true;
+        return giveAbility(abilityInfo, currentPoints);
     }
     return false;
+}
+
+bool AbilityComponent::giveAbility(const AbilityManager::AbilityInfo *info,
+                                   int currentPoints)
+{
+    bool added = mAbilities.insert(std::pair<int, AbilityValue>(info->id,
+                                   AbilityValue(currentPoints, info))).second;
+
+    signal_ability_changed.emit(info->id);
+    return added;
 }
 
 /**
