@@ -83,6 +83,9 @@ class MapObject
         const std::string &getProperty(const std::string &key) const
         { return mProperties.value(key); }
 
+        bool hasProperty(const std::string &key) const
+        { return mProperties.contains(key); }
+
         const std::string &getName() const
         { return mName; }
 
