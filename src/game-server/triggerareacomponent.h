@@ -50,6 +50,39 @@ class WarpAction : public TriggerAction
         Point mTargetPoint;
 };
 
+class AutowarpAction: public TriggerAction
+{
+    public:
+        enum ExitDirection {
+            ExitNorth,
+            ExitEast,
+            ExitSouth,
+            ExitWest
+        };
+
+        AutowarpAction(MapComposite *m,
+                       const Rectangle &sourceArea,
+                       const Rectangle &targetArea,
+                       ExitDirection direction)
+            : mMap(m),
+              mSourceArea(sourceArea),
+              mTargetArea(targetArea),
+              mDirection(direction)
+        {}
+
+        virtual void process(Entity *obj);
+
+    private:
+        /** Target map */
+        MapComposite *mMap;
+        /** Source area - used to calculate warp offset and warp direction */
+        Rectangle mSourceArea;
+        /** Target area */
+        Rectangle mTargetArea;
+        /** The direction to exit target area */
+        ExitDirection mDirection;
+};
+
 class ScriptAction : public TriggerAction
 {
     public:

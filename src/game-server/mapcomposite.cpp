@@ -775,51 +775,124 @@ void MapComposite::initializeContent()
 
         if (utils::compareStrI(type, "WARP") == 0)
         {
-            std::string destMapName = object->getProperty("DEST_MAP");
-            std::string destMapObjectName = object->getProperty("DEST_NAME");
-
+            const std::string destMapName = object->getProperty("DEST_MAP");
+            const Rectangle &sourceBounds = object->getBounds();
             MapComposite *destMap = MapManager::getMap(destMapName);
-            int destX = 0;
-            int destY = 0;
 
-            if (destMap && !destMapObjectName.empty())
+            // check destination map
+            if (!destMap)
             {
-                const MapObject *obj =
-                        destMap->findMapObject(destMapObjectName, "WARP");
-                if (obj)
+                if (destMapName.empty())
                 {
-                    const Rectangle &rect = obj->getBounds();
-                    destX = rect.x + rect.w / 2;
-                    destY = rect.y + rect.h / 2;
+                    // this must be a one way warp target
+                    continue;
+                }
+
+                LOG_ERROR("Warp \"" << object->getName() << "\" targets missing map \""
+                          << destMapName << "\" in " << getName());
+                continue;
+            }
+
+
+            TriggerAction* action;
+            if (object->hasProperty("DEST_NAME"))
+            {
+                // warp to an object
+                // get destination object name
+                const std::string destMapObjectName = object->getProperty("DEST_NAME");
+                // get target object and validate it
+                const MapObject *destination = destMap->findMapObject(destMapObjectName, "WARP");
+                if (!destination)
+                {
+                    LOG_ERROR("Warp \"" << object->getName() << "\" from map " << getName()
+                              << " targets missing warp \"" << destMapObjectName << "\" "
+                              << " on map " << destMap->getName());
+                    continue;
+                }
+
+                const Rectangle &destinationBounds = destination->getBounds();
+
+                const std::string &exit = destination->getProperty("EXIT_DIRECTION");
+
+                if (exit.empty()) {
+                    // old style WARP, warp to center of that object
+                    int destX = destinationBounds.x + destinationBounds.w / 2;
+                    int destY = destinationBounds.y + destinationBounds.h / 2;
+                    action = new WarpAction(destMap, Point(destX, destY));
                 }
                 else
                 {
-                    LOG_ERROR("Warp target \"" << destMapObjectName << "\" "
-                              << "was not found on the map "
-                              << destMap->getName());
+                    // newer and cooler warp
+
+                    AutowarpAction::ExitDirection exitDir;
+
+                    // find the exit direction
+                    if (utils::compareStrI(exit, "NORTH") == 0)
+                    {
+                        exitDir = AutowarpAction::ExitNorth;
+                    }
+                    else if (utils::compareStrI(exit, "EAST") == 0)
+                    {
+                        exitDir = AutowarpAction::ExitEast;
+                    }
+                    else if (utils::compareStrI(exit, "SOUTH") == 0)
+                    {
+                        exitDir = AutowarpAction::ExitSouth;
+                    }
+                    else if (utils::compareStrI(exit, "WEST") == 0)
+                    {
+                        exitDir = AutowarpAction::ExitWest;
+                    }
+                    else
+                    {
+                        // invalid or missing exit direction
+                        if (exit.empty())
+                        {
+                            LOG_ERROR("Warp target \"" << destMapObjectName << "\" on map "
+                                    << destMap->getName()
+                                    << " is missing exit direction!");
+                        }
+                        else
+                        {
+                            LOG_ERROR("Warp target \"" << destMapObjectName << "\" on map "
+                                    << destMap->getName()
+                                    << " has an invalid exit direction \""
+                                    << exit
+                                    << "\"!");
+                        }
+                        continue;
+                    }
+
+                    action = new AutowarpAction(destMap, sourceBounds,
+                                                destinationBounds, exitDir);
                 }
             }
-            else
+            else if (object->hasProperty("DEST_X") && object->hasProperty("DEST_Y"))
             {
-                destX = utils::stringToInt(object->getProperty("DEST_X"));
-                destY = utils::stringToInt(object->getProperty("DEST_Y"));
-            }
+                // warp to absolute position
+                int destX = utils::stringToInt(object->getProperty("DEST_X"));
+                int destY = utils::stringToInt(object->getProperty("DEST_Y"));
 
-
-            if (destMap && destX && destY)
-            {
-                Entity *entity = new Entity(OBJECT_OTHER, this);
-                const Point warpTarget(destX, destY);
-                WarpAction *action = new WarpAction(destMap, warpTarget);
-                entity->addComponent(
-                            new TriggerAreaComponent(object->getBounds(),
-                                                     action, false));
-                insert(entity);
+                action = new WarpAction(destMap, Point(destX, destY));
             }
             else
             {
-                LOG_WARN("Unrecognized warp format on map " << mName);
+                LOG_ERROR("Warp \"" << object->getName() << "\" on map "
+                          << getName()
+                          << " is invalid!");
+                continue;
             }
+
+            // add this trigger to the map
+            Entity *entity = new Entity(OBJECT_OTHER, this);
+            entity->addComponent(
+                        new TriggerAreaComponent(
+                            sourceBounds,
+                            action,
+                            false
+                        )
+                     );
+            insert(entity);
         }
         else if (utils::compareStrI(type, "SPAWN") == 0)
         {

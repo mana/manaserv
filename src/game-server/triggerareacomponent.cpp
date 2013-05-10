@@ -38,6 +38,47 @@ void WarpAction::process(Entity *obj)
     }
 }
 
+void AutowarpAction::process(Entity *obj)
+{
+    Point targetPoint;
+
+    // only characters can warp
+    if (obj->getType() != OBJECT_CHARACTER)
+        return;
+
+    // get the direction
+    ActorComponent *actor = obj->getComponent<ActorComponent>();
+
+    // calculate proportions
+    float horizontal = float(mTargetArea.w) / float(mSourceArea.w);
+    float vertical = float(mTargetArea.h) / float(mSourceArea.h);
+
+    // calculate final target position
+    const Point &actorPosition = actor->getPosition();
+    int actorSize = actor->getSize();
+    switch (mDirection)
+    {
+    case ExitNorth:
+        targetPoint.x = (actorPosition.x - mSourceArea.x) * horizontal + mTargetArea.x;
+        targetPoint.y = mTargetArea.y - actorSize;
+        break;
+    case ExitSouth:
+        targetPoint.x = (actorPosition.x - mSourceArea.x) * horizontal + mTargetArea.x;
+        targetPoint.y = mTargetArea.y + mTargetArea.h + actorSize;
+        break;
+    case ExitEast:
+        targetPoint.x = mTargetArea.x + mTargetArea.w + actorSize;
+        targetPoint.y = (actorPosition.y - mSourceArea.y) * vertical + mTargetArea.y;
+        break;
+    case ExitWest:
+        targetPoint.x = mTargetArea.x - actorSize;
+        targetPoint.y = (actorPosition.y - mSourceArea.y) * vertical + mTargetArea.y;
+        break;
+    }
+
+    GameState::enqueueWarp(obj, mMap, targetPoint);
+}
+
 ScriptAction::ScriptAction(Script *script, Script::Ref callback, int arg) :
     mScript(script),
     mCallback(callback),
