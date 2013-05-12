@@ -17,7 +17,11 @@ return {
         trackrange = 5 * TILESIZE,
         attack_distance = TILESIZE,
         ability_id = 2,
-        damage = 1,
+        damage = {
+            base = 2,
+            delta = 5,
+            chance_to_hit = 20,
+        },
     },
     ["Green Slime"] = {
         strollrange = TILESIZE,

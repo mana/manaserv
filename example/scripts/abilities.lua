@@ -25,13 +25,12 @@ spell1:on_use(function(user, x, y, abilityId)
     local affected_beings = get_beings_in_circle(target_x, target_y, TILESIZE)
     for _, being in ipairs(affected_beings) do
         if being ~= user then
-            local old_hp = being:base_attribute(ATTR_HP)
-            local new_hp = math.max(old_hp - 5, 0)
-            being:set_base_attribute(ATTR_HP, new_hp)
-            local diff = old_hp - new_hp
-            if diff > 0 then
-                being:add_hit_taken(diff)
-            end
+            local damage = {
+                base = 10,
+                delta = 5,
+                chance_to_hit = user:modified_attribute(ATTR_STR),
+            }
+            being:damage(user, damage)
         end
     end
 end)
