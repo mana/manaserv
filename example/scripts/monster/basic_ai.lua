@@ -157,14 +157,8 @@ local function update(mob, tick)
 end
 
 local function mob_attack(mob, target, ability_id)
-    local hp = target:base_attribute(ATTR_HP)
     local config = mob_config[mob:name()]
-    local dealt_damage = math.min(hp, config.damage)
-    if dealt_damage > 0 then
-        local v = hp - dealt_damage
-        target:set_base_attribute(ATTR_HP, hp - dealt_damage)
-        target:add_hit_taken(dealt_damage)
-    end
+    target:damage(mob, config.damage)
 end
 
 local function mob_recharged(mob, ability_id)

@@ -5,6 +5,9 @@
 
 --]]
 
+-- Global functions:
+require "scripts/damage"
+
 -- At the moment the event handlers are split up over the following files:
 require "scripts/global_events"
 require "scripts/abilities"
