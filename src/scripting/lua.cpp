@@ -33,7 +33,6 @@ extern "C" {
 #include "game-server/buysell.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/effect.h"
 #include "game-server/gamehandler.h"
 #include "game-server/inventory.h"
@@ -1278,107 +1277,74 @@ static int chr_set_quest(lua_State *s)
     return 0;
 }
 
-/** LUA entity:set_special_recharge_speed (being)
- * entity:set_special_recharge_speed(int specialid, int new_speed)
- * entity:set_special_recharge_speed(string specialname, int new_speed)
+/** LUA entity:set_ability_mana (being)
+ * entity:set_ability_mana(int abilityid, int new_mana)
+ * entity:set_ability_mana(string abilityname, int new_mana)
  **
  * Valid only for character entities.
  *
- * Sets the recharge speed of the special to a new value for the character.
- *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
- */
-static int entity_set_special_recharge_speed(lua_State *s)
-{
-    Entity *c = checkCharacter(s, 1);
-    const int special = checkSpecial(s, 2);
-    const int speed = luaL_checkint(s, 3);
-
-    if (!c->getComponent<CharacterComponent>()
-            ->setSpecialRechargeSpeed(special, speed))
-    {
-        luaL_error(s,
-                   "set_special_recharge_speed called with special "
-                   "that is not owned by character.");
-    }
-    return 0;
-}
-
-/** LUA entity:special_recharge_speed (being)
- * entity:special_recharge_speed(int specialid)
- * entity:special_recharge_speed(string specialname)
- **
- * Valid only for character entities.
- *
- * **Return value:** The current recharge speed of the special that is owned by
- * the character.
- *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
- */
-static int entity_get_special_recharge_speed(lua_State *s)
-{
-    Entity *c = checkCharacter(s, 1);
-    const int special = checkSpecial(s, 2);
-
-    auto *characterComponent = c->getComponent<CharacterComponent>();
-
-    SpecialMap::iterator it = characterComponent->findSpecial(special);
-
-    luaL_argcheck(s, it != characterComponent->getSpecialEnd(), 2,
-                  "character does not have special");
-
-    lua_pushinteger(s, it->second.rechargeSpeed);
-    return 1;
-}
-
-/** LUA entity:set_special_mana (being)
- * entity:set_special_mana(int specialid, int new_mana)
- * entity:set_special_mana(string specialname, int new_mana)
- **
- * Valid only for character entities.
- *
- * Sets the mana (recharge status) of the special to a new value for the
+ * Sets the mana (recharge status) of the ability to a new value for the
  * character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the ''abilityname'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
  */
-static int entity_set_special_mana(lua_State *s)
+static int entity_set_ability_mana(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    const int special = checkSpecial(s, 2);
+    auto *abilityInfo = checkAbility(s, 2);
     const int mana = luaL_checkint(s, 3);
-    if (!c->getComponent<CharacterComponent>()->setSpecialMana(special, mana))
+    if (!c->getComponent<AbilityComponent>()->setAbilityMana(abilityInfo->id,
+                                                             mana))
     {
         luaL_error(s,
-                   "set_special_mana called with special "
+                   "set_ability_mana called with ability "
                    "that is not owned by character.");
     }
     return 0;
 }
 
-/** LUA entity:special_mana (being)
- * entity:special_mana(int specialid)
- * entity:special_mana(string specialname)
+/** LUA entity:ability_mana (being)
+ * entity:ability_mana(int abilityid)
+ * entity:ability_mana(string abilityname)
  **
- * **Return value:** The mana (recharge status) of the special that is owned by
+ * **Return value:** The mana (recharge status) of the ability that is owned by
  * the character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the ''abilityname'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
  */
-static int entity_get_special_mana(lua_State *s)
+static int entity_get_ability_mana(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    auto *characterComponent = c->getComponent<CharacterComponent>();
-    const int special = checkSpecial(s, 2);
-    SpecialMap::iterator it = characterComponent->findSpecial(special);
-    luaL_argcheck(s, it != characterComponent->getSpecialEnd(), 2,
-                  "character does not have special");
-    lua_pushinteger(s, it->second.currentMana);
+    auto *abilityComponent = c->getComponent<AbilityComponent>();
+    auto *abilityInfo = checkAbility(s, 2);
+    AbilityMap::iterator it = abilityComponent->findAbility(abilityInfo->id);
+    luaL_argcheck(s, it != abilityComponent->getAbilities().end(), 2,
+                  "character does not have ability");
+    lua_pushinteger(s, it->second.currentPoints);
     return 1;
+}
+
+/** LUA entity:cooldown_ability (being)
+ * entity:cooldown_ability(int abilityid)
+ * entity:cooldown_ability(string abilityname)
+ **
+ * Starts the cooldown of the passed ability. No other ability will be useable
+ * in this time.
+ *
+ * You do not need to call this if the attribute is set to ''autoconsume''.
+ *
+ * **Note:** When passing the ''abilityname'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
+ */
+static int entity_cooldown_ability(lua_State *s)
+{
+    Entity *c = checkCharacter(s, 1);
+    auto *abilityComponent = c->getComponent<AbilityComponent>();
+    auto *abilityInfo = checkAbility(s, 2);
+    abilityComponent->startCooldown(*c, abilityInfo);
+    return 0;
 }
 
 /** LUA entity:walk (being)
@@ -1415,84 +1381,51 @@ static int entity_walk(lua_State *s)
     return 0;
 }
 
-/** LUA entity:damage (being)
- * entity:damage(int damage, int delta,
- *               int accuracy, int type, int element)
- * entity:damage(int damage, int delta, int accuracy,
- *               int type, int element, handle source)
- * entity:damage(int damage, int delta, int accuracy,
- *               int type, int element, handle source, int skill)
- * entity:damage(int damage, int delta, int accuracy,
- *               int type, int element, handle source, string skillname)
+/** LUA entity:destination (being)
+ * local x, y = entity:destination()
  **
  * Valid only for being entities.
  *
- * Inflicts damage to the being. The severity of the attack is between
- * ''damage'' and (''damage'' + ''delta'') and is calculated using the normal
- * [[damage calculation]] rules. The being has a chance to
- * [[hitting and dodging|dodge the attack]] with its
- * [[attributes|agility attribute]]. The ''accuracy'' decides how hard this is.
- *
- * If ''source'' is provided the attack is handled as if the ''source''
- * triggered the damage.
- *
- * If ''skill'' is given the ''owner'' can also recieve XP for the attack. The
- * ''skill'' should be defined in the [[skills.xml|skills.xml]]. If the skill
- * is provided as string (''skillname'') you have to use this format:
- * <setname>_<skillname>. So for example: "Weapons_Unarmed"
- *
- * ''type'' affects which kind of armor and character attributes reduce the
- * damage. It can be one of the following values:
- * | 0 | DAMAGE_PHYSICAL  |
- * | 1 | DAMAGE_MAGICAL  |
- * | 2 | DAMAGE_OTHER  |
- *
- * ''element'' decides how the [[element system]] changes the damage. The
- * following values are possible:
- * | 0 | ELEMENT_NEUTRAL  |
- * | 1 | ELEMENT_FIRE  |
- * | 2 | ELEMENT_WATER  |
- * | 3 | ELEMENT_EARTH  |
- * | 4 | ELEMENT_AIR  |
- * | 5 | ELEMENT_LIGHTNING  |
- * | 6 | ELEMENT_METAL  |
- * | 7 | ELEMENT_WOOD  |
- * | 8 | ELEMENT_ICE  |
- *
- * **Return Value**: Actual HP reduction resulting from the attack.
+ * **Return value:** The x and y coordinates of the destination.
  */
-static int entity_damage(lua_State *s)
+static int entity_destination(lua_State *s)
+{
+    Entity *being = checkBeing(s, 1);
+    auto *beingComponent = being->getComponent<BeingComponent>();
+    const Point &point = beingComponent->getDestination();
+    lua_pushinteger(s, point.x);
+    lua_pushinteger(s, point.y);
+    return 2;
+}
+
+/** LUA entity:entity_look_at (being)
+ * local x, y = entity:entity_look_at(entity other)
+ * local x, y = entity:entity_look_at(int x, int y)
+ **
+ * Valid only for being entities.
+ *
+ * Makes the being looking at another being or a point.
+ */
+static int entity_look_at(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
 
-    if (!being->canFight())
+    auto &ownPosition = being->getComponent<ActorComponent>()->getPosition();
+
+    Point otherPoint;
+    if (lua_gettop(s) > 2)
     {
-        luaL_error(s, "damage called with victim that cannot fight");
-        return 0;
+        otherPoint.x = luaL_checkint(s, 2);
+        otherPoint.y = luaL_checkint(s, 3);
+    }
+    else
+    {
+        Entity *other = checkBeing(s, 2);
+        otherPoint = other->getComponent<ActorComponent>()->getPosition();
     }
 
-    Damage dmg;
-    dmg.base = luaL_checkint(s, 2);
-    dmg.delta = luaL_checkint(s, 3);
-    dmg.cth = luaL_checkint(s, 4);
-    dmg.type = (DamageType)luaL_checkint(s, 5);
-    dmg.element = (Element)luaL_checkint(s, 6);
-    Entity *source = 0;
-    if (lua_gettop(s) >= 7)
-    {
-        source = checkBeing(s, 7);
-
-        if (!source->canFight())
-        {
-            luaL_error(s, "damage called with source that cannot fight");
-            return 0;
-        }
-    }
-    if (lua_gettop(s) >= 8)
-    {
-        dmg.skill = checkSkill(s, 8);
-    }
-    being->getComponent<CombatComponent>()->damage(*being, source, dmg);
+    being->getComponent<BeingComponent>()->updateDirection(*being, ownPosition,
+                                                           otherPoint);
 
     return 0;
 }
@@ -1565,10 +1498,9 @@ static int entity_get_type(lua_State *s)
  *
  * | 0 | ACTION_STAND  |
  * | 1 | ACTION_WALK   |
- * | 2 | ACTION_ATTACK |
- * | 3 | ACTION_SIT    |
- * | 4 | ACTION_DEAD   |
- * | 5 | ACTION_HURT   |
+ * | 2 | ACTION_SIT    |
+ * | 3 | ACTION_DEAD   |
+ * | 4 | ACTION_HURT   |
  */
 static int entity_get_action(lua_State *s)
 {
@@ -1648,15 +1580,8 @@ static int entity_set_direction(lua_State *s)
 static int entity_set_walkmask(lua_State *s)
 {
    Entity *being = checkActor(s, 1);
-   const char *stringMask = luaL_checkstring(s, 2);
-   unsigned char mask = 0x00;
-   if (strchr(stringMask, 'w'))
-       mask |= Map::BLOCKMASK_WALL;
-   else if (strchr(stringMask, 'c'))
-       mask |= Map::BLOCKMASK_CHARACTER;
-   else if (strchr(stringMask, 'm'))
-       mask |= Map::BLOCKMASK_MONSTER;
-   being->getComponent<ActorComponent>()->setWalkMask(mask);
+   unsigned char walkmask = checkWalkMask(s, 2);
+   being->getComponent<ActorComponent>()->setWalkMask(walkmask);
    return 0;
 }
 
@@ -2043,6 +1968,20 @@ static int xp_for_level(lua_State *s)
     return 1;
 }
 
+/** LUA entity:add_hit_taken (being)
+ * add_hit_taken(int damage)
+ **
+ * Adds a damage value to the taken hits of a being. This list will be send to
+ * all clients in the view range in order to allow to display the hit particles.
+ */
+static int entity_add_hit_taken(lua_State *s)
+{
+    Entity *c = checkBeing(s, 1);
+    const int damage = luaL_checkinteger(s, 2);
+    c->getComponent<BeingComponent>()->addHitTaken(damage);
+    return 0;
+}
+
 /** LUA entity:hair_color (being)
  * entity:hair_color()
  **
@@ -2342,58 +2281,93 @@ static int entity_show_text_particle(lua_State *s)
     return 0;
 }
 
-/** LUA entity:give_special (being)
- * entity:give_special(int special)
+/** LUA entity:give_ability (being)
+ * entity:give_ability(int ability)
  **
- * Valid only for character entities.
+ * Valid only for character and monster entities.
  *
- * Enables a special for a character.
+ * Enables a ability for a character.
  */
-static int entity_give_special(lua_State *s)
+static int entity_give_ability(lua_State *s)
 {
     // cost_type is ignored until we have more than one cost type
-    Entity *c = checkCharacter(s, 1);
-    const int special = checkSpecial(s, 2);
+    Entity *b = checkBeing(s, 1);
+    auto *abilityInfo = checkAbility(s, 2);
     const int currentMana = luaL_optint(s, 3, 0);
 
-    c->getComponent<CharacterComponent>()->giveSpecial(special, currentMana);
+    b->getComponent<AbilityComponent>()->giveAbility(abilityInfo->id,
+                                                     currentMana);
     return 0;
 }
 
-/** LUA entity:has_special (being)
- * entity:has_special(int special)
+/** LUA entity:has_ability (being)
+ * entity:has_ability(int ability)
  **
- * Valid only for character entities.
+ * Valid only for character and monster entities.
  *
- * **Return value:** True if the character has the special, false otherwise.
+ * **Return value:** True if the character has the ability, false otherwise.
  */
-static int entity_has_special(lua_State *s)
+static int entity_has_ability(lua_State *s)
 {
-    Entity *c = checkCharacter(s, 1);
-    const int special = luaL_checkint(s, 2);
+    Entity *b = checkBeing(s, 1);
+    const int ability = luaL_checkint(s, 2);
 
-    lua_pushboolean(s, c->getComponent<CharacterComponent>()->hasSpecial(special));
+    lua_pushboolean(s, b->getComponent<AbilityComponent>()->hasAbility(ability));
     return 1;
 }
 
-/** LUA entity:take_special (being)
- * entity:take_special(int special)
+/** LUA entity:take_ability (being)
+ * entity:take_ability(int ability)
  **
- * Valid only for character entities.
+ * Valid only for character and monster entities.
  *
- * Removes a special from a character.
+ * Removes a ability from a entity.
  *
  * **Return value:** True if removal was successful, false otherwise (in case
- * the character did not have the special).
+ * the character did not have the ability).
  */
-static int entity_take_special(lua_State *s)
+static int entity_take_ability(lua_State *s)
 {
-    Entity *c = checkCharacter(s, 1);
-    const int special = luaL_checkint(s, 2);
+    Entity *b = checkBeing(s, 1);
+    const int ability = luaL_checkint(s, 2);
 
-    CharacterComponent *cc = c->getComponent<CharacterComponent>();
-    lua_pushboolean(s, cc->hasSpecial(special));
-    cc->takeSpecial(special);
+    auto *abilityComponent = b->getComponent<AbilityComponent>();
+    lua_pushboolean(s, abilityComponent->hasAbility(ability));
+    abilityComponent->takeAbility(ability);
+    return 1;
+}
+
+/** LUA entity:use_ability (being)
+ * entity:use_ability(int ability)
+ **
+ * Valid only for character and monster entities.
+ *
+ * Makes the entity using the given ability if it is available and recharged.
+ *
+ * **Return value:** True if the ability was used successfully. False otherwise
+ * (if the ability is not available for the entity or was not recharged).
+ */
+static int entity_use_ability(lua_State *s)
+{
+    Entity *b = checkBeing(s, 1);
+    const int ability = luaL_checkint(s, 2);
+    bool targetIsBeing = lua_gettop(s) == 3;
+
+    auto *abilityComponent = b->getComponent<AbilityComponent>();
+    if (targetIsBeing)
+    {
+        Entity *target = checkBeing(s, 3);
+        lua_pushboolean(s, abilityComponent->useAbilityOnBeing(*b, ability,
+                                                               target));
+    }
+    else
+    {
+        const int x = luaL_checkint(s, 3);
+        const int y = luaL_checkint(s, 4);
+        lua_pushboolean(s, abilityComponent->useAbilityOnPoint(*b, ability,
+                                                               x, y));
+    }
+
     return 1;
 }
 
@@ -2413,55 +2387,6 @@ static int entity_get_monster_id(lua_State *s)
     Entity *monster = checkMonster(s, 1);
     MonsterComponent *monsterComponent = monster->getComponent<MonsterComponent>();
     lua_pushinteger(s, monsterComponent->getSpecy()->getId());
-    return 1;
-}
-
-/** LUA entity:change_anger (monster)
- * entity:change_anger(handle being, int anger)
- **
- * Valid only for monster entities.
- *
- * Makes the monster more angry about the ''being'' by adding ''anger'' to the
- * being.
- */
-static int entity_change_anger(lua_State *s)
-{
-    Entity *monster = checkMonster(s, 1);
-    Entity *being = checkBeing(s, 2);
-    const int anger = luaL_checkint(s, 3);
-    monster->getComponent<MonsterComponent>()->changeAnger(being, anger);
-    return 0;
-}
-
-/** LUA entity:drop_anger (monster)
- * entity:drop_anger(handle target)
- **
- * Valid only for monster entities.
- *
- * Will drop all anger against the ''target''.
- */
-static int entity_drop_anger(lua_State *s)
-{
-    Entity *monster = checkMonster(s, 1);
-    Entity *being = checkBeing(s, 2);
-    monster->getComponent<MonsterComponent>()->forgetTarget(being);
-    return 0;
-}
-
-/** LUA entity:get_angerlist (monster)
- * entity:get_angerlist()
- **
- * Valid only for monster entities.
- *
- * **Return value:** A table with the beings as key and the anger against them
- * as values.
- */
-static int entity_get_angerlist(lua_State *s)
-{
-    Entity *monster = checkMonster(s, 1);
-    MonsterComponent *monsterComponent =
-            monster->getComponent<MonsterComponent>();
-    pushSTLContainer(s, monsterComponent->getAngerList());
     return 1;
 }
 
@@ -2606,6 +2531,40 @@ static int is_walkable(lua_State *s)
     else
         lua_pushboolean(s, 0);
 
+    return 1;
+}
+
+/** LUA get_path_length (mapinformation)
+ * get_path_lenght(int startX, int startY, int destX, int destY, int maxRange)
+ * get_path_lenght(int startX, int startY, int destX, int destY, int maxRange,
+ *                 string walkmask)
+ **
+ * Tries to find a path from the start coordinates to the target ones with a
+ * maximum of ''maxRange'' steps (in tiles).
+ *
+ * If no ''walkmask'' is passed '''w''' is used.
+ *
+ * **Return value:** The number of steps (in tiles) are required to reach
+ * the target or 0 if no path was found.
+ */
+static int get_path_length(lua_State *s)
+{
+    const int startX = luaL_checkint(s, 1);
+    const int startY = luaL_checkint(s, 2);
+    const int destX = luaL_checkint(s, 3);
+    const int destY = luaL_checkint(s, 4);
+    unsigned maxRange = luaL_checkint(s, 5);
+    unsigned char walkmask = BLOCKTYPE_WALL;
+    if (lua_gettop(s) > 5)
+        walkmask = checkWalkMask(s, 6);
+
+    Map *map = checkCurrentMap(s)->getMap();
+    Path path = map->findPath(startX / map->getTileWidth(),
+                              startY / map->getTileHeight(),
+                              destX / map->getTileWidth(),
+                              destY / map->getTileHeight(),
+                              walkmask, maxRange);
+    lua_pushinteger(s, path.size());
     return 1;
 }
 
@@ -2902,125 +2861,123 @@ static int get_distance(lua_State *s)
 }
 
 
-/** LUA_CATEGORY Special info class (specialinfo)
- * See the [[specials.xml#A script example|specials Documentation]] for a
+/** LUA_CATEGORY Ability info class (abilityinfo)
+ * See the [[abilitys.xml#A script example|abilitys Documentation]] for a
  * script example
  */
 
-/** LUA get_special_info (specialinfo)
- * get_special_info(int specialId)
- * get_special_info(string specialName)
+/** LUA get_ability_info (abilityinfo)
+ * get_ability_info(int abilityId)
+ * get_ability_info(string abilityName)
  **
- * **Return value:** This function returns a object of the specialinfo class.
+ * **Return value:** This function returns a object of the abilityinfo class.
  * See below for usage of that object.
  *
- * **Note:** When passing the ''specialName'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the ''abilityName'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
  */
-static int get_special_info(lua_State *s)
+static int get_ability_info(lua_State *s)
 {
-    const int special = checkSpecial(s, 1);
-    SpecialManager::SpecialInfo *info = specialManager->getSpecialInfo(special);
-    luaL_argcheck(s, info, 1, "invalid special");
-    LuaSpecialInfo::push(s, info);
+    auto *abilityInfo = checkAbility(s, 1);
+    LuaAbilityInfo::push(s, abilityInfo);
     return 1;
 }
 
-/** LUA specialinfo:name (specialinfo)
- * specialinfo:name()
+/** LUA abilityinfo:name (abilityinfo)
+ * abilityinfo:name()
  **
- * ** Return value:** The name of the specialinfo object.
+ * ** Return value:** The name of the abilityinfo object.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting a
- * specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting a
+ * abilityinfo object.
  */
-static int specialinfo_get_name(lua_State *s)
+static int abilityinfo_get_name(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     push(s, info->name);
     return 1;
 }
 
-/** LUA specialinfo:needed_mana (specialinfo)
- * specialinfo:needed_mana()
+/** LUA abilityinfo:needed_mana (abilityinfo)
+ * abilityinfo:needed_mana()
  **
- * ** Return value:** The mana that is needed to use the special
+ * ** Return value:** The mana that is needed to use the ability
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting a
- * specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting a
+ * abilityinfo object.
  */
-static int specialinfo_get_needed_mana(lua_State *s)
+static int abilityinfo_get_needed_mana(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
-    lua_pushinteger(s, info->neededMana);
+    auto *info = LuaAbilityInfo::check(s, 1);
+    lua_pushinteger(s, info->neededPoints);
     return 1;
 }
 
-/** LUA specialinfo:rechargeable (specialinfo)
- * specialinfo:rechargeable()
+/** LUA abilityinfo:rechargeable (abilityinfo)
+ * abilityinfo:rechargeable()
  **
- * ** Return value:** A boolean value that indicates whether the special is
+ * ** Return value:** A boolean value that indicates whether the ability is
  * rechargeable or usuable without recharge.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
- * a specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting
+ * a abilityinfo object.
  */
-static int specialinfo_is_rechargeable(lua_State *s)
+static int abilityinfo_is_rechargeable(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     lua_pushboolean(s, info->rechargeable);
     return 1;
 }
 
-/** LUA specialinfo:on_use (specialinfo)
- * specialinfo:on_use(function callback)
+/** LUA abilityinfo:on_use (abilityinfo)
+ * abilityinfo:on_use(function callback)
  **
  * Assigns the ''callback'' as callback for the use event. This function will
- * be called everytime a character uses a special.
+ * be called everytime a character uses a ability.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
- * a specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting
+ * a abilityinfo object.
  */
-static int specialinfo_on_use(lua_State *s)
+static int abilityinfo_on_use(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     Script *script = getScript(s);
     luaL_checktype(s, 2, LUA_TFUNCTION);
     script->assignCallback(info->useCallback);
     return 0;
 }
 
-/** LUA specialinfo:on_recharged (specialinfo)
- * specialinfo:on_recharged(function callback)
+/** LUA abilityinfo:on_recharged (abilityinfo)
+ * abilityinfo:on_recharged(function callback)
  **
  * Assigns the ''callback'' as callback for the recharged event. This function
- * will be called everytime when the special is fully recharged.
+ * will be called everytime when the ability is fully recharged.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
- * a specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting
+ * a abilityinfo object.
  */
-static int specialinfo_on_recharged(lua_State *s)
+static int abilityinfo_on_recharged(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     Script *script = getScript(s);
     luaL_checktype(s, 2, LUA_TFUNCTION);
     script->assignCallback(info->rechargedCallback);
     return 0;
 }
 
-/** LUA specialinfo:category (specialinfo)
- * specialinfo:category(function callback)
+/** LUA abilityinfo:category (abilityinfo)
+ * abilityinfo:category(function callback)
  **
- * **Return value:** The set-name of the special as defined in the
- * [[specials.xml]]
+ * **Return value:** The set-name of the ability as defined in the
+ * [[abilities.xml]]
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
- * a specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting
+ * a abilityinfo object.
  */
-static int specialinfo_get_category(lua_State *s)
+static int abilitiyinfo_get_category(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
-    push(s, info->setName);
+    auto *info = LuaAbilityInfo::check(s, 1);
+    push(s, info->categoryName);
     return 1;
 }
 
@@ -3074,6 +3031,19 @@ static int get_monster_class(lua_State *s)
     return 1;
 }
 
+/** LUA get_monster_classes (monsterclass)
+ * get_monster_classes()
+ **
+ * **Return value:** A Table with all monster classes. The id of the monster
+ * is the key. The monster class itself the value. See below for the usage of
+ * this object.
+ */
+static int get_monster_classes(lua_State *s)
+{
+    pushSTLContainer(s, monsterManager->getMonsterClasses());
+    return 1;
+}
+
 /** LUA monsterclass:on_update (monsterclass)
  * monsterclass:on_update(function callback)
  **
@@ -3091,36 +3061,6 @@ static int monster_class_on_update(lua_State *s)
     return 0;
 }
 
-/** LUA monsterclass:on_damage (monsterclass)
- * monsterclass:on_damage(function callback)
- **
- * Assigns the ''callback'' as callback for the monster damage event.
- * This callback will be called every time when a monster takes damage.
- * The damage can be either invoked from scripts or from other beings such
- * as players. The parameters of the callback are: the attacked monster,
- * the being dealing the damage and the hp loss
- *
- * **Note:** See [[scripting#get_monster_class|get_monster_class]] for getting
- * a monsterclass object.
- *
- * **Example:** <code lua>
- * local function damage(mob, aggressor, hploss)
- *     mob:say("I took damage -.- ".. hploss)
- *     if aggressor then
- *         mob:say("Curse you, ".. aggressor:name())
- *     end
- * end
- * local maggot = get_monster_class("maggot")
- * maggot:on_damage(damage)</code>
- */
-static int monster_class_on_damage(lua_State *s)
-{
-    MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
-    luaL_checktype(s, 2, LUA_TFUNCTION);
-    monsterClass->setDamageCallback(getScript(s));
-    return 0;
-}
-
 /** LUA monsterclass:name (monsterclass)
  * monsterclass:name()
  **
@@ -3130,234 +3070,6 @@ static int monster_class_get_name(lua_State *s)
 {
     MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
     push(s, monsterClass->getName());
-    return 1;
-}
-
-/** LUA monsterclass:attacks (monsterclass)
- * monsterclass:attacks()
- **
- * **Return value:** This function returns a table with all attacks of the
- * monster. See the [[scripting#AttackInfo class|Attack Info]] section.
- */
-static int monster_class_attacks(lua_State *s)
-{
-    MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
-    pushSTLContainer(s, monsterClass->getAttackInfos());
-    return 1;
-}
-
-
-/** LUA_CATEGORY AttackInfo class (attackinfoclass)
- * The AttackInfo class reveals info about attacks and provides functions to
- * register callbacks on attacks. See the
- * [[attackconfiguration|Attack Configuration]] for more info.
- * To get an AttackInfo use
- * [[scripting#monsterclass:attacks|monsterclass:attacks]] or
- * [[scripting#itemclass:attacks|itemclass:attacks]]
- */
-
-/** LUA attackinfo:priority (attackinfoclass)
- * attackinfo:priority()
- **
- * **Return value:** This function returns the priority of the attack.
- */
-static int attack_get_priority(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    lua_pushinteger(s, attack->getPriority());
-    return 1;
-}
-
-/** LUA attackinfo:cooldowntime (attackinfoclass)
- * attackinfo:cooldowntime()
- **
- * **Return value:** This function returns the cooldowntime (time after dealing
- * damage after which a new attack can be used) of the attack.
- */
-static int attack_get_cooldowntime(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    lua_pushinteger(s, attack->getCooldownTime());
-    return 1;
-}
-
-/** LUA attackinfo:warmuptime (attackinfoclass)
- * attackinfo:warmuptime()
- **
- * **Return value:** This function returns the warmuptime (time before a attack
- * triggers damage after being used) of the attack.
- */
-static int attack_get_warmuptime(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    lua_pushinteger(s, attack->getWarmupTime());
-    return 1;
-}
-
-/** LUA attackinfo:reusetime (attackinfoclass)
- * attackinfo:reusetime()
- **
- * **Return value:** This function returns the reusetime (time after which the
- * same attack can be used again) of the attack.
- */
-static int attack_get_reusetime(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    lua_pushinteger(s, attack->getReuseTime());
-    return 1;
-}
-
-/** LUA attackinfo:damage (attackinfoclass)
- * attackinfo:damage()
- **
- * **Return value:** This function returns the damage info of the attack.
- *
- * **See also:** [[scripting#Damage Class|Damage Class]]
- */
-static int attack_get_damage(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    LuaDamage::push(s, &attack->getDamage());
-    return 1;
-}
-
-/** LUA attackinfo:on_attack (attackinfoclass)
- * attackinfo:on_attack(function callback)
- **
- * Assigns a callback to the attack that will be called as soon the attack is
- * used. The callback will get called with the following parameters:
- * being user, being target, int damage_dealt.
- */
-static int attack_on_attack(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    luaL_checktype(s, 2, LUA_TFUNCTION);
-    attack->setCallback(getScript(s));
-    return 0;
-}
-
-
-/** LUA_CATEGORY Damage Class (damageclass)
- * The Damage class provides info about the kind of damage attack deals.
- */
-
-/** LUA damage:id (damageclass)
- * damage:id()
- **
- * **Return value:** This function returns the id of the attack.
- */
-static int damage_get_id(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->id);
-    return 1;
-}
-
-/** LUA damage:skill (damageclass)
- * damage:skill()
- **
- * **Return value:** This function returns the skill id of the attack. If the
- * damage dealer is a character is a character this skill will recieve exp.
- */
-static int damage_get_skill(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->skill);
-    return 1;
-}
-
-/** LUA damage:base (damageclass)
- * damage:base()
- **
- * **Return value:** This function returns the base damage of the attack.
- * It is the minimum of damage dealt.
- */
-static int damage_get_base(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->base);
-    return 1;
-}
-
-/** LUA damage:delta (damageclass)
- * damage:delta()
- **
- * **Return value:** This function returns the damage delta of the attack.
- * base damage + delta damage is the maximum of damage the attack can cause.
- * A number in between will be picked by random.
- */
-static int damage_get_delta(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->delta);
-    return 1;
-}
-
-/** LUA damage:cth (damageclass)
- * damage:cth()
- **
- * **Return value:** This function returns the chance to hit of the attack.
- * This number is not a percent value but some factor. Higher means a better
- * chance to hit. FIXME: Add info about the factor.
- */
-static int damage_get_cth(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->cth);
-    return 1;
-}
-
-/** LUA damage:element (damageclass)
- * damage:element()
- **
- * **Return value:** This function returns the element of the attack.
- *
- * **See:** [[scripting#entitydamage|entity:damage]] for possible values.
- */
-static int damage_get_element(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->element);
-    return 1;
-}
-
-/** LUA damage:type (damageclass)
- * damage:type()
- **
- * **Return value:** This function returns the type of the attack.
- *
- * **See:** [[scripting#entitydamage|entity:damage]] for possible values.
- */
-static int damage_get_type(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->type);
-    return 1;
-}
-
-/** LUA damage:is_truestrike (damageclass)
- * damage:is_truestrike()
- **
- * **Return value:** This function returns whether the attack is a true strike.
- * A true strike is not effected by chance of hit or anything that could
- * prevent the hit.
- */
-static int damage_is_truestrike(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushboolean(s, damage->trueStrike);
-    return 1;
-}
-
-/** LUA damage:range (damageclass)
- * damage:range()
- **
- * **Return value:** This function returns the range of the attack in pixels.
- */
-static int damage_get_range(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->range);
     return 1;
 }
 
@@ -3527,23 +3239,6 @@ static int item_class_get_name(lua_State *s)
     return 1;
 }
 
-/** LUA itemclass:attacks (itemclass)
- * itemclass:attacks()
- **
- * **Return value:** Returns a list of all attacks the item offers.
- *
- * **See:** the [[scripting#AttackInfo Class|AttackInfo class]] for more info
- * about how to use the values in the list.
- */
-static int item_class_attacks(lua_State *s)
-{
-    ItemClass *itemClass = LuaItemClass::check(s, 1);
-    std::vector<AttackInfo *> attacks = itemClass->getAttackInfos();
-    pushSTLContainer<AttackInfo *>(s, attacks);
-    return 1;
-}
-
-
 /**
  * Returns four useless tables for testing the STL container push wrappers.
  * This function can be removed when there are more useful functions which use
@@ -3654,6 +3349,7 @@ LuaScript::LuaScript():
         { "on_mapupdate",                   on_mapupdate                      },
         { "get_item_class",                 get_item_class                    },
         { "get_monster_class",              get_monster_class                 },
+        { "get_monster_classes",            get_monster_classes               },
         { "get_status_effect",              get_status_effect                 },
         { "npc_create",                     npc_create                        },
         { "say",                            say                               },
@@ -3684,13 +3380,14 @@ LuaScript::LuaScript():
         { "get_map_id",                     get_map_id                        },
         { "get_map_property",               get_map_property                  },
         { "is_walkable",                    is_walkable                       },
+        { "get_path_length",                get_path_length                   },
         { "map_get_pvp",                    map_get_pvp                       },
         { "item_drop",                      item_drop                         },
         { "log",                            log                               },
         { "get_distance",                   get_distance                      },
         { "map_get_objects",                map_get_objects                   },
         { "announce",                       announce                          },
-        { "get_special_info",               get_special_info                  },
+        { "get_ability_info",               get_ability_info                  },
         { nullptr, nullptr }
     };
 #if LUA_VERSION_NUM < 502
@@ -3701,29 +3398,6 @@ LuaScript::LuaScript():
     luaL_setfuncs(mRootState, callbacks, 0);
 #endif
     lua_pop(mRootState, 1);                     // pop the globals table
-
-    static luaL_Reg const members_AttackInfo[] = {
-        { "priority",                       attack_get_priority               },
-        { "cooldowntime",                   attack_get_cooldowntime           },
-        { "warmuptime",                     attack_get_warmuptime             },
-        { "reusetime",                      attack_get_reusetime              },
-        { "damage",                         attack_get_damage                 },
-        { "on_attack",                      attack_on_attack                  },
-        { nullptr, nullptr }
-    };
-
-    static luaL_Reg const members_Damage[] = {
-        { "id",                             damage_get_id                     },
-        { "skill",                          damage_get_skill                  },
-        { "base",                           damage_get_base                   },
-        { "delta",                          damage_get_delta                  },
-        { "cth",                            damage_get_cth                    },
-        { "element",                        damage_get_element                },
-        { "type",                           damage_get_type                   },
-        { "is_truestrike",                  damage_is_truestrike              },
-        { "range",                          damage_get_range                  },
-        { nullptr, nullptr }
-    };
 
     static luaL_Reg const members_Entity[] = {
         { "remove",                         entity_remove                     },
@@ -3737,12 +3411,12 @@ LuaScript::LuaScript():
         { "equip_item",                     entity_equip_item                 },
         { "unequip_slot",                   entity_unequip_slot               },
         { "unequip_item",                   entity_unequip_item               },
-        { "set_special_recharge_speed",     entity_set_special_recharge_speed },
-        { "special_recharge_speed",         entity_get_special_recharge_speed },
-        { "set_special_mana",               entity_set_special_mana           },
-        { "special_mana",                   entity_get_special_mana           },
+        { "set_ability_mana",               entity_set_ability_mana           },
+        { "ability_mana",                   entity_get_ability_mana           },
+        { "cooldown_ability",               entity_cooldown_ability           },
         { "walk",                           entity_walk                       },
-        { "damage",                         entity_damage                     },
+        { "destination",                    entity_destination                },
+        { "look_at",                        entity_look_at                    },
         { "heal",                           entity_heal                       },
         { "name",                           entity_get_name                   },
         { "type",                           entity_get_type                   },
@@ -3777,25 +3451,23 @@ LuaScript::LuaScript():
         { "register",                       entity_register                   },
         { "shake_screen",                   entity_shake_screen               },
         { "show_text_particle",             entity_show_text_particle         },
-        { "give_special",                   entity_give_special               },
-        { "has_special",                    entity_has_special                },
-        { "take_special",                   entity_take_special               },
+        { "give_ability",                   entity_give_ability               },
+        { "has_ability",                    entity_has_ability                },
+        { "take_ability",                   entity_take_ability               },
+        { "use_ability",                    entity_use_ability                },
         { "monster_id",                     entity_get_monster_id             },
-        { "change_anger",                   entity_change_anger               },
-        { "drop_anger",                     entity_drop_anger                 },
-        { "angerlist",                      entity_get_angerlist              },
         { "apply_status",                   entity_apply_status               },
         { "remove_status",                  entity_remove_status              },
         { "has_status",                     entity_has_status                 },
         { "status_time",                    entity_get_status_time            },
         { "set_status_time",                entity_set_status_time            },
+        { "add_hit_taken",                  entity_add_hit_taken              },
         { nullptr, nullptr }
     };
 
     static luaL_Reg const members_ItemClass[] = {
         { "on",                             item_class_on                     },
         { "name",                           item_class_get_name               },
-        { "attacks",                        item_class_attacks                },
         { nullptr, nullptr }
     };
 
@@ -3809,9 +3481,7 @@ LuaScript::LuaScript():
 
     static luaL_Reg const members_MonsterClass[] = {
         { "on_update",                      monster_class_on_update           },
-        { "on_damage",                      monster_class_on_damage           },
         { "name",                           monster_class_get_name            },
-        { "attacks",                        monster_class_attacks             },
         { nullptr, nullptr }
     };
 
@@ -3820,24 +3490,22 @@ LuaScript::LuaScript():
         { nullptr, nullptr }
     };
 
-    static luaL_Reg const members_SpecialInfo[] = {
-        { "name",                           specialinfo_get_name              },
-        { "needed_mana",                    specialinfo_get_needed_mana       },
-        { "rechargeable",                   specialinfo_is_rechargeable       },
-        { "on_use",                         specialinfo_on_use                },
-        { "on_recharged",                   specialinfo_on_recharged          },
-        { "category",                       specialinfo_get_category          },
+    static luaL_Reg const members_AbilityInfo[] = {
+        { "name",                           abilityinfo_get_name              },
+        { "needed_mana",                    abilityinfo_get_needed_mana       },
+        { "rechargeable",                   abilityinfo_is_rechargeable       },
+        { "on_use",                         abilityinfo_on_use                },
+        { "on_recharged",                   abilityinfo_on_recharged          },
+        { "category",                       abilitiyinfo_get_category         },
         { nullptr, nullptr}
     };
 
-    LuaAttackInfo::registerType(mRootState, "Attack", members_AttackInfo);
-    LuaDamage::registerType(mRootState, "Damage", members_Damage);
     LuaEntity::registerType(mRootState, "Entity", members_Entity);
     LuaItemClass::registerType(mRootState, "ItemClass", members_ItemClass);
     LuaMapObject::registerType(mRootState, "MapObject", members_MapObject);
     LuaMonsterClass::registerType(mRootState, "MonsterClass", members_MonsterClass);
     LuaStatusEffect::registerType(mRootState, "StatusEffect", members_StatusEffect);
-    LuaSpecialInfo::registerType(mRootState, "SpecialInfo", members_SpecialInfo);
+    LuaAbilityInfo::registerType(mRootState, "AbilityInfo", members_AbilityInfo);
 
     // Make script object available to callback functions.
     lua_pushlightuserdata(mRootState, const_cast<char *>(&registryKey));

@@ -29,8 +29,9 @@
 
 #include "game-server/actor.h"
 #include "game-server/attribute.h"
-#include "game-server/attack.h"
 #include "game-server/timeout.h"
+
+#include "scripting/script.h"
 
 class BeingComponent;
 class MapComposite;
@@ -45,6 +46,11 @@ struct Status
 };
 
 typedef std::map< int, Status > StatusEffects;
+
+/**
+ * Type definition for a list of hits
+ */
+typedef std::vector<unsigned> Hits;
 
 /**
  * Generic being (living actor). Keeps direction, destination and a few other
@@ -280,6 +286,10 @@ class BeingComponent : public Component
                              const Point &currentPos,
                              const Point &destPos);
 
+        void addHitTaken(unsigned damage);
+        const Hits &getHitsTaken() const;
+        void clearHitsTaken();
+
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
 
@@ -312,11 +322,35 @@ class BeingComponent : public Component
         /** The last being emote Id. Used when triggering a being emoticon. */
         int mEmoteId;
 
+        Hits mHitsTaken;            //List of punches taken since last update.
+
         /** Called when derived attributes need to get calculated */
         static Script::Ref mRecalculateDerivedAttributesCallback;
 
         /** Called when a base attribute needs to get calculated */
         static Script::Ref mRecalculateBaseAttributeCallback;
 };
+
+
+inline void BeingComponent::addHitTaken(unsigned damage)
+{
+    mHitsTaken.push_back(damage);
+}
+
+/**
+ * Gets the damage list.
+ */
+inline const Hits &BeingComponent::getHitsTaken() const
+{
+    return mHitsTaken;
+}
+
+/**
+ * Clears the damage list.
+ */
+inline void BeingComponent::clearHitsTaken()
+{
+    mHitsTaken.clear();
+}
 
 #endif // BEING_H

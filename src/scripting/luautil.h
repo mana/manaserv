@@ -34,8 +34,7 @@ extern "C" {
 #include <set>
 #include <vector>
 
-#include "game-server/attack.h"
-#include "game-server/specialmanager.h"
+#include "game-server/abilitymanager.h"
 
 class CharacterComponent;
 class Entity;
@@ -159,29 +158,28 @@ private:
 
 template <typename T> const char * LuaUserData<T>::mTypeName;
 
-typedef LuaUserData<AttackInfo> LuaAttackInfo;
-typedef LuaUserData<Damage> LuaDamage;
 typedef LuaUserData<Entity> LuaEntity;
 typedef LuaUserData<ItemClass> LuaItemClass;
 typedef LuaUserData<MapObject> LuaMapObject;
 typedef LuaUserData<MonsterClass> LuaMonsterClass;
 typedef LuaUserData<StatusEffect> LuaStatusEffect;
-typedef LuaUserData<SpecialManager::SpecialInfo> LuaSpecialInfo;
+typedef LuaUserData<AbilityManager::AbilityInfo> LuaAbilityInfo;
 
-Script *        getScript(lua_State *s);
+Script *                     getScript(lua_State *s);
 
-ItemClass *     getItemClass(lua_State *s, int p);
-MonsterClass *  getMonsterClass(lua_State *s, int p);
+ItemClass *                  getItemClass(lua_State *s, int p);
+MonsterClass *               getMonsterClass(lua_State *s, int p);
 
-Entity *        checkActor(lua_State *s, int p);
-Entity *        checkBeing(lua_State *s, int p);
-Entity *        checkCharacter(lua_State *s, int p);
-ItemClass *     checkItemClass(lua_State *s, int p);
-Entity *        checkMonster(lua_State *s, int p);
-MonsterClass *  checkMonsterClass(lua_State *s, int p);
-Entity *        checkNpc(lua_State *s, int p);
-int             checkSkill(lua_State *s, int p);
-int             checkSpecial(lua_State *s, int p);
+Entity *                     checkActor(lua_State *s, int p);
+Entity *                     checkBeing(lua_State *s, int p);
+Entity *                     checkCharacter(lua_State *s, int p);
+ItemClass *                  checkItemClass(lua_State *s, int p);
+Entity *                     checkMonster(lua_State *s, int p);
+MonsterClass *               checkMonsterClass(lua_State *s, int p);
+Entity *                     checkNpc(lua_State *s, int p);
+int                          checkSkill(lua_State *s, int p);
+AbilityManager::AbilityInfo *checkAbility(lua_State *s, int p);
+unsigned char                checkWalkMask(lua_State *s, int p);
 
 MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
 Script::Thread* checkCurrentThread(lua_State *s, Script *script = 0);
@@ -210,14 +208,14 @@ inline void push(lua_State *s, double val)
     lua_pushnumber(s, val);
 }
 
-inline void push(lua_State *s, AttackInfo *val)
-{
-    LuaAttackInfo::push(s, val);
-}
-
 inline void push(lua_State *s, MapObject *val)
 {
     LuaMapObject::push(s, val);
+}
+
+inline void push(lua_State *s, MonsterClass *val)
+{
+    LuaMonsterClass::push(s, val);
 }
 
 

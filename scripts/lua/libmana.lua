@@ -46,7 +46,7 @@ map = setmetatable({}, {
 ---
 -- Sets or gets a persistent world variable. The value is stored in the
 -- database and thus will survive a server reboot.
--- 
+--
 -- **Important:** When you are using this function, be aware of race
 -- conditions: It is impossible to prevent that another map changes the value
 -- of a variable between you requesting to old value and setting a new value.
@@ -71,7 +71,7 @@ world = setmetatable({}, {
 -- ERROR(string message)
 ---
 -- Will log the ''message'' using the log level LOG_ERROR.
--- 
+--
 -- **Note:** When passing multiple arguments these arguments will get connected
 -- using a " ".
 function ERROR(...) log(LOG_ERROR, table.concat({...}, " ")) end
@@ -320,7 +320,7 @@ local onremove_functs = {}
 -- on_death(handle being, function() [function body] end)
 ---
 -- Executes the ''function body'' when ''being'' is killed. Note that this
--- doesn't happen anymore after the being left the map. 
+-- doesn't happen anymore after the being left the map.
 function on_death(being, funct)
   if ondeath_functs[being] == nil then
     ondeath_functs[being] = {}
@@ -334,7 +334,8 @@ end
 ---
 -- Executes the ''function body'' when ''being'' is no longer on the map for
 -- some reason (leaves the map voluntarily, is warped away, logs out, cleaned
--- up after getting killed or whatever).
+-- up after getting killed or whatever). The removed ''being'' will be passed
+-- as an argument of the function
 function on_remove(being, funct)
   if onremove_functs[being] == nil then
     onremove_functs[being] = {}
@@ -347,7 +348,7 @@ end
 local function death_notification(being)
   if type(ondeath_functs[being]) == "table" then
     for i,funct in pairs(ondeath_functs[being]) do
-      funct()
+      funct(being)
     end
     ondeath_functs[being] = nil
   end
@@ -357,7 +358,7 @@ end
 local function remove_notification(being)
   if type(onremove_functs[being]) == "table" then
     for i,funct in pairs(onremove_functs[being]) do
-      funct()
+      funct(being)
     end
     onremove_functs[being] = nil
     ondeath_functs[being] = nil

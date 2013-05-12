@@ -58,8 +58,8 @@ Script *currentState();
 bool performCraft(Entity *crafter, const std::list<InventoryItem> &recipe);
 
 void setCraftCallback(Script *script);
-void setSpecialCallback(Script *script);
-void setGetSpecialRechargeCostCallback(Script *script);
+void setAbilityCallback(Script *script);
+void setGetAbilityRechargeCostCallback(Script *script);
 
 } // namespace ScriptManager
 

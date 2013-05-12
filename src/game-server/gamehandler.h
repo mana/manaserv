@@ -134,9 +134,8 @@ class GameHandler: public ConnectionHandler
         void handleUnequip(GameClient &client, MessageIn &message);
         void handleMoveItem(GameClient &client, MessageIn &message);
 
-        void handleAttack(GameClient &client, MessageIn &message);
-        void handleUseSpecialOnBeing(GameClient &client, MessageIn &message);
-        void handleUseSpecialOnPoint(GameClient &client, MessageIn &message);
+        void handleUseAbilityOnBeing(GameClient &client, MessageIn &message);
+        void handleUseAbilityOnPoint(GameClient &client, MessageIn &message);
         void handleActionChange(GameClient &client, MessageIn &message);
         void handleDirectionChange(GameClient &client, MessageIn &message);
 

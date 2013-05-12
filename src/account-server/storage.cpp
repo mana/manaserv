@@ -78,7 +78,7 @@ static const char *CHAR_ATTR_TBL_NAME           =   "mana_char_attr";
 static const char *CHAR_SKILLS_TBL_NAME         =   "mana_char_skills";
 static const char *CHAR_STATUS_EFFECTS_TBL_NAME =   "mana_char_status_effects";
 static const char *CHAR_KILL_COUNT_TBL_NAME     =   "mana_char_kill_stats";
-static const char *CHAR_SPECIALS_TBL_NAME       =   "mana_char_specials";
+static const char *CHAR_ABILITIES_TBL_NAME      =   "mana_char_abilities";
 static const char *CHAR_EQUIPS_TBL_NAME         =   "mana_char_equips";
 static const char *INVENTORIES_TBL_NAME         =   "mana_inventories";
 static const char *ITEMS_TBL_NAME               =   "mana_items";
@@ -474,20 +474,20 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
             }
         }
 
-        // Load the special status
+        // Load the ability status
         s.clear();
         s.str("");
-        s << "SELECT special_id, special_current_mana FROM "
-          << CHAR_SPECIALS_TBL_NAME
+        s << "SELECT ability_id, ability_current_points FROM "
+          << CHAR_ABILITIES_TBL_NAME
           << " WHERE char_id = " << character->getDatabaseID();
-        const dal::RecordSet &specialsInfo = mDb->execSql(s.str());
-        if (!specialsInfo.isEmpty())
+        const dal::RecordSet &abilitiesInfo = mDb->execSql(s.str());
+        if (!abilitiesInfo.isEmpty())
         {
-            const unsigned nRows = specialsInfo.rows();
+            const unsigned nRows = abilitiesInfo.rows();
             for (unsigned row = 0; row < nRows; row++)
             {
-                character->giveSpecial(toUint(specialsInfo(row, 0)),
-                                       toUint(specialsInfo(row, 1)));
+                character->giveAbility(toUint(abilitiesInfo(row, 0)),
+                                       toUint(abilitiesInfo(row, 1)));
             }
         }
     }
@@ -788,29 +788,29 @@ bool Storage::updateCharacter(CharacterData *character)
                           "SQL query failure: ", e);
     }
 
-    //  Character's special actions
+    //  Character's abillities
     try
     {
         // Out with the old
         std::ostringstream deleteSql("");
         std::ostringstream insertSql;
-        deleteSql   << "DELETE FROM " << CHAR_SPECIALS_TBL_NAME
+        deleteSql   << "DELETE FROM " << CHAR_ABILITIES_TBL_NAME
                     << " WHERE char_id='"
                     << character->getDatabaseID() << "';";
         mDb->execSql(deleteSql.str());
         // In with the new
-        SpecialMap::const_iterator special_it, special_it_end;
-        for (special_it = character->getSpecialBegin(),
-             special_it_end = character->getSpecialEnd();
-             special_it != special_it_end; ++special_it)
+        AbilityMap::const_iterator ability_it, ability_it_end;
+        for (ability_it = character->getAbilityBegin(),
+             ability_it_end = character->getAbilityEnd();
+             ability_it != ability_it_end; ++ability_it)
         {
             insertSql.str("");
-            insertSql   << "INSERT INTO " << CHAR_SPECIALS_TBL_NAME
-                        << " (char_id, special_id, special_current_mana)"
+            insertSql   << "INSERT INTO " << CHAR_ABILITIES_TBL_NAME
+                        << " (char_id, ability_id, ability_current_points)"
                         << " VALUES ("
                         << " '" << character->getDatabaseID() << "',"
-                        << " '" << special_it->first << "',"
-                        << " '" << special_it->second.currentMana
+                        << " '" << ability_it->first << "',"
+                        << " '" << ability_it->second.currentPoints
                         << "');";
             mDb->execSql(insertSql.str());
         }

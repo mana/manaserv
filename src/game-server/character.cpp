@@ -22,10 +22,8 @@
 
 #include "common/configuration.h"
 #include "game-server/accountconnection.h"
-#include "game-server/attack.h"
 #include "game-server/attributemanager.h"
 #include "game-server/buysell.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
@@ -75,7 +73,6 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mClient(nullptr),
     mConnected(true),
     mTransactionHandler(nullptr),
-    mSpecialUpdateNeeded(false),
     mDatabaseID(-1),
     mHairStyle(0),
     mHairColor(0),
@@ -83,11 +80,11 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mLevelProgress(0),
     mUpdateLevelProgress(false),
     mRecalculateLevel(true),
+    mSendAbilityCooldown(false),
     mParty(0),
     mTransaction(TRANS_NONE),
     mTalkNpcId(0),
     mNpcThread(0),
-    mKnuckleAttackInfo(0),
     mBaseEntity(&entity)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
@@ -106,27 +103,13 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     actorComponent->setSize(16);
 
 
-    CombatComponent *combatcomponent = new CombatComponent(entity);
-    entity.addComponent(combatcomponent);
-    combatcomponent->getAttacks().attack_added.connect(
-            sigc::mem_fun(this, &CharacterComponent::attackAdded));
-    combatcomponent->getAttacks().attack_removed.connect(
-            sigc::mem_fun(this, &CharacterComponent::attackRemoved));
-
-    // Default knuckle attack
-    int damageBase = beingComponent->getModifiedAttribute(ATTR_STR);
-    int damageDelta = damageBase / 2;
-    Damage knuckleDamage;
-    knuckleDamage.skill = skillManager->getDefaultSkillId();
-    knuckleDamage.base = damageBase;
-    knuckleDamage.delta = damageDelta;
-    knuckleDamage.cth = 2;
-    knuckleDamage.element = ELEMENT_NEUTRAL;
-    knuckleDamage.type = DAMAGE_PHYSICAL;
-    knuckleDamage.range = DEFAULT_TILE_LENGTH;
-
-    mKnuckleAttackInfo = new AttackInfo(0, knuckleDamage, 7, 3, 0);
-    combatcomponent->addAttack(mKnuckleAttackInfo);
+    auto *abilityComponent = new AbilityComponent(entity);
+    entity.addComponent(abilityComponent);
+    abilityComponent->signal_ability_changed.connect(
+            sigc::mem_fun(this, &CharacterComponent::abilityStatusChanged));
+    abilityComponent->signal_cooldown_activated.connect(
+            sigc::mem_fun(this,
+                          &CharacterComponent::abilityCooldownActivated));
 
     // Get character data.
     mDatabaseID = msg.readInt32();
@@ -140,12 +123,14 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
 
     beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
             this, &CharacterComponent::attributeChanged));
+
+    for (auto &abilityIt : abilityComponent->getAbilities())
+        mModifiedAbilities.insert(abilityIt.first);
 }
 
 CharacterComponent::~CharacterComponent()
 {
     delete mNpcThread;
-    delete mKnuckleAttackInfo;
 }
 
 void CharacterComponent::update(Entity &entity)
@@ -161,31 +146,11 @@ void CharacterComponent::update(Entity &entity)
     if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
-    // Update special recharge
-    for (SpecialMap::iterator it = mSpecials.begin(), it_end = mSpecials.end();
-         it != it_end; it++)
-    {
-        SpecialValue &s = it->second;
-        if (s.specialInfo->rechargeable && s.currentMana < s.specialInfo->neededMana)
-        {
-            s.currentMana += s.rechargeSpeed;
-            if (s.currentMana >= s.specialInfo->neededMana &&
-                    s.specialInfo->rechargedCallback.isValid())
-            {
-                Script *script = ScriptManager::currentState();
-                script->prepare(s.specialInfo->rechargedCallback);
-                script->push(&entity);
-                script->push(s.specialInfo->id);
-                script->execute(entity.getMap());
-            }
-        }
-    }
+    if (!mModifiedAbilities.empty())
+        sendAbilityUpdate(entity);
 
-    if (mSpecialUpdateNeeded)
-    {
-        sendSpecialUpdate();
-        mSpecialUpdateNeeded = false;
-    }
+    if (mSendAbilityCooldown)
+        sendAbilityCooldownUpdate(entity);
 }
 
 void CharacterComponent::characterDied(Entity *being)
@@ -206,8 +171,6 @@ void CharacterComponent::respawn(Entity &entity)
 
     // Make it alive again
     beingComponent->setAction(entity, STAND);
-    // Reset target
-    entity.getComponent<CombatComponent>()->clearTarget();
 
     // Execute respawn callback when set
     if (executeCallback(mDeathAcceptedCallback, entity))
@@ -225,133 +188,49 @@ void CharacterComponent::respawn(Entity &entity)
                            Point(spawnX, spawnY));
 }
 
-bool CharacterComponent::specialUseCheck(SpecialMap::iterator it)
+void CharacterComponent::abilityStatusChanged(int id)
 {
-    if (it == mSpecials.end())
-    {
-        LOG_INFO("Character uses special " << it->first
-                 << " without authorization.");
-        return false;
-    }
-
-    //check if the special is currently recharged
-    SpecialValue &special = it->second;
-    if (special.specialInfo->rechargeable &&
-            special.currentMana < special.specialInfo->neededMana)
-    {
-        LOG_INFO("Character uses special " << it->first << " which is not recharged. ("
-                 << special.currentMana << "/"
-                 << special.specialInfo->neededMana << ")");
-        return false;
-    }
-
-    if (!special.specialInfo->useCallback.isValid())
-    {
-        LOG_WARN("No callback for use of special "
-                 << special.specialInfo->setName << "/"
-                 << special.specialInfo->name << ". Ignoring special.");
-        return false;
-    }
-    return true;
+    mModifiedAbilities.insert(id);
 }
 
-void CharacterComponent::useSpecialOnBeing(Entity &user, int id, Entity *b)
+void CharacterComponent::abilityCooldownActivated()
 {
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (!specialUseCheck(it))
-            return;
-    SpecialValue &special = it->second;
-
-    if (special.specialInfo->target != SpecialManager::TARGET_BEING)
-        return;
-
-    //tell script engine to cast the spell
-    Script *script = ScriptManager::currentState();
-    script->prepare(special.specialInfo->useCallback);
-    script->push(&user);
-    script->push(b);
-    script->push(special.specialInfo->id);
-    script->execute(user.getMap());
+    mSendAbilityCooldown = true;
 }
 
-void CharacterComponent::useSpecialOnPoint(Entity &user, int id, int x, int y)
+void CharacterComponent::sendAbilityUpdate(Entity &entity)
 {
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (!specialUseCheck(it))
-            return;
-    SpecialValue &special = it->second;
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    if (special.specialInfo->target != SpecialManager::TARGET_POINT)
-        return;
+    auto &abilities = entity.getComponent<AbilityComponent>()->getAbilities();
 
-    //tell script engine to cast the spell
-    Script *script = ScriptManager::currentState();
-    script->prepare(special.specialInfo->useCallback);
-    script->push(&user);
-    script->push(x);
-    script->push(y);
-    script->push(special.specialInfo->id);
-    script->execute(user.getMap());
-}
-
-bool CharacterComponent::giveSpecial(int id, int currentMana)
-{
-    if (mSpecials.find(id) == mSpecials.end())
+    MessageOut msg(GPMSG_ABILITY_STATUS);
+    for (unsigned id : mModifiedAbilities)
     {
-        const SpecialManager::SpecialInfo *specialInfo =
-                specialManager->getSpecialInfo(id);
-        if (!specialInfo)
-        {
-            LOG_ERROR("Tried to give not existing special id " << id << ".");
-            return false;
-        }
-        mSpecials.insert(std::pair<int, SpecialValue>(
-                             id, SpecialValue(currentMana, specialInfo)));
-        mSpecialUpdateNeeded = true;
-        return true;
-    }
-    return false;
-}
+        auto it = abilities.find(id);
+        if (it == abilities.end())
+            continue; // got deleted
 
-bool CharacterComponent::setSpecialMana(int id, int mana)
-{
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (it != mSpecials.end())
-    {
-        it->second.currentMana = mana;
-        mSpecialUpdateNeeded = true;
-        return true;
-    }
-    return false;
-}
+        const double rechargeSpeed = beingComponent->getModifiedAttribute(
+                            it->second.abilityInfo->rechargeAttribute);
 
-bool CharacterComponent::setSpecialRechargeSpeed(int id, int speed)
-{
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (it != mSpecials.end())
-    {
-        it->second.rechargeSpeed = speed;
-        mSpecialUpdateNeeded = true;
-        return true;
+        msg.writeInt8(id);
+        msg.writeInt32(it->second.currentPoints);
+        msg.writeInt32(it->second.abilityInfo->neededPoints);
+        msg.writeInt32((int)rechargeSpeed);
     }
-    return false;
-}
 
-void CharacterComponent::sendSpecialUpdate()
-{
-    //GPMSG_SPECIAL_STATUS = 0x0293,
-    // { B specialID, L current, L max, L recharge }
-
-    MessageOut msg(GPMSG_SPECIAL_STATUS);
-    for (SpecialMap::iterator it = mSpecials.begin(), it_end = mSpecials.end();
-         it != it_end; ++it)
-    {
-        msg.writeInt8(it->first);
-        msg.writeInt32(it->second.currentMana);
-        msg.writeInt32(it->second.specialInfo->neededMana);
-        msg.writeInt32(it->second.rechargeSpeed);
-    }
+    mModifiedAbilities.clear();
     gameHandler->sendTo(mClient, msg);
+}
+
+void CharacterComponent::sendAbilityCooldownUpdate(Entity &entity)
+{
+    MessageOut msg(GPMSG_ABILITY_COOLDOWN);
+    auto *abilityComponent = entity.getComponent<AbilityComponent>();
+    msg.writeInt16(abilityComponent->remainingCooldown());
+    gameHandler->sendTo(mClient, msg);
+    mSendAbilityCooldown = false;
 }
 
 void CharacterComponent::cancelTransaction()
@@ -471,15 +350,6 @@ void CharacterComponent::attributeChanged(Entity *entity, unsigned attr)
                                    beingComponent->getAttributeBase(attr),
                                    beingComponent->getModifiedAttribute(attr));
     mModifiedAttributes.insert(attr);
-
-    // Update the knuckle Attack if required
-    if (attr == ATTR_STR && mKnuckleAttackInfo)
-    {
-        // TODO: dehardcode this
-        Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
-        knuckleDamage.base = beingComponent->getModifiedAttribute(ATTR_STR);
-        knuckleDamage.delta = knuckleDamage.base / 2;
-    }
 }
 
 int CharacterComponent::expForLevel(int level)
@@ -694,23 +564,6 @@ void CharacterComponent::resumeNpcThread()
     }
 }
 
-void CharacterComponent::attackAdded(CombatComponent *combatComponent,
-                                     Attack &attack)
-{
-    // Remove knuckle attack
-    if (attack.getAttackInfo() != mKnuckleAttackInfo)
-        combatComponent->removeAttack(mKnuckleAttackInfo);
-}
-
-void CharacterComponent::attackRemoved(CombatComponent *combatComponent,
-                                       Attack &attack)
-{
-    // Add knuckle attack
-    // 1 since the attack is not really removed yet.
-    if (combatComponent->getAttacks().getNumber() == 1)
-        combatComponent->addAttack(mKnuckleAttackInfo);
-}
-
 void CharacterComponent::disconnected(Entity &entity)
 {
     mConnected = false;
@@ -723,24 +576,6 @@ void CharacterComponent::disconnected(Entity &entity)
 
     signal_disconnected.emit(entity);
 }
-
-bool CharacterComponent::takeSpecial(int id)
-{
-    SpecialMap::iterator i = mSpecials.find(id);
-    if (i != mSpecials.end())
-    {
-        mSpecials.erase(i);
-        mSpecialUpdateNeeded = true;
-        return true;
-    }
-    return false;
-}
-
-void CharacterComponent::clearSpecials()
-{
-    mSpecials.clear();
-}
-
 void CharacterComponent::triggerLoginCallback(Entity &entity)
 {
     executeCallback(mLoginCallback, entity);

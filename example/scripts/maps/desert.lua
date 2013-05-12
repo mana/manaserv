@@ -130,13 +130,11 @@ function Tamer(npc, ch, list)
     end
 
     local m1 = monster_create("Maggot", ch:position())
-    m1:change_anger(ch, 100)
 
     -- (The following is not safe, since the being might have been removed by
     --  the time this function gets executed (especially with the above code))
     --
     --schedule_in(0.5, function()
     --            m1:say("Roaaarrrr!!!")
-    --            m1:change_anger(ch, 100)
     --            end)
 end

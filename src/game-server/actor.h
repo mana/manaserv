@@ -33,12 +33,13 @@ enum
 {
     UPDATEFLAG_NEW_ON_MAP = 1,
     UPDATEFLAG_NEW_DESTINATION = 2,
-    UPDATEFLAG_ATTACK = 4,
-    UPDATEFLAG_ACTIONCHANGE = 8,
-    UPDATEFLAG_LOOKSCHANGE = 16,
-    UPDATEFLAG_DIRCHANGE = 32,
-    UPDATEFLAG_HEALTHCHANGE = 64,
-    UPDATEFLAG_EMOTE = 128
+    UPDATEFLAG_ACTIONCHANGE = 4,
+    UPDATEFLAG_LOOKSCHANGE = 8,
+    UPDATEFLAG_DIRCHANGE = 16,
+    UPDATEFLAG_HEALTHCHANGE = 32,
+    UPDATEFLAG_EMOTE = 64,
+    UPDATEFLAG_ABILITY_ON_POINT = 128,
+    UPDATEFLAG_ABILITY_ON_BEING = 256
 };
 
 /**
@@ -143,7 +144,7 @@ class ActorComponent : public Component
         unsigned short mMoveTime;
 
     private:
-        char mUpdateFlags;          /**< Changes in actor status. */
+        int mUpdateFlags;           /**< Changes in actor status. */
 
         /** Actor ID sent to clients (unique with respect to the map). */
         unsigned short mPublicID;

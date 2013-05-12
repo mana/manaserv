@@ -25,10 +25,11 @@
 #include "common/inventorydata.h"
 #include "common/manaserv_protocol.h"
 
+#include "game-server/abilitycomponent.h"
 #include "game-server/being.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
-#include "game-server/specialmanager.h"
+#include "game-server/abilitymanager.h"
 
 #include "scripting/script.h"
 
@@ -45,25 +46,6 @@ class MessageIn;
 class MessageOut;
 class Point;
 class Trade;
-
-struct SpecialValue
-{
-    SpecialValue(unsigned currentMana,
-                 const SpecialManager::SpecialInfo *specialInfo)
-        : currentMana(currentMana)
-        , rechargeSpeed(specialInfo->defaultRechargeSpeed)
-        , specialInfo(specialInfo)
-    {}
-
-    unsigned currentMana;
-    unsigned rechargeSpeed;
-    const SpecialManager::SpecialInfo *specialInfo;
-};
-
-/**
- * Stores specials by their id.
- */
-typedef std::map<unsigned, SpecialValue> SpecialMap;
 
 
 class CharacterData
@@ -114,11 +96,11 @@ public:
     const std::map<int, int>::const_iterator getKillCountEnd() const;
     void setKillCount(int monsterId, int kills);
 
-    void clearSpecials();
-    void giveSpecial(int id, int mana);
-    int getSpecialSize() const;
-    SpecialMap::const_iterator getSpecialBegin() const;
-    SpecialMap::const_iterator getSpecialEnd() const;
+    void clearAbilities();
+    void giveAbility(int id, int mana);
+    int getAbilitySize() const;
+    AbilityMap::const_iterator getAbilityBegin() const;
+    AbilityMap::const_iterator getAbilityEnd() const;
 
     Possessions &getPossessions() const;
 
@@ -149,8 +131,6 @@ class CharacterComponent : public Component
          */
         void update(Entity &entity);
 
-        void processAttacks();
-
         /**
          * Executes the global die script
          */
@@ -160,54 +140,6 @@ class CharacterComponent : public Component
          * makes the character respawn
          */
         void respawn(Entity &entity);
-
-        /**
-         * makes the character perform a special action on a being
-         * when it is allowed to do so
-         */
-        void useSpecialOnBeing(Entity &user, int id, Entity *b);
-
-        /**
-         * makes the character perform a special action on a map point
-         * when it is allowed to do so
-         */
-        void useSpecialOnPoint(Entity &user, int id, int x, int y);
-
-        /**
-         * Allows a character to perform a special action
-         */
-        bool giveSpecial(int id, int currentMana = 0);
-
-        /**
-         * Sets new current mana + makes sure that the client will get informed.
-         */
-        bool setSpecialMana(int id, int mana);
-
-        /**
-         * Gets the special value by id
-         */
-        SpecialMap::iterator findSpecial(int id)
-        { return mSpecials.find(id); }
-
-        /**
-         * Sets recharge speed of a special
-         */
-        bool setSpecialRechargeSpeed(int id, int speed);
-
-        /**
-         * Removes all specials from character
-         */
-        void clearSpecials();
-
-        /**
-         * Checks if a character knows a special action
-         */
-        bool hasSpecial(int id) { return mSpecials.find(id) != mSpecials.end(); }
-
-        /**
-         * Removes an available special action
-         */
-        bool takeSpecial(int id);
 
         /**
          * Gets client computer.
@@ -356,18 +288,6 @@ class CharacterComponent : public Component
         { mKillCount[monsterId] = kills; }
 
         /**
-         * Used to serialize specials.
-         */
-        int getSpecialSize() const
-        { return mSpecials.size(); }
-
-        const SpecialMap::const_iterator getSpecialBegin() const
-        { return mSpecials.begin(); }
-
-        const SpecialMap::const_iterator getSpecialEnd() const
-        { return mSpecials.end(); }
-
-        /**
          * Gets total accumulated exp for skill.
          */
         int getExperience(int skill) const
@@ -464,14 +384,9 @@ class CharacterComponent : public Component
 
         void triggerLoginCallback(Entity &entity);
 
-        void attackAdded(CombatComponent *combatComponent, Attack &attackInfo);
-        void attackRemoved(CombatComponent *combatComponent, Attack &attackInfo);
-
         sigc::signal<void, Entity &> signal_disconnected;
 
     private:
-        bool specialUseCheck(SpecialMap::iterator it);
-
         double getAttrBase(AttributeMap::const_iterator it) const
         { return it->second.getBase(); }
         double getAttrMod(AttributeMap::const_iterator it) const
@@ -508,10 +423,15 @@ class CharacterComponent : public Component
          */
         void recalculateLevel(Entity &entity);
 
+        void abilityStatusChanged(int id);
+        void abilityCooldownActivated();
+
         /**
-         * Informs the client about his characters special charge status
+         * Informs the client about his characters abilities charge status
          */
-        void sendSpecialUpdate();
+        void sendAbilityUpdate(Entity &entity);
+
+        void sendAbilityCooldownUpdate(Entity &entity);
 
         enum TransactionType
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
@@ -535,8 +455,7 @@ class CharacterComponent : public Component
 
         std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
-        SpecialMap mSpecials;
-        bool mSpecialUpdateNeeded;
+        std::set<unsigned> mModifiedAbilities;
 
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */
@@ -547,6 +466,7 @@ class CharacterComponent : public Component
         int mCorrectionPoints;       /**< Unused attribute correction points */
         bool mUpdateLevelProgress;   /**< Flag raised when percent to next level changed */
         bool mRecalculateLevel;      /**< Flag raised when the character level might have increased */
+        bool mSendAbilityCooldown;
         unsigned char mAccountLevel; /**< Account level of the user. */
         int mParty;                  /**< Party id of the character */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
@@ -556,8 +476,6 @@ class CharacterComponent : public Component
         Script::Thread *mNpcThread;  /**< Script thread executing NPC interaction, if any */
 
         Timeout mMuteTimeout;        /**< Time until the character is no longer muted  */
-
-        AttackInfo *mKnuckleAttackInfo;
 
         Entity *mBaseEntity;        /**< The entity this component is part of
                                          this is ONLY required to allow using
@@ -744,29 +662,29 @@ inline void CharacterData::setKillCount(int monsterId, int kills)
     mCharacterComponent->setKillCount(monsterId, kills);
 }
 
-inline void CharacterData::clearSpecials()
+inline void CharacterData::clearAbilities()
 {
-    mCharacterComponent->clearSpecials();
+    mEntity->getComponent<AbilityComponent>()->clearAbilities();
 }
 
-inline void CharacterData::giveSpecial(int id, int mana)
+inline void CharacterData::giveAbility(int id, int mana)
 {
-    mCharacterComponent->giveSpecial(id, mana);
+    mEntity->getComponent<AbilityComponent>()->giveAbility(id, mana);
 }
 
-inline int CharacterData::getSpecialSize() const
+inline int CharacterData::getAbilitySize() const
 {
-    return mCharacterComponent->getSpecialSize();
+    return mEntity->getComponent<AbilityComponent>()->getAbilities().size();
 }
 
-inline SpecialMap::const_iterator CharacterData::getSpecialBegin() const
+inline AbilityMap::const_iterator CharacterData::getAbilityBegin() const
 {
-    return mCharacterComponent->getSpecialBegin();
+    return mEntity->getComponent<AbilityComponent>()->getAbilities().begin();
 }
 
-inline SpecialMap::const_iterator CharacterData::getSpecialEnd() const
+inline AbilityMap::const_iterator CharacterData::getAbilityEnd() const
 {
-    return mCharacterComponent->getSpecialEnd();
+    return mEntity->getComponent<AbilityComponent>()->getAbilities().end();
 }
 
 inline Possessions &CharacterData::getPossessions() const

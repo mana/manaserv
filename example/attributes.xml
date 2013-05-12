@@ -172,5 +172,22 @@
         player-info="max-weight" >
          <modifier stacktype="stackable" modtype="additive" tag="cap1" effect="Capacity %+.2f" />
     </attribute>
+    <attribute id="20" name="Global ability cooldown"
+        desc="The time in ticks until any ability can be used again after one was used"
+        modifiable="false"
+        scope="being"
+        minimum="0"
+        maximum="100" />
     <!-- End of core-attributes definition -->
+    <attribute id="21" name="Monster attack speed"
+        desc="Attackspeed of the monster. 0 = no attacks, 100 = one per tick, 10 = one per second"
+        modifiable="false"
+        scope="monster"
+        minimum="0"
+        maximum="100" />
+    <attribute id="22" name="Monster attack damage"
+        desc="damage the monster deals per hit"
+        modifiable="false"
+        scope="monster"
+        minimum="0" />
 </attributes>

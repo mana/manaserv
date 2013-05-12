@@ -107,7 +107,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
 
     MonsterDrops drops;
     bool attributesSet = false;
-    bool behaviorSet = false;
 
     for_each_xml_child_node(subnode, node)
     {
@@ -171,21 +170,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
             }
 
             bool attributesComplete = true;
-            const AttributeManager::AttributeScope &mobAttr =
-                        attributeManager->getAttributeScope(MonsterScope);
-
-            for (AttributeManager::AttributeScope::const_iterator it =
-                mobAttr.begin(), it_end = mobAttr.end(); it != it_end; ++it)
-            {
-                if (!monster->mAttributes.count(it->first))
-                {
-                    LOG_WARN(filename << ": No attribute "
-                             << it->first << " for monster Id: "
-                             << id << ". Defaulted to 0.");
-                    attributesComplete = false;
-                    monster->setAttribute(it->first, 0);
-                }
-            }
 
             if (monster->getSize() == -1)
             {
@@ -216,70 +200,55 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
             }
 
         }
+        else if (xmlStrEqual(subnode->name, BAD_CAST "attribute"))
+        {
+            const int id = XML::getProperty(subnode, "id", 0);
+            auto *attributeInfo = attributeManager->getAttributeInfo(id);
+
+            if (!attributeInfo)
+            {
+                LOG_WARN(filename
+                         << ": Invalid attribute id " << id
+                         << " for monster Id: " << id
+                         << ". Skipping!");
+                continue;
+            }
+
+            const double value = XML::getFloatProperty(subnode, "value", 0.0);
+
+            monster->setAttribute(id, value);
+        }
+        else if (xmlStrEqual(subnode->name, BAD_CAST "ability"))
+        {
+            const std::string idText = XML::getProperty(subnode, "id",
+                                                        std::string());
+            AbilityManager::AbilityInfo *info = 0;
+            if (utils::isNumeric(idText))
+            {
+                const int id = utils::stringToInt(idText);
+                info = abilityManager->getAbilityInfo(id);
+            }
+            else
+            {
+                info = abilityManager->getAbilityInfo(idText);
+            }
+
+            if (!info)
+            {
+                LOG_WARN(filename
+                         << ": Invalid ability id " << idText
+                         << " for monster id: " << id
+                         << " Skipping!");
+                continue;
+            }
+
+            monster->addAbility(info);
+        }
         else if (xmlStrEqual(subnode->name, BAD_CAST "exp"))
         {
             xmlChar *exp = subnode->xmlChildrenNode->content;
             monster->setExp(atoi((const char*)exp));
             monster->setOptimalLevel(XML::getProperty(subnode, "level", 0));
-        }
-        else if (xmlStrEqual(subnode->name, BAD_CAST "behavior"))
-        {
-            behaviorSet = true;
-            if (XML::getBoolProperty(subnode, "aggressive", false))
-                monster->setAggressive(true);
-
-            monster->setTrackRange(
-                           XML::getProperty(subnode, "track-range", 1));
-            monster->setStrollRange(
-                           XML::getProperty(subnode, "stroll-range", 0));
-            monster->setAttackDistance(
-                           XML::getProperty(subnode, "attack-distance", 0));
-        }
-        else if (xmlStrEqual(subnode->name, BAD_CAST "attack"))
-        {
-            AttackInfo *att = AttackInfo::readAttackNode(subnode);
-            bool validMonsterAttack = true;
-
-            if (att->getDamage().id < 1)
-            {
-                LOG_WARN(filename
-                         << ": Attack without ID for monster Id:"
-                         << id << " (" << name << ") - attack ignored");
-                validMonsterAttack = false;
-            }
-            else if (att->getDamage().element == ELEMENT_ILLEGAL)
-            {
-                LOG_WARN(filename
-                         << ": Attack with unknown element for monster Id:"
-                         << id << " (" << name << ") - attack ignored");
-                validMonsterAttack = false;
-            }
-            else if (att->getDamage().type == DAMAGE_OTHER)
-            {
-                LOG_WARN(filename
-                         << ": Attack with unknown damage type "
-                         << "for monster Id:" << id
-                         << " (" << name << ")");
-                validMonsterAttack = false;
-            }
-
-            if (validMonsterAttack)
-            {
-                monster->addAttack(att);
-            }
-            else
-            {
-                delete att;
-                att = 0;
-            }
-
-        }
-        else if (xmlStrEqual(subnode->name, BAD_CAST "vulnerability"))
-        {
-            Element element = elementFromString(
-                    XML::getProperty(subnode, "element", std::string()));
-            double factor =  XML::getFloatProperty(subnode, "factor", 1.0);
-            monster->setVulnerability(element, factor);
         }
     }
 
@@ -289,12 +258,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
         LOG_WARN(filename
                  << ": No attributes defined for monster Id:" << id
                  << " (" << name << ")");
-    }
-    if (!behaviorSet)
-    {
-        LOG_WARN(filename
-            << ": No behavior defined for monster Id:" << id
-            << " (" << name << ")");
     }
     if (monster->getExp() == -1)
     {

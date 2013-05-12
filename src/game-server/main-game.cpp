@@ -31,7 +31,7 @@
 #include "game-server/mapmanager.h"
 #include "game-server/monstermanager.h"
 #include "game-server/skillmanager.h"
-#include "game-server/specialmanager.h"
+#include "game-server/abilitymanager.h"
 #include "game-server/statusmanager.h"
 #include "game-server/postman.h"
 #include "game-server/state.h"
@@ -78,11 +78,11 @@ static bool running = true;     /**< Whether the server keeps running */
 
 utils::StringFilter *stringFilter; /**< Slang's Filter */
 
+AbilityManager *abilityManager = new AbilityManager();
 AttributeManager *attributeManager = new AttributeManager();
 ItemManager *itemManager = new ItemManager();
 MonsterManager *monsterManager = new MonsterManager();
 SkillManager *skillManager = new SkillManager();
-SpecialManager *specialManager = new SpecialManager();
 EmoteManager *emoteManager = new EmoteManager();
 
 SettingsManager *settingsManager = new SettingsManager(DEFAULT_SETTINGS_FILE);
@@ -185,7 +185,7 @@ static void deinitializeServer()
     // Destroy Managers
     delete stringFilter; stringFilter = 0;
     delete monsterManager; monsterManager = 0;
-    delete skillManager; skillManager = 0;
+    delete abilityManager; abilityManager = 0;
     delete itemManager; itemManager = 0;
     delete emoteManager; emoteManager = 0;
     delete settingsManager; settingsManager = 0;

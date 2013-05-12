@@ -30,7 +30,7 @@ namespace ManaServ {
 
 enum {
     PROTOCOL_VERSION = 3,
-    SUPPORTED_DB_VERSION = 21
+    SUPPORTED_DB_VERSION = 22
 };
 
 /**
@@ -143,11 +143,13 @@ enum {
     GPMSG_BEING_HEALTH_CHANGE      = 0x0274, // W being id, W hp, W max hp
     GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, [W*2 position,] W*2 destination, B speed] }*
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
-    PGMSG_ATTACK                   = 0x0290, // W being id
-    GPMSG_BEING_ATTACK             = 0x0291, // W being id, B direction, B attack Id
-    PGMSG_USE_SPECIAL_ON_BEING     = 0x0292, // B specialID, W being id
-    GPMSG_SPECIAL_STATUS           = 0x0293, // { B specialID, D current, D max, D recharge }
-    PGMSG_USE_SPECIAL_ON_POINT     = 0x0294, // B specialID, W*2 position
+    GPMSG_BEING_ABILITY_POINT      = 0x0282, // W being id, B abilityId, W*2 point
+    GPMSG_BEING_ABILITY_BEING      = 0x0283, // W being id, B abilityId, W target being id
+    PGMSG_USE_ABILITY_ON_BEING     = 0x0292, // B abilityID, W being id
+    GPMSG_ABILITY_STATUS           = 0x0293, // { B abilityID, D current, D max, D recharge }
+    PGMSG_USE_ABILITY_ON_POINT     = 0x0294, // B abilityID, W*2 position
+    GPMSG_ABILITY_REMOVED          = 0x0295, // B abilityID
+    GPMSG_ABILITY_COOLDOWN         = 0x0296, // W ticks to wait
     PGMSG_SAY                      = 0x02A0, // S text
     GPMSG_SAY                      = 0x02A1, // W being id, S text
     GPMSG_NPC_CHOICE               = 0x02B0, // W being id, { S text }*
@@ -421,24 +423,9 @@ enum BeingAction
 {
     STAND,
     WALK,
-    ATTACK,
     SIT,
     DEAD,
     HURT
-};
-
-/**
-  * Moves enum for beings and actors for others players attack types.
-  * WARNING: Has to be in sync with the same enum in the Being class
-  * of the client!
-  */
-enum AttackType
-{
-    HIT = 0x00,
-    CRITICAL = 0x0a,
-    MULTI = 0x08,
-    REFLECT = 0x04,
-    FLEE = 0x0b
 };
 
 /**

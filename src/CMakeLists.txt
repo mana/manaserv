@@ -197,12 +197,14 @@ SET(SRCS_MANASERVGAME
     game-server/main-game.cpp
     common/permissionmanager.h
     common/permissionmanager.cpp
+    game-server/abilitycomponent.cpp
+    game-server/abilitycomponent.h
+    game-server/abilitymanager.cpp
+    game-server/abilitymanager.h
     game-server/accountconnection.h
     game-server/accountconnection.cpp
     game-server/actor.h
     game-server/actor.cpp
-    game-server/attack.h
-    game-server/attack.cpp
     game-server/attribute.h
     game-server/attribute.cpp
     game-server/attributemanager.h
@@ -215,8 +217,6 @@ SET(SRCS_MANASERVGAME
     game-server/character.cpp
     game-server/collisiondetection.h
     game-server/collisiondetection.cpp
-    game-server/combatcomponent.h
-    game-server/combatcomponent.cpp
     game-server/commandhandler.cpp
     game-server/commandhandler.h
     game-server/component.h
@@ -244,8 +244,6 @@ SET(SRCS_MANASERVGAME
     game-server/mapreader.cpp
     game-server/monster.h
     game-server/monster.cpp
-    game-server/monstercombatcomponent.h
-    game-server/monstercombatcomponent.cpp
     game-server/monstermanager.h
     game-server/monstermanager.cpp
     game-server/npc.h
@@ -259,8 +257,6 @@ SET(SRCS_MANASERVGAME
     game-server/skillmanager.cpp
     game-server/spawnareacomponent.h
     game-server/spawnareacomponent.cpp
-    game-server/specialmanager.cpp
-    game-server/specialmanager.h
     game-server/state.h
     game-server/state.cpp
     game-server/statuseffect.h
