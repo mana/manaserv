@@ -135,10 +135,10 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default being scope.");
     }
-    else if (scope == "NONE")
+    else
     {
-        LOG_DEBUG("Attribute manager: attribute '" << id
-                  << "' set to have no default scope.");
+        LOG_WARN("Attribute manager: attribute '" << id
+                  << "' has no scope.");
     }
 }
 
