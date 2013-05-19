@@ -89,13 +89,11 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    const AttributeManager::AttributeScope &attributes =
-                           attributeManager->getAttributeScope(CharacterScope);
+    auto &attributeScope = attributeManager->getAttributeScope(CharacterScope);
     LOG_DEBUG("Character creation: initialisation of "
-              << attributes.size() << " attributes.");
-    for (auto attributeScope : attributes)
-        beingComponent->createAttribute(attributeScope.first,
-                                        *attributeScope.second);
+              << attributeScope.size() << " attributes.");
+    for (auto &attributeIt : attributeScope)
+        beingComponent->createAttribute(attributeIt.first, attributeIt.second);
 
     auto *actorComponent = entity.getComponent<ActorComponent>();
     actorComponent->setWalkMask(Map::BLOCKMASK_WALL);
@@ -499,7 +497,7 @@ void CharacterComponent::levelup(Entity &entity)
 }
 
 AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
-                                                            size_t attribute)
+                                                            int attribute)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
@@ -517,7 +515,7 @@ AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
 }
 
 AttribmodResponseCode CharacterComponent::useCorrectionPoint(Entity &entity,
-                                                             size_t attribute)
+                                                             int attribute)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 

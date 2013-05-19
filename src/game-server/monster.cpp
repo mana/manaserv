@@ -53,7 +53,7 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
 
     for (auto attrInfo : attributeManager->getAttributeScope(MonsterScope))
     {
-        beingComponent->createAttribute(attrInfo.first, *attrInfo.second);
+        beingComponent->createAttribute(attrInfo.first, attrInfo.second);
     }
 
     /*
@@ -71,7 +71,8 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
             double factor = 100 + (rand() % (mutation * 2)) - mutation;
             attributeValue = attributeValue * factor / 100.0;
         }
-        beingComponent->setAttribute(entity, attribute.first, attributeValue);
+        beingComponent->setAttribute(entity, attribute.first->id,
+                                     attributeValue);
     }
 
     beingComponent->setGender(specy->getGender());

@@ -47,18 +47,21 @@ BeingComponent::BeingComponent(Entity &entity):
     mDirection(DOWN),
     mEmoteId(0)
 {
-    const AttributeManager::AttributeScope &attr = attributeManager->getAttributeScope(BeingScope);
-    LOG_DEBUG("Being creation: initialisation of " << attr.size() << " attributes.");
-    for (AttributeManager::AttributeScope::const_iterator it1 = attr.begin(),
-         it1_end = attr.end();
-        it1 != it1_end;
-        ++it1)
+    auto &attributeScope = attributeManager->getAttributeScope(BeingScope);
+    LOG_DEBUG("Being creation: initialisation of " << attributeScope.size()
+              << " attributes.");
+    for (auto &attributeIt : attributeScope)
     {
-        if (mAttributes.count(it1->first))
-            LOG_WARN("Redefinition of attribute '" << it1->first << "'!");
-        LOG_DEBUG("Attempting to create attribute '" << it1->first << "'.");
-        mAttributes.insert(std::make_pair(it1->first,
-                                          Attribute(*it1->second)));
+        if (mAttributes.count(attributeIt.first))
+        {
+            LOG_WARN("Redefinition of attribute '"
+                     << attributeIt.first << "'!");
+        }
+
+        LOG_DEBUG("Attempting to create attribute '"
+                  << attributeIt.first << "'.");
+        mAttributes.insert(std::make_pair(attributeIt.first,
+                                          Attribute(attributeIt.second)));
     }
 
     clearDestination(entity);
@@ -341,8 +344,8 @@ void BeingComponent::setGender(BeingGender gender)
 
 void BeingComponent::setAttribute(Entity &entity, unsigned id, double value)
 {
-    AttributeMap::iterator ret = mAttributes.find(id);
-    if (ret == mAttributes.end())
+    auto attributeIt = mAttributes.find(id);
+    if (attributeIt == mAttributes.end())
     {
         /*
          * The attribute does not yet exist, so we must attempt to create it.
@@ -354,16 +357,16 @@ void BeingComponent::setAttribute(Entity &entity, unsigned id, double value)
     }
     else
     {
-        ret->second.setBase(value);
+        attributeIt->second.setBase(value);
         updateDerivedAttributes(entity, id);
     }
 }
 
-void BeingComponent::createAttribute(unsigned id, const AttributeManager::AttributeInfo
-                            &attributeInfo)
+void BeingComponent::createAttribute(unsigned id,
+                                     const AttributeManager::AttributeInfo *attributeInfo)
 {
     mAttributes.insert(std::pair<unsigned, Attribute>
-                                            (id,Attribute(attributeInfo)));
+                                            (id, Attribute(attributeInfo)));
 }
 
 const Attribute *BeingComponent::getAttribute(unsigned id) const

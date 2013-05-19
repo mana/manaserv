@@ -237,6 +237,18 @@ AbilityManager::AbilityInfo *checkAbility(lua_State *s, int p)
     return abilityInfo;
 }
 
+const AttributeManager::AttributeInfo *checkAttribute(lua_State *s, int p)
+{
+    const AttributeManager::AttributeInfo *attributeInfo;
+    if (lua_isnumber(s, p))
+        attributeInfo = attributeManager->getAttributeInfo(luaL_checkint(s, p));
+    else
+        attributeInfo = attributeManager->getAttributeInfo(luaL_checkstring(s, p));
+
+    luaL_argcheck(s, attributeInfo != nullptr, p, "invalid attribute");
+    return attributeInfo;
+}
+
 unsigned char checkWalkMask(lua_State *s, int p)
 {
     const char *stringMask = luaL_checkstring(s, p);

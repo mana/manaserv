@@ -106,23 +106,11 @@ class MonsterClass
         /**
          * Sets a being base attribute.
          */
-        void setAttribute(int attribute, double value)
-        { mAttributes[attribute] = value; }
+        void setAttribute(const AttributeManager::AttributeInfo *attribute,
+                          double value);
 
-        /**
-         * Returns a being base attribute.
-         */
-        double getAttribute(int attribute) const
-        { return mAttributes.at(attribute); }
-
-        /**
-         * Returns whether the monster has got the attribute.
-         */
-        bool hasAttribute(int attribute) const
-        { return (mAttributes.find(attribute) != mAttributes.end()); }
-
-        const std::map<int, double> &getAttributes() const
-        { return mAttributes; }
+        const std::map<const AttributeManager::AttributeInfo *, double>
+        &getAttributes() const;
 
         /** Sets collision circle radius. */
         void setSize(int size) { mSize = size; }
@@ -163,7 +151,7 @@ class MonsterClass
         BeingGender mGender;
 
         MonsterDrops mDrops;
-        std::map<int, double> mAttributes; /**< Base attributes of the monster. */
+        std::map<const AttributeManager::AttributeInfo *, double> mAttributes;
         std::set<AbilityManager::AbilityInfo *> mAbilities;
         float mSpeed; /**< The monster class speed in tiles per second */
         int mSize;
@@ -215,6 +203,18 @@ class MonsterComponent : public Component
         /** Time until dead monster is removed */
         Timeout mDecayTimeout;
 };
+
+inline void MonsterClass::setAttribute(
+        const AttributeManager::AttributeInfo *attribute, double value)
+{
+    mAttributes[attribute] = value;
+}
+
+inline const std::map<const AttributeManager::AttributeInfo *, double>
+&MonsterClass::getAttributes() const
+{
+    return mAttributes;
+}
 
 inline void MonsterClass::addAbility(AbilityManager::AbilityInfo *info)
 {

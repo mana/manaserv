@@ -138,7 +138,7 @@ class Attribute
             , mMaxValue(0)
         {throw;} // DEBUG; Find improper constructions
 
-        Attribute(const AttributeManager::AttributeInfo &info);
+        Attribute(const AttributeManager::AttributeInfo *info);
 
         ~Attribute();
 

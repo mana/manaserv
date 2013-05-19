@@ -324,14 +324,14 @@ class CharacterComponent : public Component
          * basic attribute
          */
         AttribmodResponseCode useCharacterPoint(Entity &entity,
-                                                size_t attribute);
+                                                int attribute);
 
         /**
          * Tries to use a correction point to reduce a
          * basic attribute and regain a character point
          */
         AttribmodResponseCode useCorrectionPoint(Entity &entity,
-                                                 size_t attribute);
+                                                 int attribute);
 
         void setCharacterPoints(int points) { mCharacterPoints = points; }
         int getCharacterPoints() const { return mCharacterPoints; }

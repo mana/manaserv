@@ -35,6 +35,7 @@ extern "C" {
 #include <vector>
 
 #include "game-server/abilitymanager.h"
+#include "game-server/attributemanager.h"
 
 class CharacterComponent;
 class Entity;
@@ -165,21 +166,22 @@ typedef LuaUserData<MonsterClass> LuaMonsterClass;
 typedef LuaUserData<StatusEffect> LuaStatusEffect;
 typedef LuaUserData<AbilityManager::AbilityInfo> LuaAbilityInfo;
 
-Script *                     getScript(lua_State *s);
+Script *                               getScript(lua_State *s);
 
-ItemClass *                  getItemClass(lua_State *s, int p);
-MonsterClass *               getMonsterClass(lua_State *s, int p);
+ItemClass *                            getItemClass(lua_State *s, int p);
+MonsterClass *                         getMonsterClass(lua_State *s, int p);
 
-Entity *                     checkActor(lua_State *s, int p);
-Entity *                     checkBeing(lua_State *s, int p);
-Entity *                     checkCharacter(lua_State *s, int p);
-ItemClass *                  checkItemClass(lua_State *s, int p);
-Entity *                     checkMonster(lua_State *s, int p);
-MonsterClass *               checkMonsterClass(lua_State *s, int p);
-Entity *                     checkNpc(lua_State *s, int p);
+Entity *                               checkActor(lua_State *s, int p);
+Entity *                               checkBeing(lua_State *s, int p);
+Entity *                               checkCharacter(lua_State *s, int p);
+ItemClass *                            checkItemClass(lua_State *s, int p);
+Entity *                               checkMonster(lua_State *s, int p);
+MonsterClass *                         checkMonsterClass(lua_State *s, int p);
+Entity *                               checkNpc(lua_State *s, int p);
 int                          checkSkill(lua_State *s, int p);
-AbilityManager::AbilityInfo *checkAbility(lua_State *s, int p);
-unsigned char                checkWalkMask(lua_State *s, int p);
+AbilityManager::AbilityInfo *          checkAbility(lua_State *s, int p);
+const AttributeManager::AttributeInfo *checkAttribute(lua_State *s, int p);
+unsigned char                          checkWalkMask(lua_State *s, int p);
 
 MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
 Script::Thread* checkCurrentThread(lua_State *s, Script *script = 0);
