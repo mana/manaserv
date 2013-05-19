@@ -151,8 +151,8 @@ class BeingComponent : public Component
          * @param id The id of the attribute
          * @param attributeInfo The info that describes the attribute
          */
-        void createAttribute(unsigned id, const AttributeManager::AttributeInfo
-                             &attributeInfo);
+        void createAttribute(unsigned id,
+                             const AttributeManager::AttributeInfo *attributeInfo);
 
         /**
          * Gets an attribute or 0 if not existing.

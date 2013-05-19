@@ -73,10 +73,10 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
     if (!xmlStrEqual(node->name, BAD_CAST "monster"))
         return;
 
-    int id = XML::getProperty(node, "id", 0);
+    int monsterId = XML::getProperty(node, "id", 0);
     std::string name = XML::getProperty(node, "name", std::string());
 
-    if (id < 1)
+    if (monsterId < 1)
     {
         LOG_WARN("Monster Manager: Ignoring monster ("
                  << name << ") without Id in "
@@ -84,29 +84,29 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
         return;
     }
 
-    MonsterClasses::iterator i = mMonsterClasses.find(id);
+    MonsterClasses::iterator i = mMonsterClasses.find(monsterId);
     if (i != mMonsterClasses.end())
     {
         LOG_WARN("Monster Manager: Ignoring duplicate definition of "
-                 "monster '" << id << "'!");
+                 "monster '" << monsterId << "'!");
         return;
     }
 
-    MonsterClass *monster = new MonsterClass(id);
-    mMonsterClasses[id] = monster;
+    MonsterClass *monster = new MonsterClass(monsterId);
+    mMonsterClasses[monsterId] = monster;
 
     if (!name.empty())
     {
         monster->setName(name);
 
         if (mMonsterClassesByName.contains(name))
-            LOG_WARN("Monster Manager: Name not unique for monster " << id);
+            LOG_WARN("Monster Manager: Name not unique for monster "
+                     << monsterId);
         else
             mMonsterClassesByName.insert(name, monster);
     }
 
     MonsterDrops drops;
-    bool attributesSet = false;
 
     for_each_xml_child_node(subnode, node)
     {
@@ -137,24 +137,7 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
         }
         else if (xmlStrEqual(subnode->name, BAD_CAST "attributes"))
         {
-            attributesSet = true;
-
-            const int hp = XML::getProperty(subnode, "hp", -1);
-            monster->setAttribute(ATTR_MAX_HP, hp);
-            monster->setAttribute(ATTR_HP, hp);
-
-            monster->setAttribute(ATTR_DODGE,
-                XML::getProperty(subnode, "evade", -1));
-            monster->setAttribute(ATTR_MAGIC_DODGE,
-                XML::getProperty(subnode, "magic-evade", -1));
-            monster->setAttribute(ATTR_ACCURACY,
-                XML::getProperty(subnode, "hit", -1));
-            monster->setAttribute(ATTR_DEFENSE,
-                XML::getProperty(subnode, "physical-defence", -1));
-            monster->setAttribute(ATTR_MAGIC_DEFENSE,
-                XML::getProperty(subnode, "magical-defence", -1));
             monster->setSize(XML::getProperty(subnode, "size", -1));
-            float speed = (XML::getFloatProperty(subnode, "speed", -1.0f));
             monster->setMutation(XML::getProperty(subnode, "mutation", 0));
             std::string genderString = XML::getProperty(subnode, "gender",
                                                         std::string());
@@ -164,59 +147,48 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
             if (monster->getMutation() > MAX_MUTATION)
             {
                 LOG_WARN(filename
-                << ": Mutation of monster Id:" << id << " more than "
-                << MAX_MUTATION << "%. Defaulted to 0.");
+                         << ": Mutation of monster Id:" << monsterId
+                         << " more than " << MAX_MUTATION
+                         << "%. Defaulted to 0.");
                 monster->setMutation(0);
             }
-
-            bool attributesComplete = true;
 
             if (monster->getSize() == -1)
             {
                 LOG_WARN(filename
-                         << ": No size set for monster Id:" << id << ". "
+                         << ": No size set for monster Id:" << monsterId << ". "
                          << "Defaulted to " << DEFAULT_MONSTER_SIZE
                          << " pixels.");
                 monster->setSize(DEFAULT_MONSTER_SIZE);
-                attributesComplete = false;
             }
-
-            if (speed == -1.0f)
-            {
-                LOG_WARN(filename
-                         << ": No speed set for monster Id:" << id << ". "
-                         << "Defaulted to " << DEFAULT_MONSTER_SPEED
-                         << " tiles/second.");
-                speed = DEFAULT_MONSTER_SPEED;
-                attributesComplete = false;
-            }
-            monster->setAttribute(ATTR_MOVE_SPEED_TPS, speed);
-
-            if (!attributesComplete)
-            {
-                LOG_WARN(filename
-                         << ": Attributes incomplete for monster Id:" << id
-                         << ". Defaults values may have been applied!");
-            }
-
         }
         else if (xmlStrEqual(subnode->name, BAD_CAST "attribute"))
         {
-            const int id = XML::getProperty(subnode, "id", 0);
-            auto *attributeInfo = attributeManager->getAttributeInfo(id);
+            std::string attributeIdString = XML::getProperty(subnode, "id",
+                                                             std::string());
+            const AttributeManager::AttributeInfo *info;
+            if (utils::isNumeric(attributeIdString))
+            {
+                const int attributeId = utils::stringToInt(attributeIdString);
+                info = attributeManager->getAttributeInfo(attributeId);
+            }
+            else
+            {
+                info = attributeManager->getAttributeInfo(attributeIdString);
+            }
 
-            if (!attributeInfo)
+            if (!info)
             {
                 LOG_WARN(filename
-                         << ": Invalid attribute id " << id
-                         << " for monster Id: " << id
+                         << ": Invalid attribute id " << attributeIdString
+                         << " for monster Id: " << monsterId
                          << ". Skipping!");
                 continue;
             }
 
             const double value = XML::getFloatProperty(subnode, "value", 0.0);
 
-            monster->setAttribute(id, value);
+            monster->setAttribute(info, value);
         }
         else if (xmlStrEqual(subnode->name, BAD_CAST "ability"))
         {
@@ -225,8 +197,8 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
             AbilityManager::AbilityInfo *info = 0;
             if (utils::isNumeric(idText))
             {
-                const int id = utils::stringToInt(idText);
-                info = abilityManager->getAbilityInfo(id);
+                const int abilityId = utils::stringToInt(idText);
+                info = abilityManager->getAbilityInfo(abilityId);
             }
             else
             {
@@ -237,7 +209,7 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
             {
                 LOG_WARN(filename
                          << ": Invalid ability id " << idText
-                         << " for monster id: " << id
+                         << " for monster id: " << monsterId
                          << " Skipping!");
                 continue;
             }
@@ -253,16 +225,10 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
     }
 
     monster->setDrops(drops);
-    if (!attributesSet)
-    {
-        LOG_WARN(filename
-                 << ": No attributes defined for monster Id:" << id
-                 << " (" << name << ")");
-    }
     if (monster->getExp() == -1)
     {
         LOG_WARN(filename
-                << ": No experience defined for monster Id:" << id
+                << ": No experience defined for monster Id:" << monsterId
                 << " (" << name << ")");
         monster->setExp(0);
     }

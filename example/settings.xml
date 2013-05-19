@@ -1,8 +1,8 @@
 <settings>
 	<include file="paths.xml" />
+	<include file="attributes.xml" />
 	<include file="abilities.xml" />
 	<include file="maps.xml" />
-	<include file="attributes.xml" />
 	<include file="skills.xml" />
 	<include file="equip.xml" />
 	<include file="items.xml" />

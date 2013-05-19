@@ -41,17 +41,13 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <drop item="3" percent="2.8"/>
         <drop item="4" percent="0.7"/>
         <attributes
-            hp="200"
             size="4"
-            speed="2.0"
-            hit="10"
-            evade="5"
-            magical-evade="5"
-            physical-defence="5"
-            magical-defence="0"
             mutation="50"
             />
         <exp>10</exp>
+        <attribute id="HP" value="200" />
+        <attribute id="Max HP" value="200" />
+        <attribute id="Movement speed" value="2" />
         <!-- average stroll- and track range-->
     </monster>
 
@@ -68,15 +64,11 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <drop item="9" percent="7"/>
         <exp>20</exp>
         <attributes
-            hp="20"
             size="8"
-            speed="6.0"
-            hit="10"
-            evade="10"
-            magical-evade="10"
-            physical-defence="5"
-            magical-defence="0"
             />
+        <attribute id="HP" value="20" />
+        <attribute id="Max HP" value="20" />
+        <attribute id="Movement speed" value="6" />
         <!-- doesn't move much, but attacks when you are comming too close. -->
         <behavior
             aggressive="true"
@@ -101,17 +93,13 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <drop item="9" percent="5.4"/>
         <exp>50</exp>
         <attributes
-            hp="20"
             size="8"
-            speed="6.0"
-            hit="30"
-            evade="30"
-            magical-evade="30"
-            physical-defence="5"
-            magical-defence="0"
             gender="female"
             />
-        <attribute id="21" value="10" />
+        <attribute id="HP" value="20" />
+        <attribute id="Max HP" value="20" />
+        <attribute id="Movement speed" value="6" />
+        <attribute id="Monster attack speed" value="10" />
         <ability id="2" />
     </monster>
 
@@ -127,15 +115,13 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <drop item="9" percent="7.5"/>
         <exp>60</exp>
         <attributes
-            hp="200"
             size="4"
-            speed="1.0"
-            hit="100"
-            evade="10"
-            magical-evade="10"
-            physical-defence="0"
-            magical-defence="0"
             />
+        <attribute id="HP" value="200" />
+        <attribute id="Max HP" value="200" />
+        <attribute id="Movement speed" value="1" />
+        <attribute id="Monster attack speed" value="10" />
+        <ability id="2" />
     </monster>
 </monsters>
 

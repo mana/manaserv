@@ -1727,7 +1727,7 @@ static int entity_get_y(lua_State *s)
 static int entity_get_base_attribute(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
-    int attr = luaL_checkint(s, 2);
+    int attr = checkAttribute(s, 2)->id;
     luaL_argcheck(s, attr > 0, 2, "invalid attribute id");
 
     lua_pushinteger(s, being->getComponent<BeingComponent>()->getAttributeBase(attr));
@@ -1745,7 +1745,7 @@ static int entity_get_base_attribute(lua_State *s)
 static int entity_set_base_attribute(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
-    int attr = luaL_checkint(s, 2);
+    int attr = checkAttribute(s, 2)->id;
     double value = luaL_checknumber(s, 3);
 
     being->getComponent<BeingComponent>()->setAttribute(*being, attr, value);
@@ -1775,7 +1775,7 @@ static int entity_set_base_attribute(lua_State *s)
 static int entity_get_modified_attribute(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
-    int attr = luaL_checkint(s, 2);
+    int attr = checkAttribute(s, 2)->id;
     luaL_argcheck(s, attr > 0, 2, "invalid attribute id");
 
     const double value =
@@ -1805,7 +1805,7 @@ static int entity_get_modified_attribute(lua_State *s)
 static int entity_apply_attribute_modifier(lua_State *s)
 {
     Entity *being   = checkBeing(s, 1);
-    int attr        = luaL_checkint(s,2);
+    int attr        = checkAttribute(s, 2)->id;
     double value    = luaL_checknumber(s, 3);
     int layer       = luaL_checkint(s, 4);
     int duration    = luaL_optint(s, 5, 0);
@@ -1828,7 +1828,7 @@ static int entity_apply_attribute_modifier(lua_State *s)
 static int entity_remove_attribute_modifier(lua_State *s)
 {
     Entity *being   = checkBeing(s, 1);
-    int attr        = luaL_checkint(s, 2);
+    int attr        = checkAttribute(s, 2)->id;
     double value    = luaL_checknumber(s, 3);
     int layer       = luaL_checkint(s, 4);
     int effectId    = luaL_optint(s, 5, 0);
