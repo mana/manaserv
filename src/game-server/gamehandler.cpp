@@ -634,17 +634,20 @@ void GameHandler::handleEquip(GameClient &client, MessageIn &message)
         msg.writeInt8(ERRMSG_OK);
     else
         msg.writeInt8(ERRMSG_FAILURE);
+    msg.writeInt16(slot);
     client.send(msg);
 }
 
 void GameHandler::handleUnequip(GameClient &client, MessageIn &message)
 {
-    const int itemInstance = message.readInt16();
+    const int slot = message.readInt16();
     MessageOut msg(GPMSG_UNEQUIP_RESPONE);
-    if (Inventory(client.character).unequip(itemInstance))
+    if (Inventory(client.character).unequip(slot))
         msg.writeInt8(ERRMSG_OK);
     else
         msg.writeInt8(ERRMSG_FAILURE);
+    msg.writeInt16(slot);
+    client.send(msg);
 }
 
 void GameHandler::handleAttack(GameClient &client, MessageIn &message)

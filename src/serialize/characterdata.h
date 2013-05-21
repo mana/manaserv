@@ -103,13 +103,10 @@ void serializeCharacterData(const T &data, MessageOut &msg)
     for (InventoryData::const_iterator itemIt = inventoryData.begin(),
          itemIt_end = inventoryData.end(); itemIt != itemIt_end; ++itemIt)
     {
-        msg.writeInt16(itemIt->first);           // slot id
-        msg.writeInt16(itemIt->second.itemId);   // item id
-        msg.writeInt16(itemIt->second.amount);   // amount
-        if (equipData.find(itemIt->first) != equipData.end())
-            msg.writeInt8(1); // equipped
-        else
-            msg.writeInt8(0); // not equipped
+        msg.writeInt16(itemIt->first);
+        msg.writeInt16(itemIt->second.itemId);
+        msg.writeInt16(itemIt->second.amount);
+        msg.writeInt8(itemIt->second.equipmentSlot);
     }
 }
 
@@ -195,9 +192,9 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         i.slot          = msg.readInt16();
         i.itemId        = msg.readInt16();
         i.amount        = msg.readInt16();
-        bool isEquipped = msg.readInt8() != 0;
+        i.equipmentSlot = msg.readInt8();
         inventoryData.insert(std::make_pair(i.slot, i));
-        if (isEquipped)
+        if (i.equipmentSlot != 0)
             equipmentData.insert(i.slot);
     }
     poss.setInventory(inventoryData);

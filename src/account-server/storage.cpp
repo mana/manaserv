@@ -519,7 +519,16 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
                 inventoryData[slot] = item;
 
                 if (toUint(itemInfo(k, 5)) != 0)
+                {
+                    // The game server will set the right slot anyway,
+                    // but this speeds up checking if the item is equipped
+                    item.equipmentSlot = 1;
                     equipmentData.insert(slot);
+                }
+                else
+                {
+                    item.equipmentSlot = 0;
+                }
             }
         }
         poss.setInventory(inventoryData);
@@ -831,7 +840,7 @@ bool Storage::updateCharacter(CharacterData *character)
             unsigned short slot = itemIt->first;
             unsigned itemId = itemIt->second.itemId;
             unsigned amount = itemIt->second.amount;
-            bool equipped = equipData.find(itemIt->first) != equipData.end();
+            bool equipped = itemIt->second.equipmentSlot != 0;
             assert(itemId);
             sql << base << slot << ", " << itemId << ", " << amount << ", "
                 << (equipped ? 1 : 0) << ");";

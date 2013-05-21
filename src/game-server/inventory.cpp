@@ -389,8 +389,8 @@ bool Inventory::checkEquipmentCapacity(unsigned equipmentSlot,
         InventoryData::iterator itemIt = mPoss->inventory.find(*it);
         if (itemIt->second.equipmentSlot == equipmentSlot)
         {
-            const ItemClass *item = itemManager->getItem(
-                                                        itemIt->second.itemId);
+            const int itemId = itemIt->second.itemId;
+            const ItemClass *item = itemManager->getItem(itemId);
             capacity -= item->getItemEquipRequirement().capacityRequired;
         }
     }
@@ -539,7 +539,7 @@ bool Inventory::unequip(unsigned itemSlot)
     InventoryData::iterator it = mPoss->inventory.find(itemSlot);
     if (it == mPoss->inventory.end())
     {
-        LOG_WARN("Tried to unequip invalid item at slot " << itemSlot);
+        LOG_DEBUG("Tried to unequip invalid item at slot " << itemSlot);
         return false;
     }
 

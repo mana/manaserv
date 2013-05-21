@@ -116,9 +116,9 @@ enum {
     GPMSG_INVENTORY                = 0x0120, // { W slot, W item id [, W amount] (if item id is nonzero) }*
     GPMSG_INVENTORY_FULL           = 0x0121, // W inventory slot count { W slot, W itemId, W amount, W equipmentSlot }
     GPMSG_EQUIP                    = 0x0122, // W equipped inventory slot, W slot equipmentSlot
-    GPMSG_EQUIP_RESPONSE           = 0x0123, // B error
+    GPMSG_EQUIP_RESPONSE           = 0x0123, // B error, W slot
     GPMSG_UNEQUIP                  = 0x0124, // W equipped inventory slot
-    GPMSG_UNEQUIP_RESPONE          = 0x0125, // B error
+    GPMSG_UNEQUIP_RESPONE          = 0x0125, // B error, W slot
     GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { W attribute, D base value (in 1/256ths), D modified value (in 1/256ths)}*
     GPMSG_PLAYER_EXP_CHANGE        = 0x0140, // { W skill, D exp got, D exp needed, W skill level }*
     GPMSG_LEVELUP                  = 0x0150, // W new level, W character points, W correction points

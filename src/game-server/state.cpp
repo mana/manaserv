@@ -266,8 +266,6 @@ static void informPlayer(MapComposite *map, Entity *p)
             {
                 case OBJECT_CHARACTER:
                 {
-                    auto *characterComponent =
-                            o->getComponent<CharacterComponent>();
                     enterMsg.writeString(
                             o->getComponent<BeingComponent>()->getName());
                     serializeLooks(o, enterMsg);
