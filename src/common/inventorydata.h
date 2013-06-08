@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 
 /**
  * Numbers of inventory slots
@@ -36,38 +37,23 @@
 struct InventoryItem
 {
     InventoryItem():
-        itemId(0), amount(0)
+        slot(0),
+        itemId(0),
+        amount(0),
+        equipmentSlot(0)
     {}
 
+    unsigned slot;
     unsigned itemId;
     unsigned amount;
-};
-
-struct EquipmentItem
-{
-    EquipmentItem():
-        itemId(0), itemInstance(0)
-    {}
-
-    EquipmentItem(unsigned itemId, unsigned itemInstance)
-    {
-        this->itemId = itemId;
-        this->itemInstance = itemInstance;
-    }
-
-    // The item id taken from the item db.
-    unsigned itemId;
-    // A unique instance number used to separate items when equipping the same
-    // item id multiple times on possible multiple slots.
-    unsigned itemInstance;
+    unsigned equipmentSlot; /** 0 if not equipped */
 };
 
 // inventory slot id -> { item }
 typedef std::map< unsigned, InventoryItem > InventoryData;
 
-// equip slot id -> { item id, item instance }
-// Equipment taking up multiple equip slot ids will be referenced multiple times
-typedef std::multimap< unsigned, EquipmentItem > EquipData;
+// the slots which are equipped
+typedef std::set<int> EquipData;
 
 /**
  * Structure storing the equipment and inventory of a Player.
@@ -77,7 +63,7 @@ struct Possessions
     friend class Inventory;
 public:
     const EquipData &getEquipment() const
-    { return equipSlots; }
+    { return equipment; }
 
     const InventoryData &getInventory() const
     { return inventory; }
@@ -86,13 +72,13 @@ public:
      * Should be done only at character serialization and storage load time.
      */
     void setEquipment(EquipData &equipData)
-    { equipSlots.swap(equipData); }
+    { equipment.swap(equipData); }
     void setInventory(InventoryData &inventoryData)
     { inventory.swap(inventoryData); }
 
 private:
     InventoryData inventory;
-    EquipData equipSlots;
+    EquipData equipment;
 };
 
 #endif

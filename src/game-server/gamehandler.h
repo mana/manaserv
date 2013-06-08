@@ -132,7 +132,6 @@ class GameHandler: public ConnectionHandler
 
         void handleEquip(GameClient &client, MessageIn &message);
         void handleUnequip(GameClient &client, MessageIn &message);
-        void handleMoveItem(GameClient &client, MessageIn &message);
 
         void handleAttack(GameClient &client, MessageIn &message);
         void handleUseSpecialOnBeing(GameClient &client, MessageIn &message);

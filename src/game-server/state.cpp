@@ -81,12 +81,13 @@ static std::map< std::string, std::string > mScriptVariables;
  */
 static void serializeLooks(Entity *ch, MessageOut &msg)
 {
-    const EquipData &equipData = ch->getComponent<CharacterComponent>()
-            ->getPossessions().getEquipment();
-
-    // We'll use a set to check whether we already sent the update for the given
-    // item instance.
-    std::set<unsigned> itemInstances;
+    auto *characterComponent = ch->getComponent<CharacterComponent>();
+    msg.writeInt8(characterComponent->getHairStyle());
+    msg.writeInt8(characterComponent->getHairColor());
+    const EquipData &equipData =
+            characterComponent->getPossessions().getEquipment();
+    const InventoryData &inventoryData =
+            characterComponent->getPossessions().getInventory();
 
     // The map storing the info about the look changes to send
     //{ slot type id, item id }
@@ -97,17 +98,14 @@ static void serializeLooks(Entity *ch, MessageOut &msg)
     for (EquipData::const_iterator it = equipData.begin(),
          it_end = equipData.end(); it != it_end; ++it)
     {
-        if (!itemManager->isEquipSlotVisible(it->first))
+        InventoryData::const_iterator itemIt = inventoryData.find(*it);
+
+        if (!itemManager->isEquipSlotVisible(itemIt->second.equipmentSlot))
             continue;
 
-        if (!it->second.itemInstance
-            || itemInstances.insert(it->second.itemInstance).second)
-        {
-            // When the insertion succeeds, its the first time
-            // we encounter the item, so we can send the look change.
-            // We also send empty slots for unequipment handling.
-            lookChanges.insert(std::make_pair(it->first, it->second.itemId));
-        }
+        lookChanges.insert(std::make_pair(
+                itemIt->second.equipmentSlot,
+                itemIt->second.itemId));
     }
 
     if (!lookChanges.empty())
@@ -115,12 +113,12 @@ static void serializeLooks(Entity *ch, MessageOut &msg)
         // Number of look changes to send
         msg.writeInt8(lookChanges.size());
 
-        for (std::map<unsigned, unsigned>::const_iterator it2 =
-             lookChanges.begin(), it2_end = lookChanges.end();
-             it2 != it2_end; ++it2)
+        for (std::map<unsigned, unsigned>::const_iterator it =
+             lookChanges.begin(), it_end = lookChanges.end();
+             it != it_end; ++it)
         {
-            msg.writeInt8(it2->first);
-            msg.writeInt16(it2->second);
+            msg.writeInt8(it->first);
+            msg.writeInt16(it->second);
         }
     }
 }
@@ -195,12 +193,6 @@ static void informPlayer(MapComposite *map, Entity *p)
                 MessageOut LooksMsg(GPMSG_BEING_LOOKS_CHANGE);
                 LooksMsg.writeInt16(oid);
                 serializeLooks(o, LooksMsg);
-                auto *characterComponent =
-                        o->getComponent<CharacterComponent>();
-                LooksMsg.writeInt16(characterComponent->getHairStyle());
-                LooksMsg.writeInt16(characterComponent->getHairColor());
-                LooksMsg.writeInt16(
-                        o->getComponent<BeingComponent>()->getGender());
                 gameHandler->sendTo(p, LooksMsg);
             }
 
@@ -274,12 +266,8 @@ static void informPlayer(MapComposite *map, Entity *p)
             {
                 case OBJECT_CHARACTER:
                 {
-                    auto *characterComponent =
-                            o->getComponent<CharacterComponent>();
                     enterMsg.writeString(
                             o->getComponent<BeingComponent>()->getName());
-                    enterMsg.writeInt8(characterComponent->getHairStyle());
-                    enterMsg.writeInt8(characterComponent->getHairColor());
                     serializeLooks(o, enterMsg);
                 } break;
 
