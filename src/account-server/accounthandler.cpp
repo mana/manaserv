@@ -280,7 +280,7 @@ void AccountHandler::sendCharacterData(AccountClient &client,
     charInfo.writeInt8(ch.getGender());
     charInfo.writeInt8(ch.getHairStyle());
     charInfo.writeInt8(ch.getHairColor());
-    charInfo.writeInt16(ch.getCharacterPoints());
+    charInfo.writeInt16(ch.getAttributePoints());
     charInfo.writeInt16(ch.getCorrectionPoints());
 
     for (AttributeMap::const_iterator it = ch.mAttributes.begin(),

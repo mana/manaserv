@@ -219,7 +219,9 @@ enum
 
     // Money and inventory size attributes.
     ATTR_GP                = 18,
-    ATTR_INV_CAPACITY      = 19
+    ATTR_INV_CAPACITY      = 19,
+
+    ATTR_LEVEL             = 23
 };
 
 #endif // DEFINES_H

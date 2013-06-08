@@ -43,9 +43,10 @@ attributes <TAG>:  Tells all the monsters attribute. These attribute, as for ite
             size="4"
             mutation="50"
             />
-        <attribute id="HP" value="200" />
-        <attribute id="Max HP" value="200" />
+        <attribute id="HP" value="20" />
+        <attribute id="Max HP" value="20" />
         <attribute id="Movement speed" value="2" />
+        <ability id="2" />
         <!-- average stroll- and track range-->
     </monster>
 

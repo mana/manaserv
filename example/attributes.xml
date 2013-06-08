@@ -190,4 +190,10 @@
         modifiable="false"
         scope="character"
         minimum="0" />
+    <attribute id="23" name="Level"
+        desc="The level of this character."
+        modifiable="false"
+        scope="character"
+        minimum="0"
+        maximum="100" />
 </attributes>

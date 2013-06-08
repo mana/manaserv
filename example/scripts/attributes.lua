@@ -7,6 +7,9 @@
 
 --]]
 
+local ATTR_EXP = 22
+local ATTR_LEVEL = 23
+
 local function recalculate_base_attribute(being, attribute)
     local old_base = being:base_attribute(attribute)
     local new_base = old_base
@@ -49,6 +52,10 @@ local function recalculate_base_attribute(being, attribute)
     elseif attribute == ATTR_ABILITY_COOLDOWN then
         -- Provisional
         new_base = 100 - being:modified_attribute(ATTR_WIL)
+    elseif attribute == ATTR_LEVEL then
+        -- Provisional
+        --new_base = 100 - 100 * math.pow(0.99999, being:base_attribute(ATTR_EXP))
+        new_base = being:base_attribute(ATTR_EXP) / 20
     end
 
     if new_base ~= old_base then
@@ -70,8 +77,67 @@ local function update_derived_attributes(being, attribute)
         -- unimplemented
     elseif attribute == ATTR_WIL then
         recalculate_base_attribute(being, ATTR_ABILITY_COOLDOWN)
+    elseif attribute == ATTR_EXP then
+        recalculate_base_attribute(being, ATTR_LEVEL)
     end
 end
 
 on_recalculate_base_attribute(recalculate_base_attribute)
 on_update_derived_attribute(update_derived_attributes)
+
+function Entity:level()
+    return math.floor(self:base_attribute(ATTR_LEVEL))
+end
+
+function Entity:give_experience(experience)
+    local old_experience = self:base_attribute(ATTR_EXP)
+    local old_level = self:level()
+    self:set_base_attribute(ATTR_EXP, old_experience + experience)
+    if self:level() > old_level then
+        self:say("LEVELUP!!! " .. self:level())
+        self:set_attribute_points(self:attribute_points() + 1)
+        self:set_correction_points(self:correction_points() + 1)
+    end
+end
+
+local mobs_config = require "scripts/monster/settings"
+
+local exp_receiver = {}
+
+-- Give EXP for monster kills
+local function monster_damaged(mob, source, damage)
+
+    local receiver = exp_receiver[mob] or { chars = {}, total = 0 }
+    exp_receiver[mob] = receiver
+
+    if source and source:type() == TYPE_CHARACTER then
+        mob:change_anger(source, damage)
+
+        local current_damage = receiver.chars[source]
+        if not current_damage then
+            on_remove(source, function(removed_being)
+                receiver[removed_being] = nil
+            end)
+            on_death(source, function(removed_being)
+                receiver[removed_being] = nil
+            end)
+        end
+
+        current_damage = (current_damage or 0) + damage
+        receiver.chars[source] = current_damage
+        receiver.total = receiver.total + damage
+    end
+
+    if mob:base_attribute(ATTR_HP) == 0 then
+        local mob_config = mobs_config[mob:name()]
+        local experience = mob_config.experience or 0
+        for char, damage in pairs(receiver.chars) do
+            local gained_exp = damage / receiver.total * experience
+            char:give_experience(gained_exp)
+        end
+    end
+end
+
+for _, monsterclass in pairs(get_monster_classes()) do
+    monsterclass:on_damaged(monster_damaged)
+end

@@ -64,8 +64,8 @@ public:
     void setAttribute(int id, int base);
     void setModAttribute(int id, int mod);
     const AttributeMap &getAttributes() const;
-    void setCharacterPoints(int characterPoints);
-    int getCharacterPoints() const;
+    void setAttributePoints(int characterPoints);
+    int getAttributePoints() const;
     void setCorrectionPoints(int correctionPoints);
     int getCorrectionPoints() const;
 
@@ -285,11 +285,11 @@ class CharacterComponent : public Component
         AttribmodResponseCode useCorrectionPoint(Entity &entity,
                                                  int attribute);
 
-        void setCharacterPoints(int points) { mCharacterPoints = points; }
-        int getCharacterPoints() const { return mCharacterPoints; }
+        void setAttributePoints(int points);
+        int getAttributePoints() const;
 
-        void setCorrectionPoints(int points) { mCorrectionPoints = points; }
-        int getCorrectionPoints() const { return mCorrectionPoints; }
+        void setCorrectionPoints(int points);
+        int getCorrectionPoints() const;
 
 
         /**
@@ -350,12 +350,9 @@ class CharacterComponent : public Component
         void abilityStatusChanged(int id);
         void abilityCooldownActivated();
 
-        /**
-         * Informs the client about his characters abilities charge status
-         */
         void sendAbilityUpdate(Entity &entity);
-
         void sendAbilityCooldownUpdate(Entity &entity);
+        void sendAttributePointsStatus(Entity &entity);
 
         enum TransactionType
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
@@ -381,8 +378,11 @@ class CharacterComponent : public Component
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */
         unsigned char mHairColor;    /**< Hair Color of the character. */
-        int mCharacterPoints;        /**< Unused attribute points that can be distributed */
+
+        bool mSendAttributePointsStatus;
+        int mAttributePoints;        /**< Unused attribute points that can be distributed */
         int mCorrectionPoints;       /**< Unused attribute correction points */
+
         bool mSendAbilityCooldown;
         unsigned char mAccountLevel; /**< Account level of the user. */
         int mParty;                  /**< Party id of the character */
@@ -459,14 +459,14 @@ inline const AttributeMap &CharacterData::getAttributes() const
     return mEntity->getComponent<BeingComponent>()->getAttributes();
 }
 
-inline void CharacterData::setCharacterPoints(int characterPoints)
+inline void CharacterData::setAttributePoints(int characterPoints)
 {
-    mCharacterComponent->setCharacterPoints(characterPoints);
+    mCharacterComponent->setAttributePoints(characterPoints);
 }
 
-inline int CharacterData::getCharacterPoints() const
+inline int CharacterData::getAttributePoints() const
 {
-    return mCharacterComponent->getCharacterPoints();
+    return mCharacterComponent->getAttributePoints();
 }
 
 inline void CharacterData::setCorrectionPoints(int correctionPoints)
@@ -577,6 +577,29 @@ inline AbilityMap::const_iterator CharacterData::getAbilityEnd() const
 inline Possessions &CharacterData::getPossessions() const
 {
     return mCharacterComponent->getPossessions();
+}
+
+
+inline void CharacterComponent::setAttributePoints(int points)
+{
+    mSendAttributePointsStatus = true;
+    mAttributePoints = points;
+}
+
+inline int CharacterComponent::getAttributePoints() const
+{
+    return mAttributePoints;
+}
+
+inline void CharacterComponent::setCorrectionPoints(int points)
+{
+    mSendAttributePointsStatus = true;
+    mCorrectionPoints = points;
+}
+
+inline int CharacterComponent::getCorrectionPoints() const
+{
+    return mCorrectionPoints;
 }
 
 #endif // CHARACTER_H

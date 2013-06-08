@@ -69,6 +69,9 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mDatabaseID(-1),
     mHairStyle(0),
     mHairColor(0),
+    mSendAttributePointsStatus(false),
+    mAttributePoints(0),
+    mCorrectionPoints(0),
     mSendAbilityCooldown(false),
     mParty(0),
     mTransaction(TRANS_NONE),
@@ -131,6 +134,9 @@ void CharacterComponent::update(Entity &entity)
 
     if (mSendAbilityCooldown)
         sendAbilityCooldownUpdate(entity);
+
+    if (mSendAttributePointsStatus)
+        sendAttributePointsStatus(entity);
 }
 
 void CharacterComponent::characterDied(Entity *being)
@@ -211,6 +217,15 @@ void CharacterComponent::sendAbilityCooldownUpdate(Entity &entity)
     msg.writeInt16(abilityComponent->remainingCooldown());
     gameHandler->sendTo(mClient, msg);
     mSendAbilityCooldown = false;
+}
+
+void CharacterComponent::sendAttributePointsStatus(Entity &entity)
+{
+    MessageOut msg(GPMSG_ATTRIBUTE_POINTS_STATUS);
+    msg.writeInt16(mAttributePoints);
+    msg.writeInt16(mCorrectionPoints);
+    gameHandler->sendTo(mClient, msg);
+    mSendAttributePointsStatus = false;
 }
 
 void CharacterComponent::cancelTransaction()
@@ -341,10 +356,10 @@ AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
 
     if (!attributeManager->isAttributeDirectlyModifiable(attribute))
         return ATTRIBMOD_INVALID_ATTRIBUTE;
-    if (!mCharacterPoints)
+    if (!mAttributePoints)
         return ATTRIBMOD_NO_POINTS_LEFT;
 
-    --mCharacterPoints;
+    setAttributePoints(mAttributePoints - 1);
 
     const double base = beingComponent->getAttributeBase(attribute);
     beingComponent->setAttribute(entity, attribute, base + 1);
@@ -364,8 +379,8 @@ AttribmodResponseCode CharacterComponent::useCorrectionPoint(Entity &entity,
     if (beingComponent->getAttributeBase(attribute) <= 1)
         return ATTRIBMOD_DENIED;
 
-    --mCorrectionPoints;
-    ++mCharacterPoints;
+    setCorrectionPoints(mCorrectionPoints - 1);
+    setAttributePoints(mAttributePoints + 1);
 
     const double base = beingComponent->getAttributeBase(attribute);
     beingComponent->setAttribute(entity, attribute, base - 1);

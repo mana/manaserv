@@ -890,7 +890,7 @@ void GameHandler::handleRaiseAttribute(GameClient &client, MessageIn &message)
     {
         accountHandler->updateCharacterPoints(
                 characterComponent->getDatabaseID(),
-                characterComponent->getCharacterPoints(),
+                characterComponent->getAttributePoints(),
                 characterComponent->getCorrectionPoints());
 
         // log transaction
@@ -920,7 +920,7 @@ void GameHandler::handleLowerAttribute(GameClient &client, MessageIn &message)
     {
         accountHandler->updateCharacterPoints(
                 characterComponent->getDatabaseID(),
-                characterComponent->getCharacterPoints(),
+                characterComponent->getAttributePoints(),
                 characterComponent->getCorrectionPoints());
 
         // log transaction

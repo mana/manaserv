@@ -245,11 +245,11 @@ class CharacterData
         Possessions &getPossessions()
         { return mPossessions; }
 
-        void setCharacterPoints(int points)
-        { mCharacterPoints = points; }
+        void setAttributePoints(int points)
+        { mAttributePoints = points; }
 
-        int getCharacterPoints() const
-        { return mCharacterPoints; }
+        int getAttributePoints() const
+        { return mAttributePoints; }
 
         void setCorrectionPoints(int points)
         { mCorrectionPoints = points; }
@@ -283,7 +283,7 @@ class CharacterData
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.
         unsigned char mHairColor; //!< Hair color of the being.
-        short mCharacterPoints;   //!< Unused character points.
+        short mAttributePoints;   //!< Unused character points.
         short mCorrectionPoints;  //!< Unused correction points.
         unsigned char mAccountLevel; //!< Level of the associated account.
 
