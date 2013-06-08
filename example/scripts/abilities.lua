@@ -31,7 +31,14 @@ spell1:on_use(function(user, x, y, abilityId)
                 chance_to_hit = user:modified_attribute(ATTR_STR),
             }
             being:damage(user, damage)
+            being:say("OUCH")
         end
     end
 end)
 --spell1:on_recharged(function(ch) ch:say("Hoooooooo...") end)
+
+local debugspell = get_ability_info("debug_debug")
+debugspell:on_use(function(user)
+    WARN("USED")
+    user:give_experience(10)
+end)

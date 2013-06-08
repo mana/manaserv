@@ -1838,6 +1838,68 @@ static int entity_remove_attribute_modifier(lua_State *s)
     return 0;
 }
 
+/** LUA entity:attribute_points (being)
+ * entity:attribute_points()
+ **
+ * Valid only for character entities.
+ *
+ * *Returns:* Returns the amount of available attribute points.
+ */
+static int entity_attribute_points(lua_State *s)
+{
+    Entity *being = checkCharacter(s, 1);
+    auto *characterComponent = being->getComponent<CharacterComponent>();
+    lua_pushinteger(s, characterComponent->getAttributePoints());
+    return 1;
+}
+
+/** LUA entity:set_attribute_points (being)
+ * entity:set_attribute_points(int amount)
+ **
+ * Valid only for character entities.
+ *
+ * Sets the amount of attribute points for the entity
+ */
+static int entity_set_attribute_points(lua_State *s)
+{
+    Entity *being = checkCharacter(s, 1);
+    int points = luaL_checkint(s, 2);
+    auto *characterComponent = being->getComponent<CharacterComponent>();
+    characterComponent->setAttributePoints(points);
+    return 0;
+}
+
+/** LUA entity:correction_points (being)
+ * entity:correction_points()
+ **
+ * Valid only for character entities.
+ *
+ * *Returns:* Returns the amount of available correction points.
+ */
+static int entity_correction_points(lua_State *s)
+{
+    Entity *being = checkCharacter(s, 1);
+    auto *characterComponent = being->getComponent<CharacterComponent>();
+    lua_pushinteger(s, characterComponent->getCorrectionPoints());
+    return 1;
+}
+
+/** LUA entity:set_correction_points (being)
+ * entity:set_correction_points(int amount)
+ **
+ * Valid only for character entities.
+ *
+ * Sets the amount of correction points for the entity
+ */
+static int entity_set_correction_points(lua_State *s)
+{
+    Entity *being = checkCharacter(s, 1);
+    int points = luaL_checkint(s, 2);
+    auto *characterComponent = being->getComponent<CharacterComponent>();
+    characterComponent->setCorrectionPoints(points);
+    return 0;
+}
+
 /** LUA entity:gender (being)
  * entity:gender()
  **
@@ -3350,6 +3412,10 @@ LuaScript::LuaScript():
         { "modified_attribute",             entity_get_modified_attribute     },
         { "apply_attribute_modifier",       entity_apply_attribute_modifier   },
         { "remove_attribute_modifier",      entity_remove_attribute_modifier  },
+        { "attribute_points",               entity_attribute_points           },
+        { "set_attribute_points",           entity_set_attribute_points       },
+        { "correction_points",              entity_correction_points          },
+        { "set_correction_points",          entity_set_correction_points      },
         { "gender",                         entity_get_gender                 },
         { "set_gender",                     entity_set_gender                 },
         { "hair_color",                     entity_get_hair_color             },

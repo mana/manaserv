@@ -38,7 +38,7 @@ void serializeCharacterData(const T &data, MessageOut &msg)
     msg.writeInt8(data.getGender());
     msg.writeInt8(data.getHairStyle());
     msg.writeInt8(data.getHairColor());
-    msg.writeInt16(data.getCharacterPoints());
+    msg.writeInt16(data.getAttributePoints());
     msg.writeInt16(data.getCorrectionPoints());
 
 
@@ -115,7 +115,7 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.setGender(ManaServ::getGender(msg.readInt8()));
     data.setHairStyle(msg.readInt8());
     data.setHairColor(msg.readInt8());
-    data.setCharacterPoints(msg.readInt16());
+    data.setAttributePoints(msg.readInt16());
     data.setCorrectionPoints(msg.readInt16());
 
     // character attributes

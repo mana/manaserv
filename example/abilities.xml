@@ -23,4 +23,15 @@
             useaction="attack"
         />
     </ability-category>
+    <ability-category name="debug">
+        <ability
+            id="3"
+            name="debug"
+            rechargeable="true"
+            needed="1"
+            rechargeattribute="20"
+            cooldownattribute="20"
+            target="point"
+        />
+    </ability-category>
 </abilities>

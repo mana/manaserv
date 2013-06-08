@@ -362,7 +362,7 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
         character->setGender(toUshort(charInfo(0, 3)));
         character->setHairStyle(toUshort(charInfo(0, 4)));
         character->setHairColor(toUshort(charInfo(0, 5)));
-        character->setCharacterPoints(toUshort(charInfo(0, 6)));
+        character->setAttributePoints(toUshort(charInfo(0, 6)));
         character->setCorrectionPoints(toUshort(charInfo(0, 7)));
         Point pos(toInt(charInfo(0, 8)), toInt(charInfo(0, 9)));
         character->setPosition(pos);
@@ -702,7 +702,7 @@ bool Storage::updateCharacter(CharacterData *character)
             << "gender = '"     << character->getGender() << "', "
             << "hair_style = '" << character->getHairStyle() << "', "
             << "hair_color = '" << character->getHairColor() << "', "
-            << "char_pts = '"   << character->getCharacterPoints() << "', "
+            << "char_pts = '"   << character->getAttributePoints() << "', "
             << "correct_pts = '"<< character->getCorrectionPoints() << "', "
             << "x = '"          << character->getPosition().x << "', "
             << "y = '"          << character->getPosition().y << "', "
@@ -990,7 +990,7 @@ void Storage::flush(Account *account)
                      << character->getGender() << ", "
                      << (int)character->getHairStyle() << ", "
                      << (int)character->getHairColor() << ", "
-                     << (int)character->getCharacterPoints() << ", "
+                     << (int)character->getAttributePoints() << ", "
                      << (int)character->getCorrectionPoints() << ", "
                      << character->getPosition().x << ", "
                      << character->getPosition().y << ", "

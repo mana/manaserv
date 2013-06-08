@@ -12,6 +12,24 @@ local TARGET_SEARCH_DELAY = 10
 local mob_stati = {}
 local angerlist = {}
 
+local function create_mob_status()
+    return {
+        angerlist = {},
+    }
+end
+
+function Entity:change_anger(target, amount)
+    local mob_status = mob_stati[self]
+    if not mob_status then
+        mob_status = create_mob_status()
+        mob_stati[self] = mob_status
+    end
+
+    local anger = mob_status.angerlist[target] or 0
+    mob_status.angerlist[target] = anger + amount
+    mob_stati[self].update_target_timer = 0 -- Enforce looking for new target
+end
+
 local mob_config = require "scripts/monster/settings"
 
 local function calculate_position_priority(x1, y1, x2, y2, anger, range)
@@ -43,7 +61,7 @@ local function update_attack_ai(mob, tick)
         if being:type() == TYPE_CHARACTER
            and being:action() ~= ACTION_DEAD
         then
-            local anger = angerlist[being] or 0
+            local anger = mob_status.angerlist[being] or 0
             if anger == 0 and config.aggressive then
                 anger = 1
             end
@@ -130,7 +148,7 @@ end
 local function update(mob, tick)
     local mob_status = mob_stati[mob]
     if not mob_status then
-        mob_status = {}
+        mob_status = create_mob_status()
         mob_stati[mob] = mob_status
         on_remove(mob, remove_mob)
     end
