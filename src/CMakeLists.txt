@@ -17,9 +17,15 @@ ENDIF()
 IF (POLICY CMP0015)
   CMAKE_POLICY(SET CMP0015 OLD)
 ENDIF()
-INCLUDE_DIRECTORIES("../libs/enet/include")
-LINK_DIRECTORIES("../libs/enet")
-SET(INTERNAL_LIBRARIES enet)
+
+IF (ENABLE_EXTERNAL_ENET)
+  INCLUDE_DIRECTORIES(${ENet_INCLUDE_DIR})
+  SET(OPTIONAL_LIBRARIES ${OPTIONAL_LIBRARIES} ${ENet_LIBRARY})
+ELSE (ENABLE_EXTERNAL_ENET)
+  INCLUDE_DIRECTORIES("../libs/enet/include")
+  LINK_DIRECTORIES("../libs/enet")
+  SET(INTERNAL_LIBRARIES enet)
+ENDIF (ENABLE_EXTERNAL_ENET)
 
 # enable rc-handling with mingw
 # most likely this part can be kicked out with some later cmake version

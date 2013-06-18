@@ -30,7 +30,11 @@
 #include "utils/xml.h"
 #include "utils/string.h"
 
+#if defined __OpenBSD__
+#define DEFAULT_CONFIG_FILE       "/etc/manaserv.xml"
+#else
 #define DEFAULT_CONFIG_FILE       "manaserv.xml"
+#endif
 
 /**< Persistent configuration. */
 static std::map< std::string, std::string > options;
