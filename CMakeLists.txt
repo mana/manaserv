@@ -13,6 +13,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 OPTION(WITH_SQLITE "Enable Sqlite support (used by default)" ON)
 OPTION(WITH_MYSQL "Enable MySQL support" OFF)
 OPTION(ENABLE_LUA "Enable Lua scripting support" ON)
+OPTION(ENABLE_EXTERNAL_ENET "Enable external ENet support" OFF)
 
 # Exclude Sqlite support if the MySQL support was asked.
 IF(WITH_MYSQL)
@@ -52,6 +53,11 @@ ELSE (WIN32)
     SET(PKG_BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
 ENDIF (WIN32)
 
-ADD_SUBDIRECTORY(libs/enet)
+IF (ENABLE_EXTERNAL_ENET)
+    FIND_PACKAGE(ENet)
+ELSE (ENABLE_EXTERNAL_ENET)
+    ADD_SUBDIRECTORY(libs/enet)
+ENDIF (ENABLE_EXTERNAL_ENET)
+
 ADD_SUBDIRECTORY(scripts)
 ADD_SUBDIRECTORY(src)
