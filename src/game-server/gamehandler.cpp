@@ -355,23 +355,9 @@ void GameHandler::addPendingCharacter(const std::string &token, Entity *ch)
         Entity *old_ch = c->character;
         if (old_ch && id == old_ch->getComponent<CharacterComponent>()->getDatabaseID())
         {
-            if (c->status != CLIENT_CONNECTED)
-            {
-                /* Either the server is confused, or the client is up to no
-                   good. So ignore the request, and wait for the connections
-                   to properly time out. */
-                return;
-            }
-
-            /* As the connection was not properly closed, the account server
-               has not yet updated its data, so ignore them. Instead, take the
-               already present character, kill its current connection, and make
-               it available for a new connection. */
-            delete ch;
-            GameState::remove(old_ch);
-            kill(old_ch);
-            ch = old_ch;
-            break;
+            // We cannot simply terminate the connection without running stuff
+            // like db updates. So just let it time out.
+            return;
         }
     }
 
