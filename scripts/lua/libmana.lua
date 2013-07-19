@@ -25,12 +25,12 @@ require "scripts/lua/libmana-constants"
 -- survive a server reboot.
 --
 -- **Example:**
--- <code lua>
+-- {% highlight lua %}
 -- local value = map["a key"]
 -- if value == "some value" then
 --     map["a key"] = "other value"
 -- end
--- </code>
+-- {% endhighlight %}
 map = setmetatable({}, {
     __index = function(_, key)
         return getvar_map(key)
@@ -52,12 +52,12 @@ map = setmetatable({}, {
 -- of a variable between you requesting to old value and setting a new value.
 --
 -- **Example:**
--- <code lua>
+-- {% highlight lua %}
 -- local value = world["a key"]
 -- if value == "some value" then
 --     world["a key"] = "other value"
 -- end
--- </code>
+-- {% endhighlight %}
 world = setmetatable({}, {
     __index = function(_, key)
         return getvar_world(key)
@@ -267,9 +267,11 @@ end
 -- and value of the changed variable.
 --
 -- **Example:**
--- <code lua>on_mapvar_changed(key, function(key, value)
+-- {% highlight lua %}
+-- on_mapvar_changed(key, function(key, value)
 --     log(LOG_DEBUG, "mapvar " .. key .. " has new value " .. value)
--- end)</code>
+-- end)
+-- {% endhighlight %}
 function on_mapvar_changed(key, funct)
   if not onmapvar_functs[key] then
     onmapvar_functs[key] = {}
@@ -285,9 +287,11 @@ end
 -- and value of the changed variable.
 --
 -- **Example:**
--- <code lua>on_worldvar_changed(key, function(key, value)
+-- {% highlight lua %}
+-- on_worldvar_changed(key, function(key, value)
 --     log(LOG_DEBUG, "worldvar " .. key .. " has new value " .. value)
--- end)</code>
+-- end)
+-- {% endhighlight %}
 function on_worldvar_changed(key, funct)
   if not onworldvar_functs[key] then
     onworldvar_functs[key] = {}
