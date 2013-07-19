@@ -79,10 +79,10 @@ extern "C" {
 /** LUA on_update_derived_attribute (callbacks)
  * on_update_derived_attribute(function ref)
  **
- * Will call the function ''ref'' when an attribute changed and other attributes
+ * Will call the function `ref` when an attribute changed and other attributes
  * need recalculation. The function is expected to recalculate those then.
  *
- * **See:** [[attributes.xml]] for more info.
+ * **See:** [attributes.xml](attributes.xml.html) for more info.
  *
  */
 static int on_update_derived_attribute(lua_State *s)
@@ -96,13 +96,13 @@ static int on_update_derived_attribute(lua_State *s)
 /** LUA on_recalculate_base_attribute (callbacks)
  * on_recalculate_base_attribute(function ref)
  **
- * Will call the function ''ref'' when an attribute base needs to be recalculated.
+ * Will call the function `ref` when an attribute base needs to be recalculated.
  * The function is expected to do this recalculation then. The engine only
  * triggers this for characters. However you can use the same function for
  * recalculating derived attributes in the
- * [[scripting#on_update_derived_attribute|on_update_derived_attribute]] callback.
+ * [on_update_derived_attribute](scripting.html#on_update_derived_attribute) callback.
  *
- * **See:** [[attributes.xml]] for more info.
+ * **See:** [attributes.xml](attributes.xml.html) for more info.
  */
 static int on_recalculate_base_attribute(lua_State *s)
 {
@@ -114,7 +114,6 @@ static int on_recalculate_base_attribute(lua_State *s)
 /** LUA on_character_death (callbacks)
  * on_character_death(function ref)
  **
- * on_character_death( function(Character*) ): void
  * Sets a listener function to the character death event.
  */
 static int on_character_death(lua_State *s)
@@ -127,7 +126,7 @@ static int on_character_death(lua_State *s)
 /** LUA on_character_death_accept (callbacks)
  * on_character_death_accept(function ref)
  **
- * Will make sure that the function ''ref'' gets called with the character
+ * Will make sure that the function `ref` gets called with the character
  * as argument as soon a character either pressed the ok dialouge in the death
  * message or left the game while being dead.
  */
@@ -141,7 +140,7 @@ static int on_character_death_accept(lua_State *s)
 /** LUA on_character_login (callbacks)
  * on_character_login(function ref)
  **
- * Will make sure that function ''ref'' gets called with the character
+ * Will make sure that function `ref` gets called with the character
  * as argument as soon a character logged in.
  */
 static int on_character_login(lua_State *s)
@@ -154,7 +153,7 @@ static int on_character_login(lua_State *s)
 /** LUA on_being_death (callbacks)
  * on_being_death(function ref)
  **
- * Will make sure that the function ''ref'' gets called with the being
+ * Will make sure that the function `ref` gets called with the being
  * as argument as soon a being dies.
  */
 static int on_being_death(lua_State *s)
@@ -167,7 +166,7 @@ static int on_being_death(lua_State *s)
 /** LUA on_entity_remove (callbacks)
  * on_entity_remove(function ref)
  **
- * Will make sure that the function ''ref'' gets called with the being
+ * Will make sure that the function `ref` gets called with the being
  * as argument as soon a being gets removed from a map.
  */
 static int on_entity_remove(lua_State *s)
@@ -180,7 +179,7 @@ static int on_entity_remove(lua_State *s)
 /** LUA on_update (callbacks)
  * on_update(function ref)
  **
- * Will make sure that the function ''ref'' gets called every game tick.
+ * Will make sure that the function `ref` gets called every game tick.
  */
 static int on_update(lua_State *s)
 {
@@ -192,7 +191,7 @@ static int on_update(lua_State *s)
 /** LUA on_create_npc_delayed (callbacks)
  * on_create_npc_delayed(function ref)
  **
- * Will make sure that the function ''ref'' gets called with the
+ * Will make sure that the function `ref` gets called with the
  * name, id, gender, x and y values as arguments of the npc when a npc should
  * be created at map init (Npcs defined directly in the map files use this).
  */
@@ -206,7 +205,7 @@ static int on_create_npc_delayed(lua_State *s)
 /** LUA on_map_initialize (callbacks)
  * on_map_initialize(function ref)
  **
- * Will make sure that the function ''ref'' gets called with the initialized
+ * Will make sure that the function `ref` gets called with the initialized
  * map as current map when the map is initialized.
  */
 static int on_map_initialize(lua_State *s)
@@ -219,7 +218,7 @@ static int on_map_initialize(lua_State *s)
 /** LUA on_craft (callbacks)
  * on_craft(function ref)
  **
- * Will make sure that the function ''ref'' gets called with the the crafting
+ * Will make sure that the function `ref` gets called with the the crafting
  * character and a table with the recipes {(id, amount}) when a character
  * performs crafting.
  */
@@ -233,7 +232,7 @@ static int on_craft(lua_State *s)
 /** LUA on_mapupdate (callbacks)
  * on_mapupdate(function ref)
  **
- * Will make sure that the function ''ref'' gets called with the the map id
+ * Will make sure that the function `ref` gets called with the the map id
  * as argument for each game tick and map.
  */
 static int on_mapupdate(lua_State *s)
@@ -253,11 +252,11 @@ static int on_mapupdate(lua_State *s)
  **
  * **Return value:** A handle to the created NPC.
  *
- * Creates a new NPC with the name ''name'' at the coordinates ''x'':''y''
+ * Creates a new NPC with the name `name` at the coordinates `x`:`y`
  * which appears to the players with the appearence listed in their npcs.xml
- * under ''spriteID'' and the gender ''gender''. Every game tick the function
- * ''updatefunct'' is called with the handle of the NPC. When a character talks
- * to the NPC the function ''talkfunct'' is called with the NPC handle and the
+ * under `spriteID` and the gender `gender`. Every game tick the function
+ * `updatefunct` is called with the handle of the NPC. When a character talks
+ * to the NPC the function `talkfunct` is called with the NPC handle and the
  * character handle.
  *
  * For setting the gender you can use the constants defined in the
@@ -350,8 +349,8 @@ static int npc_disable(lua_State *s)
  **
  * **Return value:** A handle to the created monster.
  *
- * Spawns a new monster of type ''monsterID'' or ''monstername'' on the current
- * map on the pixel coordinates ''x'':''y''.
+ * Spawns a new monster of type `monsterID` or `monstername` on the current
+ * map on the pixel coordinates `x`:`y`.
  */
 static int monster_create(lua_State *s)
 {
@@ -388,11 +387,11 @@ static int entity_remove(lua_State *s)
  * trigger_create(int x, int y, int width, int height,
  *                function trigger_function, int arg, bool once)
  **
- * Creates a new trigger area with the given ''height'' and ''width'' in pixels
- * at the map position ''x'':''y'' in pixels. When a being steps into this area
- * the function  ''trigger_function'' is called with the being handle and
- * ''arg'' as arguments. When ''once'' is false the function is called every
- * game tick the being is inside the    area. When ''once'' is true it is only
+ * Creates a new trigger area with the given `height` and `width` in pixels
+ * at the map position `x`:`y` in pixels. When a being steps into this area
+ * the function  `trigger_function` is called with the being handle and
+ * `arg` as arguments. When `once` is false the function is called every
+ * game tick the being is inside the    area. When `once` is true it is only
  * called again when the being leaves and reenters the area.
  */
 static int trigger_create(lua_State *s)
@@ -440,8 +439,8 @@ static int trigger_create(lua_State *s)
  * effect_create(int id, int x, int y)
  * effect_create(int id, being b)
  **
- * Triggers the effect ''id'' from the clients effects.xml
- * (particle and/or sound) at map location ''x'':''y'' or on being ''b''.
+ * Triggers the effect `id` from the clients effects.xml
+ * (particle and/or sound) at map location `x`:`y` or on being `b`.
  * This has no effect on gameplay.
  *
  * **Warning:** Remember that clients might switch off particle effects for
@@ -497,7 +496,7 @@ static int item_drop(lua_State *s)
  **
  * **Warning:** May only be called from an NPC talk function.
  *
- * Shows an NPC dialog box on the screen of displaying the string ''message''.
+ * Shows an NPC dialog box on the screen of displaying the string `message`.
  * Idles the current thread until the user click "OK".
  */
 static int say(lua_State *s)
@@ -532,8 +531,8 @@ static int say(lua_State *s)
  *
  * Items are either strings or tables of strings (indices are ignored,
  * but presumed to be taken in order). So,
- * ''ask("A", {"B", "C", "D"}, "E")'' is the same as
- * ''ask("A", "B", "C", "D", "E")''.
+ * `ask("A", {"B", "C", "D"}, "E")` is the same as
+ * `ask("A", "B", "C", "D", "E")`.
  */
 static int ask(lua_State *s)
 {
@@ -588,8 +587,8 @@ static int ask(lua_State *s)
  * **Warning:** May only be called from an NPC talk function.
  *
  * Shows a dialog box to the user which allows him to choose a number between
- * ''min_num'' and ''max_num''. If ''default_num'' is set this number will be
- * uses as default.  Otherwise ''min_num'' will be the default.
+ * `min_num` and `max_num`. If `default_num` is set this number will be
+ * uses as default.  Otherwise `min_num` will be the default.
  */
 static int ask_number(lua_State *s)
 {
@@ -661,7 +660,7 @@ static int npc_post(lua_State *s)
  * entity:say(string message)
  **
  * Makes this entity (which can be a character, monster or NPC), speak the
- * string ''message'' as if it was entered by a player in the chat bar.
+ * string `message` as if it was entered by a player in the chat bar.
  */
 static int entity_say(lua_State *s)
 {
@@ -674,7 +673,7 @@ static int entity_say(lua_State *s)
 /** LUA entity:message (input)
  * entity:message(string message)
  **
- * Delivers the string ''message'' to this entity (which needs to be a
+ * Delivers the string `message` to this entity (which needs to be a
  * character). It will appear in the chatlog as a private message from
  * "Server".
  */
@@ -690,8 +689,8 @@ static int entity_message(lua_State *s)
 /** LUA announce (input)
  * announce(string message [, string sender])
  **
- * Sends a global announce with the given ''message'' and ''sender''. If no
- * ''sender'' is passed "Server" will be used as sender.
+ * Sends a global announce with the given `message` and `sender`. If no
+ * `sender` is passed "Server" will be used as sender.
  */
 static int announce(lua_State *s)
 {
@@ -719,7 +718,7 @@ static int announce(lua_State *s)
  *       { string itemNname, int itemNamount, int itemNcost })
  **
  * FIXME: Move into a seperate file
- * Opens a trade window from an NPC conversation. ''mode''
+ * Opens a trade window from an NPC conversation. `mode`
  * is true for selling and false for buying. You have to set each items the NPC
  * is buying/selling,    the cost and the maximum amount in {}.
  *
@@ -727,7 +726,7 @@ static int announce(lua_State *s)
  * the mode set to sell (true),
  * the whole player inventory is then sellable.
  *
- * **N.B.:** Be sure to put a ''value'' (item cost) parameter in your items.xml
+ * **N.B.:** Be sure to put a `value` (item cost) parameter in your items.xml
  * to permit the player to sell it when using this option.
  *
  * **Return values:**
@@ -736,7 +735,7 @@ static int announce(lua_State *s)
  *   * **2** in case of errors.
  *
  * **Examples:**
- * <code lua trade.lua>
+ * {% highlight lua %}
  *     -- "A buy sample."
  *     local buycase = trade(false, {
  *         {"Sword", 10, 20},
@@ -785,7 +784,7 @@ static int announce(lua_State *s)
  *       say("Hmm, something went wrong...")
  *       say("Ask a scripter to fix me!")
  *     end
- * </code>
+ * {% endhighlight %}
  */
 static int trade(lua_State *s)
 {
@@ -908,11 +907,11 @@ static int trade(lua_State *s)
  **
  * Valid only for character entities.
  *
- * The boolean values ''inInventory'' and ''inEquipment'' make possible to
+ * The boolean values `inInventory` and `inEquipment` make possible to
  * select whether equipped or carried items must be counted.
  *
- * **Return values:** A number of integers with the amount of items ''id'' or
- * ''name'' carried or equipped by the character.
+ * **Return values:** A number of integers with the amount of items `id` or
+ * `name` carried or equipped by the character.
  */
 static int entity_inv_count(lua_State *s)
 {
@@ -945,9 +944,9 @@ static int entity_inv_count(lua_State *s)
  **
  * Valid only for character entities.
  *
- * Changes the number of items with the item ID ''id'' or ''name'' owned by
- * this character by ''number''. You can change any number of items with this
- * function by passing multiple ''id'' or ''name'' and ''number'' pairs.
+ * Changes the number of items with the item ID `id` or `name` owned by
+ * this character by `number`. You can change any number of items with this
+ * function by passing multiple `id` or `name` and `number` pairs.
  * A failure can be caused by trying to take items the character doesn't possess.
  *
  * **Return value:** Boolean true on success, boolean false on failure.
@@ -1017,14 +1016,14 @@ static int entity_inv_change(lua_State *s)
  * inventory. Empty slots are not listed.
  *
  * **Example of use:**
- * <code lua>
+ * {% highlight lua %}
  * local inventory_table = ch:inventory()
  * for i = 1, #inventory_table do
  *     item_message = item_message.."\n"..inventory_table[i].slot..", "
  *         ..inventory_table[i].id..", "..inventory_table[i].name..", "
  *         ..inventory_table[i].amount
  * end
- * </code>
+ * {% endhighlight %}
  */
 static int entity_get_inventory(lua_State *s)
 {
@@ -1085,13 +1084,13 @@ static int entity_get_inventory(lua_State *s)
  * equipment. Empty slots are not listed.
  *
  * **Example of use:**
- * <code lua>
+ * {% highlight lua %}
  * local equipment_table = ch:equipment()
  * for i = 1, #equipment_table do
  *     item_message = item_message.."\n"..equipment_table[i].slot..", "
  *         ..equipment_table[i].id..", "..equipment_table[i].name
  * end
- * </code>
+ * {% endhighlight %}
  */
 static int entity_get_equipment(lua_State *s)
 {
@@ -1233,7 +1232,7 @@ static int entity_unequip_item(lua_State *s)
 /** LUA chr_get_quest (being)
  * chr_get_quest(handle character, string name)
  **
- * **Return value:** The quest variable named ''name'' for the given character.
+ * **Return value:** The quest variable named `name` for the given character.
  *
  * **Warning:** May only be called from an NPC talk function.
  *
@@ -1264,8 +1263,8 @@ static int chr_get_quest(lua_State *s)
 /** LUA chr_set_quest (being)
  * chr_set_quest(handle character, string name, string value)
  **
- * Sets the quest variable named ''name'' for the given  character to the value
- * ''value''.
+ * Sets the quest variable named `name` for the given  character to the value
+ * `value`.
  */
 static int chr_set_quest(lua_State *s)
 {
@@ -1286,8 +1285,8 @@ static int chr_set_quest(lua_State *s)
  *
  * Sets the recharge speed of the special to a new value for the character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the `specialname` as parameter make sure that it is
+ * formatted in this way: &lt;setname&gt;_&lt;specialname&gt; (for eg. "Magic_Healingspell").
  */
 static int entity_set_special_recharge_speed(lua_State *s)
 {
@@ -1314,8 +1313,8 @@ static int entity_set_special_recharge_speed(lua_State *s)
  * **Return value:** The current recharge speed of the special that is owned by
  * the character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the `specialname` as parameter make sure that it is
+ * formatted in this way: &lt;setname&gt;_&lt;specialname&gt; (for eg. "Magic_Healingspell").
  */
 static int entity_get_special_recharge_speed(lua_State *s)
 {
@@ -1342,8 +1341,8 @@ static int entity_get_special_recharge_speed(lua_State *s)
  * Sets the mana (recharge status) of the special to a new value for the
  * character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the `specialname` as parameter make sure that it is
+ * formatted in this way: &lt;setname&gt;_&lt;specialname&gt; (for eg. "Magic_Healingspell").
  */
 static int entity_set_special_mana(lua_State *s)
 {
@@ -1366,8 +1365,8 @@ static int entity_set_special_mana(lua_State *s)
  * **Return value:** The mana (recharge status) of the special that is owned by
  * the character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the `specialname` as parameter make sure that it is
+ * formatted in this way: &lt;setname&gt;_&lt;specialname&gt; (for eg. "Magic_Healingspell").
  */
 static int entity_get_special_mana(lua_State *s)
 {
@@ -1428,36 +1427,92 @@ static int entity_walk(lua_State *s)
  * Valid only for being entities.
  *
  * Inflicts damage to the being. The severity of the attack is between
- * ''damage'' and (''damage'' + ''delta'') and is calculated using the normal
- * [[damage calculation]] rules. The being has a chance to
- * [[hitting and dodging|dodge the attack]] with its
- * [[attributes|agility attribute]]. The ''accuracy'' decides how hard this is.
+ * `damage` and (`damage` + `delta`) and is calculated using the normal
+ * damage calculation rules. The being has a chance to
+ * dodge the attack with its
+ * [agility attribute](attributes.xml.html). The `accuracy` decides how hard this is.
  *
- * If ''source'' is provided the attack is handled as if the ''source''
+ * If `source` is provided the attack is handled as if the `source`
  * triggered the damage.
  *
- * If ''skill'' is given the ''owner'' can also recieve XP for the attack. The
- * ''skill'' should be defined in the [[skills.xml|skills.xml]]. If the skill
- * is provided as string (''skillname'') you have to use this format:
- * <setname>_<skillname>. So for example: "Weapons_Unarmed"
+ * If `skill` is given the `owner` can also recieve XP for the attack. The
+ * `skill` should be defined in the [skills.xml](skills.xml.html). If the skill
+ * is provided as string (`skillname`) you have to use this format:
+ * &lt;setname&gt;_&lt;skillname&gt;. So for example: "Weapons_Unarmed"
  *
- * ''type'' affects which kind of armor and character attributes reduce the
+ * `type` affects which kind of armor and character attributes reduce the
  * damage. It can be one of the following values:
- * | 0 | DAMAGE_PHYSICAL  |
- * | 1 | DAMAGE_MAGICAL  |
- * | 2 | DAMAGE_OTHER  |
+ * <table class="table table-bordered table-hover">
+ *     <thead>
+ *         <tr>
+ *             <th>Id</th>
+ *             <th>Name</th>
+ *         </tr>
+ *     </thead>
+ *     <tbody>
+ *         <tr>
+ *             <td>0</td>
+ *             <td>DAMAGE_PHYSICAL</td>
+ *         </tr>
+ *         <tr>
+ *             <td>1</td>
+ *             <td>DAMAGE_MAGICAL</td>
+ *         </tr>
+ *         <tr>
+ *             <td>0</td>
+ *             <td>DAMAGE_OTHER</td>
+ *         </tr>
+ *     </tbody>
+ * </table>
  *
- * ''element'' decides how the [[element system]] changes the damage. The
+ * `element` decides how the element system changes the damage. The
  * following values are possible:
- * | 0 | ELEMENT_NEUTRAL  |
- * | 1 | ELEMENT_FIRE  |
- * | 2 | ELEMENT_WATER  |
- * | 3 | ELEMENT_EARTH  |
- * | 4 | ELEMENT_AIR  |
- * | 5 | ELEMENT_LIGHTNING  |
- * | 6 | ELEMENT_METAL  |
- * | 7 | ELEMENT_WOOD  |
- * | 8 | ELEMENT_ICE  |
+ * <table class="table table-bordered table-hover">
+ *     <thead>
+ *         <tr>
+ *             <th>Id</th>
+ *             <th>Name</th>
+ *         </tr>
+ *     </thead>
+ *     <tbody>
+ *         <tr>
+ *             <td>0</td>
+ *             <td>ELEMENT_NEUTRAL</td>
+ *         </tr>
+ *         <tr>
+ *             <td>1</td>
+ *             <td>ELEMENT_FIRE</td>
+ *         </tr>
+ *         <tr>
+ *             <td>2</td>
+ *             <td>ELEMENT_WATER</td>
+ *         </tr>
+ *         <tr>
+ *             <td>3</td>
+ *             <td>ELEMENT_EARTH</td>
+ *         </tr>
+ *         <tr>
+ *             <td>4</td>
+ *             <td>ELEMENT_AIR</td>
+ *         </tr>
+ *         <tr>
+ *             <td>5</td>
+ *             <td>ELEMENT_LIGHTNING</td>
+ *         </tr>
+ *         <tr>
+ *             <td>6</td>
+ *             <td>ELEMENT_METAL</td>
+ *         </tr>
+ *         <tr>
+ *             <td>7</td>
+ *             <td>ELEMENT_WOOD</td>
+ *         </tr>
+ *         <tr>
+ *             <td>8</td>
+ *             <td>ELEMENT_ICE</td>
+ *         </tr>
+ *     </tbody>
+ * </table>
  *
  * **Return Value**: Actual HP reduction resulting from the attack.
  */
@@ -1502,7 +1557,7 @@ static int entity_damage(lua_State *s)
  **
  * Valid only for being entities.
  *
- * Restores ''value'' lost hit points to the being. Value can be omitted to
+ * Restores `value` lost hit points to the being. Value can be omitted to
  * restore the being to full hit points.
  *
  * While you can (ab)use this function to hurt a being by using a negative
@@ -1620,7 +1675,7 @@ static int entity_get_direction(lua_State *s)
  * Valid only for being entities.
  *
  * Sets the current direction of the given being. Directions are same as in
- * ''entity:direction''.
+ * `entity:direction`.
  */
 static int entity_set_direction(lua_State *s)
 {
@@ -1666,7 +1721,7 @@ static int entity_set_walkmask(lua_State *s)
  * Valid only for actor entities.
  *
  * **Return value:** The walkmask of the actor formatted as string. (See
- * [[scripting#entityset_walkmask|entity:set_walkmask]])
+ * [entity:set_walkmask](scripting.html#entityset_walkmask))
  */
 static int entity_get_walkmask(lua_State *s)
 {
@@ -1691,9 +1746,9 @@ static int entity_get_walkmask(lua_State *s)
  **
  * Valid only for character entities.
  *
- * Teleports the character to the position ''posX'':''posY'' on the map
- * with the ID number ''mapID'' or name ''mapName''. The ''mapID'' can be
- * substituted by ''nil'' to warp the character to a new position on the
+ * Teleports the character to the position `posX`:`posY` on the map
+ * with the ID number `mapID` or name `mapName`. The `mapID` can be
+ * substituted by `nil` to warp the character to a new position on the
  * current map.
  */
 static int entity_warp(lua_State *s)
@@ -1798,7 +1853,7 @@ static int entity_get_y(lua_State *s)
  **
  * Valid only for being entities.
  *
- * **Return value:** Returns the value of the being's ''base attribute''.
+ * **Return value:** Returns the value of the being's `base attribute`.
  */
 static int entity_get_base_attribute(lua_State *s)
 {
@@ -1815,7 +1870,7 @@ static int entity_get_base_attribute(lua_State *s)
  **
  * Valid only for being entities.
  *
- * Set the value of the being's ''base attribute'' to the 'new_value' parameter
+ * Set the value of the being's `base attribute` to the 'new_value' parameter
  * given. (It can be negative).
  */
 static int entity_set_base_attribute(lua_State *s)
@@ -1833,14 +1888,14 @@ static int entity_set_base_attribute(lua_State *s)
  **
  * Valid only for being entities.
  *
- * *Return value:** Returns the value of the being's ''modified attribute''.
+ * *Return value:** Returns the value of the being's `modified attribute`.
  *
  * The modified attribute is equal to the base attribute + currently applied
  * modifiers.
  *
  * To get to know how to configure and create modifiers, you can have a look at
- * the [[attributes.xml]] file and at the [[#entityapply_attribute_modifier]]()
- * and [[#entityremove_attribute_modifier]]() lua functions.
+ * the [attributes.xml](attributes.xml.html) file and at the [#entityapply_attribute_modifier](#entityapply_attribute_modifier.html)()
+ * and [#entityremove_attribute_modifier](#entityremove_attribute_modifier.html)() lua functions.
  *
  * Note also that items, equipment, and monsters attacks can cause attribute
  * modifiers.
@@ -1964,8 +2019,8 @@ static int entity_set_gender(lua_State *s)
  * **Return value:** Returns the level of the character. If a skill is passed
  * (either by name or id) the level of this skill is returned.
  *
- * **Note:** If the skill is provided as string (''skill_name'') you have to
- * use this format: <setname>_<skillname>. So for example: "Weapons_Unarmed".
+ * **Note:** If the skill is provided as string (`skill_name`) you have to
+ * use this format: &lt;setname&gt;_&lt;skillname&gt;. So for example: "Weapons_Unarmed".
  */
 static int entity_get_level(lua_State *s)
 {
@@ -1991,10 +2046,10 @@ static int entity_get_level(lua_State *s)
  * Valid only for character entities.
  *
  * **Return value:** The total experience collected by the character in
- * ''skill''.
+ * `skill`.
  *
- * If the skill is provided as string (''skillname'') you have to use this
- * format: <setname>_<skillname>. So for example: "Weapons_Unarmed".
+ * If the skill is provided as string (`skillname`) you have to use this
+ * format: &lt;setname&gt;_&lt;skillname&gt;. So for example: "Weapons_Unarmed".
  */
 static int entity_get_xp(lua_State *s)
 {
@@ -2012,10 +2067,10 @@ static int entity_get_xp(lua_State *s)
  **
  * Valid only for character entities.
  *
- * Gives the character ''amount'' experience in skill ''skill''. When an
+ * Gives the character `amount` experience in skill `skill`. When an
  * optimal level is set (over 0), the experience is reduced when the characters
  * skill level is beyond this. If the skill is provided as string
- * (''skillname'') you have to use this format: <setname>_<skillname>.
+ * (`skillname`) you have to use this format: &lt;setname&gt;_&lt;skillname&gt;.
  * So for example: "Weapons_Unarmed".
  */
 static int entity_give_xp(lua_State *s)
@@ -2034,7 +2089,7 @@ static int entity_give_xp(lua_State *s)
  * xp_for_level(int level)
  **
  * **Return value:** Returns the total experience necessary (counted from
- * level 0) for reaching ''level'' in any skill.
+ * level 0) for reaching `level` in any skill.
  */
 static int xp_for_level(lua_State *s)
 {
@@ -2063,7 +2118,7 @@ static int entity_get_hair_color(lua_State *s)
  **
  * Valid only for character entities.
  *
- * Sets the hair color ID of the character to ''color''.
+ * Sets the hair color ID of the character to `color`.
  */
 static int entity_set_hair_color(lua_State *s)
 {
@@ -2098,7 +2153,7 @@ static int entity_get_hair_style(lua_State *s)
  **
  * Valid only for character entities.
  *
- * Sets the hair style ID of the character to ''style''.
+ * Sets the hair style ID of the character to `style`.
  */
 static int entity_set_hair_style(lua_State *s)
 {
@@ -2421,7 +2476,7 @@ static int entity_get_monster_id(lua_State *s)
  **
  * Valid only for monster entities.
  *
- * Makes the monster more angry about the ''being'' by adding ''anger'' to the
+ * Makes the monster more angry about the `being` by adding `anger` to the
  * being.
  */
 static int entity_change_anger(lua_State *s)
@@ -2438,7 +2493,7 @@ static int entity_change_anger(lua_State *s)
  **
  * Valid only for monster entities.
  *
- * Will drop all anger against the ''target''.
+ * Will drop all anger against the `target`.
  */
 static int entity_drop_anger(lua_State *s)
 {
@@ -2474,8 +2529,8 @@ static int entity_get_angerlist(lua_State *s)
  **
  * Valid only for being entities.
  *
- * Gives a being a status effect ''status_id'', status effects don't work on
- * NPCs. ''time'' is in game ticks.
+ * Gives a being a status effect `status_id`, status effects don't work on
+ * NPCs. `time` is in game ticks.
  */
 static int entity_apply_status(lua_State *s)
 {
@@ -2576,8 +2631,8 @@ static int get_map_id(lua_State *s)
 /** LUA get_map_property (mapinformation)
  * get_map_property(string key)
  **
- * **Return value:** The value of the property ''key'' of the current map. The
- * string is empty if the property ''key'' does not exist.
+ * **Return value:** The value of the property `key` of the current map. The
+ * string is empty if the property `key` does not exist.
  */
 static int get_map_property(lua_State *s)
 {
@@ -2591,7 +2646,7 @@ static int get_map_property(lua_State *s)
 /** LUA is_walkable (mapinformation)
  * is_walkable(int x, int y)
  **
- * **Return value:** True if ''x'':''y'' is a walkable pixel
+ * **Return value:** True if `x`:`y` is a walkable pixel
  * on the current map.
  */
 static int is_walkable(lua_State *s)
@@ -2637,9 +2692,11 @@ static int map_get_pvp(lua_State *s)
  * and value of the changed variable.
  *
  * **Example:**
- * <code lua>on_mapvar_changed(key, function(key, value)
+ * {% highlight lua %}
+ * on_mapvar_changed(key, function(key, value)
  *   log(LOG_DEBUG, "mapvar " .. key .. " has new value " .. value)
- * end)</code>
+ * end)
+ * {% endhighlight %}
  */
 static int on_mapvar_changed(lua_State *s)
 {
@@ -2658,9 +2715,11 @@ static int on_mapvar_changed(lua_State *s)
  * and value of the changed variable.
  *
  * **Example:**
- * <code lua>on_worldvar_changed(key, function(key, value)
+ * {% highlight lua %}
+ * on_worldvar_changed(key, function(key, value)
  *   log(LOG_DEBUG, "worldvar " .. key .. " has new value " .. value)
- * end)</code>
+ * end)
+ * {% endhighlight %}
  */
 static int on_worldvar_changed(lua_State *s)
 {
@@ -2677,7 +2736,7 @@ static int on_worldvar_changed(lua_State *s)
  **
  * **Return value:** the value of a persistent map variable.
  *
- * **See:** [[scripting#map|map[]]] for an easier way to get a map variable.
+ * **See:** [map\[\]](scripting.html#map) for an easier way to get a map variable.
  */
 static int getvar_map(lua_State *s)
 {
@@ -2695,7 +2754,7 @@ static int getvar_map(lua_State *s)
  **
  * Sets the value of a persistent map variable.
  *
- * **See:** [[scripting#map|map[]]] for an easier way to get a map variable.
+ * **See:** [map\[\]](scripting.html#map) for an easier way to get a map variable.
  */
 static int setvar_map(lua_State *s)
 {
@@ -2714,7 +2773,7 @@ static int setvar_map(lua_State *s)
  **
  * Gets the value of a persistent global variable.
  *
- * **See:** [[scripting#world|world[]]] for an easier way to get a map variable.
+ * **See:** [world\[\]](scripting.html#world) for an easier way to get a map variable.
  */
 static int getvar_world(lua_State *s)
 {
@@ -2730,7 +2789,7 @@ static int getvar_world(lua_State *s)
  **
  * Sets the value of a persistent global variable.
  *
- * **See:** [[scripting#world|world[]]] for an easier way to get a map variable.
+ * **See:** [world\[\]](scripting.html#world) for an easier way to get a map variable.
  */
 static int setvar_world(lua_State *s)
 {
@@ -2783,8 +2842,8 @@ static int log(lua_State *s)
  * get_beings_in_circle(handle actor, int radius)
  **
  * **Return value:** This function returns a lua table of all beings in a
- * circle of radius (in pixels) ''radius'' centered either at the pixel at
- * (''x'', ''y'') or at the position of ''being''.
+ * circle of radius (in pixels) `radius` centered either at the pixel at
+ * (`x`, `y`) or at the position of `being`.
  */
 static int get_beings_in_circle(lua_State *s)
 {
@@ -2903,7 +2962,7 @@ static int get_distance(lua_State *s)
 
 
 /** LUA_CATEGORY Special info class (specialinfo)
- * See the [[specials.xml#A script example|specials Documentation]] for a
+ * See the [specials Documentation](specials.xml.html#a_script_example) for a
  * script example
  */
 
@@ -2914,8 +2973,8 @@ static int get_distance(lua_State *s)
  * **Return value:** This function returns a object of the specialinfo class.
  * See below for usage of that object.
  *
- * **Note:** When passing the ''specialName'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the `specialName` as parameter make sure that it is
+ * formatted in this way: &lt;setname&gt;_&lt;specialname&gt; (for eg. "Magic_Healingspell").
  */
 static int get_special_info(lua_State *s)
 {
@@ -2931,7 +2990,7 @@ static int get_special_info(lua_State *s)
  **
  * ** Return value:** The name of the specialinfo object.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting a
+ * **Note:** See [get_special_info](scripting.html#get_special_info) for getting a
  * specialinfo object.
  */
 static int specialinfo_get_name(lua_State *s)
@@ -2946,7 +3005,7 @@ static int specialinfo_get_name(lua_State *s)
  **
  * ** Return value:** The mana that is needed to use the special
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting a
+ * **Note:** See [get_special_info](scripting.html#get_special_info) for getting a
  * specialinfo object.
  */
 static int specialinfo_get_needed_mana(lua_State *s)
@@ -2962,7 +3021,7 @@ static int specialinfo_get_needed_mana(lua_State *s)
  * ** Return value:** A boolean value that indicates whether the special is
  * rechargeable or usuable without recharge.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
+ * **Note:** See [get_special_info](scripting.html#get_special_info) for getting
  * a specialinfo object.
  */
 static int specialinfo_is_rechargeable(lua_State *s)
@@ -2975,10 +3034,10 @@ static int specialinfo_is_rechargeable(lua_State *s)
 /** LUA specialinfo:on_use (specialinfo)
  * specialinfo:on_use(function callback)
  **
- * Assigns the ''callback'' as callback for the use event. This function will
+ * Assigns the `callback` as callback for the use event. This function will
  * be called everytime a character uses a special.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
+ * **Note:** See [get_special_info](scripting.html#get_special_info) for getting
  * a specialinfo object.
  */
 static int specialinfo_on_use(lua_State *s)
@@ -2993,10 +3052,10 @@ static int specialinfo_on_use(lua_State *s)
 /** LUA specialinfo:on_recharged (specialinfo)
  * specialinfo:on_recharged(function callback)
  **
- * Assigns the ''callback'' as callback for the recharged event. This function
+ * Assigns the `callback` as callback for the recharged event. This function
  * will be called everytime when the special is fully recharged.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
+ * **Note:** See [get_special_info](scripting.html#get_special_info) for getting
  * a specialinfo object.
  */
 static int specialinfo_on_recharged(lua_State *s)
@@ -3012,9 +3071,9 @@ static int specialinfo_on_recharged(lua_State *s)
  * specialinfo:category(function callback)
  **
  * **Return value:** The set-name of the special as defined in the
- * [[specials.xml]]
+ * [specials.xml](specials.xml.html)
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
+ * **Note:** See [get_special_info](scripting.html#get_special_info) for getting
  * a specialinfo object.
  */
 static int specialinfo_get_category(lua_State *s)
@@ -3047,7 +3106,7 @@ static int get_status_effect(lua_State *s)
  * Sets the callback that gets called for every tick when the status effect
  * is active.
  *
- * **Note:** See [[scripting#get_status_effect|get_status_effect]] for getting
+ * **Note:** See [get_status_effect](scripting.html#get_status_effect) for getting
  * a statuseffect object.
  */
 static int status_effect_on_tick(lua_State *s)
@@ -3077,10 +3136,10 @@ static int get_monster_class(lua_State *s)
 /** LUA monsterclass:on_update (monsterclass)
  * monsterclass:on_update(function callback)
  **
- * Assigns the ''callback'' as callback for the monster update event. This
+ * Assigns the `callback` as callback for the monster update event. This
  * callback will be called every tick for each monster of that class.
  *
- * **Note:** See [[scripting#get_monster_class|get_monster_class]] for getting
+ * **Note:** See [get_monster_class](scripting.html#get_monster_class) for getting
  * a monsterclass object.
  */
 static int monster_class_on_update(lua_State *s)
@@ -3094,16 +3153,17 @@ static int monster_class_on_update(lua_State *s)
 /** LUA monsterclass:on_damage (monsterclass)
  * monsterclass:on_damage(function callback)
  **
- * Assigns the ''callback'' as callback for the monster damage event.
+ * Assigns the `callback` as callback for the monster damage event.
  * This callback will be called every time when a monster takes damage.
  * The damage can be either invoked from scripts or from other beings such
  * as players. The parameters of the callback are: the attacked monster,
  * the being dealing the damage and the hp loss
  *
- * **Note:** See [[scripting#get_monster_class|get_monster_class]] for getting
+ * **Note:** See [get_monster_class](scripting.html#get_monster_class) for getting
  * a monsterclass object.
  *
- * **Example:** <code lua>
+ * **Example:**
+ * {% highlight lua %}
  * local function damage(mob, aggressor, hploss)
  *     mob:say("I took damage -.- ".. hploss)
  *     if aggressor then
@@ -3111,7 +3171,8 @@ static int monster_class_on_update(lua_State *s)
  *     end
  * end
  * local maggot = get_monster_class("maggot")
- * maggot:on_damage(damage)</code>
+ * maggot:on_damage(damage)
+ * {% endhighlight %}
  */
 static int monster_class_on_damage(lua_State *s)
 {
@@ -3137,7 +3198,7 @@ static int monster_class_get_name(lua_State *s)
  * monsterclass:attacks()
  **
  * **Return value:** This function returns a table with all attacks of the
- * monster. See the [[scripting#AttackInfo class|Attack Info]] section.
+ * monster. See the [Attack Info](scripting.html#attackinfo_class) section.
  */
 static int monster_class_attacks(lua_State *s)
 {
@@ -3150,10 +3211,10 @@ static int monster_class_attacks(lua_State *s)
 /** LUA_CATEGORY AttackInfo class (attackinfoclass)
  * The AttackInfo class reveals info about attacks and provides functions to
  * register callbacks on attacks. See the
- * [[attackconfiguration|Attack Configuration]] for more info.
+ * [Attack Configuration](attackconfiguration.html) for more info.
  * To get an AttackInfo use
- * [[scripting#monsterclass:attacks|monsterclass:attacks]] or
- * [[scripting#itemclass:attacks|itemclass:attacks]]
+ * [monsterclass:attacks](scripting.html#monsterclassattacks) or
+ * [itemclass:attacks](scripting.html#itemclassattacks)
  */
 
 /** LUA attackinfo:priority (attackinfoclass)
@@ -3212,7 +3273,7 @@ static int attack_get_reusetime(lua_State *s)
  **
  * **Return value:** This function returns the damage info of the attack.
  *
- * **See also:** [[scripting#Damage Class|Damage Class]]
+ * **See also:** [Damage Class](scripting.html#damage_class)
  */
 static int attack_get_damage(lua_State *s)
 {
@@ -3312,7 +3373,7 @@ static int damage_get_cth(lua_State *s)
  **
  * **Return value:** This function returns the element of the attack.
  *
- * **See:** [[scripting#entitydamage|entity:damage]] for possible values.
+ * **See:** [entity:damage](scripting.html#entitydamage) for possible values.
  */
 static int damage_get_element(lua_State *s)
 {
@@ -3326,7 +3387,7 @@ static int damage_get_element(lua_State *s)
  **
  * **Return value:** This function returns the type of the attack.
  *
- * **See:** [[scripting#entitydamage|entity:damage]] for possible values.
+ * **See:** [entity:damage](scripting.html#entitydamage) for possible values.
  */
 static int damage_get_type(lua_State *s)
 {
@@ -3370,7 +3431,7 @@ static int damage_get_range(lua_State *s)
  * map_get_objects(string type)
  **
  * **Return value:** A table of all objects or a table of all objects of the
- * given ''type''. See below for usage of these objects.
+ * given `type`. See below for usage of these objects.
  */
 static int map_get_objects(lua_State *s)
 {
@@ -3405,10 +3466,10 @@ static int map_get_objects(lua_State *s)
 /** LUA mapobject:property (mapobjectclass)
  * mapobject:property(string key)
  **
- * **Return value:** The value of the property of the key ''key'' or nil if
+ * **Return value:** The value of the property of the key `key` or nil if
  * the property does not exists.
  *
- * **Note:** See [[scripting#map_get_objects|map_get_objects]] for getting a
+ * **Note:** See [map_get_objects](scripting.html#map_get_objects) for getting a
  * monsterclass object.
  */
 static int map_object_get_property(lua_State *s)
@@ -3432,12 +3493,14 @@ static int map_object_get_property(lua_State *s)
 /** LUA mapobject:bounds (mapobjectclass)
  * mapobject:bounds()
  **
- * **Return value:** x, y position and height, width of the ''mapobject''.
+ * **Return value:** x, y position and height, width of the `mapobject`.
  *
  * **Example use:**
- * <code lua>local x, y, width, height = my_mapobject:bounds()</code>
+ * {% highlight lua %}
+ * local x, y, width, height = my_mapobject:bounds()
+ * {% endhighlight %}
  *
- * **Note:** See [[scripting#map_get_objects|map_get_objects]] for getting a
+ * **Note:** See [map_get_objects](scripting.html#map_get_objects) for getting a
  * mapobject object.
  */
 static int map_object_get_bounds(lua_State *s)
@@ -3454,9 +3517,9 @@ static int map_object_get_bounds(lua_State *s)
 /** LUA mapobject:name (mapobjectclass)
  * mapobject:name()
  **
- * **Return value:** Name as set in the mapeditor of the ''mapobject''.
+ * **Return value:** Name as set in the mapeditor of the `mapobject`.
  *
- * **Note:** See [[scripting#map_get_objects|map_get_objects]] for getting
+ * **Note:** See [map_get_objects](scripting.html#map_get_objects) for getting
  * a mapobject object.
  */
 static int map_object_get_name(lua_State *s)
@@ -3469,9 +3532,9 @@ static int map_object_get_name(lua_State *s)
 /** LUA mapobject:type (mapobjectclass)
  * mapobject:type()
  **
- * **Return value:** Type as set in the mapeditor of the ''mapobject''.
+ * **Return value:** Type as set in the mapeditor of the `mapobject`.
  *
- * **Note:** See [[scripting#map_get_objects|map_get_objects]] for getting
+ * **Note:** See [map_get_objects](scripting.html#map_get_objects) for getting
  * a mapobject object.
  */
 static int map_object_get_type(lua_State *s)
@@ -3501,9 +3564,9 @@ static int get_item_class(lua_State *s)
 /** LUA itemclass:on (itemclass)
  * itemclass:on(string event, function callback)
  **
- * Assigns ''callback'' as callback for the ''event'' event.
+ * Assigns `callback` as callback for the `event` event.
  *
- * **Note:** See [[scripting#get_item_class|get_item_class]] for getting
+ * **Note:** See [get_item_class](scripting.html#get_item_class) for getting
  * a itemclass object.
  */
 static int item_class_on(lua_State *s)
@@ -3532,7 +3595,7 @@ static int item_class_get_name(lua_State *s)
  **
  * **Return value:** Returns a list of all attacks the item offers.
  *
- * **See:** the [[scripting#AttackInfo Class|AttackInfo class]] for more info
+ * **See:** the [AttackInfo class](scripting.html#attackinfo_class) for more info
  * about how to use the values in the list.
  */
 static int item_class_attacks(lua_State *s)
