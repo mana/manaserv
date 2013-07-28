@@ -212,7 +212,7 @@ static void printHelp()
               << "  -h --help          : Display this help" << std::endl
               << "     --config <path> : Set the config path to use."
               << " (Default: ./manaserv.xml)" << std::endl
-              << "     --verbosity <n> : Set the verbosity level" << std::endl
+              << "  -v --verbosity <n> : Set the verbosity level" << std::endl
               << "                        - 0. Fatal Errors only." << std::endl
               << "                        - 1. All Errors." << std::endl
               << "                        - 2. Plus warnings." << std::endl
@@ -245,7 +245,7 @@ struct CommandLineOptions
  */
 static void parseOptions(int argc, char *argv[], CommandLineOptions &options)
 {
-    const char *optString = "h";
+    const char *optString = "hv:";
 
     const struct option longOptions[] =
     {
