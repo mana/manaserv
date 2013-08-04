@@ -134,25 +134,31 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
     const std::string scope = utils::toUpper(
                 XML::getProperty(attributeNode, "scope", std::string()));
 
-    if (scope == "CHARACTER")
+    bool hasScope = false;
+
+    if (scope.find("CHARACTER") != std::string::npos)
     {
         mAttributeScopes[CharacterScope][id] = attribute;
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default character scope.");
+        hasScope = true;
     }
-    else if (scope == "MONSTER")
+    if (scope.find("MONSTER") != std::string::npos)
     {
         mAttributeScopes[MonsterScope][id] = attribute;
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default monster scope.");
+        hasScope = true;
     }
-    else if (scope == "BEING")
+    if (scope == "BEING")
     {
         mAttributeScopes[BeingScope][id] = attribute;
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default being scope.");
+        hasScope = true;
     }
-    else
+
+    if (!hasScope)
     {
         LOG_WARN("Attribute manager: attribute '" << id
                   << "' has no (valid) scope. Skipping...");
