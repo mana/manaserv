@@ -11,7 +11,8 @@
         modifiable="true"
         scope="character"
         minimum="0"
-        maximum="255">
+        maximum="255"
+        persistent="true">
         <modifier stacktype="stackable" modtype="additive" tag="str" effect="Strength %+.1f" />
     </attribute>
     <attribute id="2" name="Agility"
@@ -19,7 +20,8 @@
         modifiable="true"
         scope="character"
         minimum="0"
-        maximum="255">
+        maximum="255"
+        persistent="true">
         <modifier stacktype="stackable" modtype="additive" tag="agi" effect="Agility %+.1f" />
     </attribute>
     <attribute id="3" name="Vitality"
@@ -27,7 +29,8 @@
         modifiable="true"
         scope="character"
         minimum="0"
-        maximum="255">
+        maximum="255"
+        persistent="true">
         <modifier stacktype="stackable" modtype="additive" tag="vit" effect="Vitality %+.1f" />
     </attribute>
     <attribute id="4" name="Intelligence"
@@ -35,7 +38,8 @@
         modifiable="true"
         scope="character"
         minimum="0"
-        maximum="255">
+        maximum="255"
+        persistent="true">
         <modifier stacktype="stackable" modtype="additive" tag="int" effect="Intelligence %+.1f" />
     </attribute>
     <attribute id="5" name="Dexterity"
@@ -43,7 +47,8 @@
         modifiable="true"
         scope="character"
         minimum="0"
-        maximum="255">
+        maximum="255"
+        persistent="true">
         <modifier stacktype="stackable" modtype="additive" tag="dex" effect="Dexterity %+.1f" />
     </attribute>
     <attribute id="6" name="Willpower"
@@ -51,7 +56,8 @@
         modifiable="true"
         scope="character"
         minimum="0"
-        maximum="255">
+        maximum="255"
+        persistent="true">
         <modifier stacktype="stackable" modtype="additive" tag="wil" effect="Willpower %+.1f" />
     </attribute>
     <attribute id="7" name="Accuracy"

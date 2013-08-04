@@ -114,6 +114,8 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
 
     AttributeInfo *attribute = new AttributeInfo(id, name);
 
+    attribute->persistent = XML::getBoolProperty(attributeNode, "persistent",
+                                                 false);
     attribute->modifiers = std::vector<AttributeModifier>();
     attribute->minimum = XML::getFloatProperty(attributeNode, "minimum",
                                            std::numeric_limits<double>::min());

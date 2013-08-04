@@ -60,6 +60,7 @@ struct AttributeInfo
     AttributeInfo(int id, const std::string &name):
         id(id),
         name(name),
+        persistent(false),
         minimum(std::numeric_limits<double>::min()),
         maximum(std::numeric_limits<double>::max()),
         modifiable(false)
@@ -67,7 +68,7 @@ struct AttributeInfo
 
     int id;
     std::string name;
-
+    bool persistent;
     double minimum;
     double maximum;
     bool modifiable;

@@ -223,12 +223,19 @@ void CharacterComponent::serialize(Entity &entity, MessageOut &msg)
 
 
     const AttributeMap &attributes = beingComponent->getAttributes();
-    msg.writeInt16(attributes.size());
-    for (auto attributeIt : attributes)
+    std::map<const AttributeInfo *, const Attribute *> attributesToSend;
+    for (auto &attributeIt : attributes)
+    {
+        if (attributeIt.first->persistent)
+            attributesToSend.insert(std::make_pair(attributeIt.first,
+                                                   &attributeIt.second));
+    }
+    msg.writeInt16(attributesToSend.size());
+    for (auto &attributeIt : attributesToSend)
     {
         msg.writeInt16(attributeIt.first->id);
-        msg.writeDouble(attributeIt.second.getBase());
-        msg.writeDouble(attributeIt.second.getModifiedAttribute());
+        msg.writeDouble(attributeIt.second->getBase());
+        msg.writeDouble(attributeIt.second->getModifiedAttribute());
     }
 
     // status effects currently affecting the character
