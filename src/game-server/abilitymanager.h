@@ -42,22 +42,12 @@ public:
     {
         AbilityInfo() :
             id(0),
-            rechargeable(false),
-            rechargeAttribute(0),
-            cooldownAttribute(0),
-            neededPoints(0),
-            autoconsume(true),
             target(TARGET_BEING)
         {}
 
         unsigned id;
         std::string name;
         std::string categoryName;
-        bool rechargeable;
-        unsigned rechargeAttribute;
-        unsigned cooldownAttribute;
-        unsigned neededPoints;
-        bool autoconsume;
         TargetMode target;
         Script::Ref rechargedCallback;
         Script::Ref useCallback;

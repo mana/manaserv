@@ -93,11 +93,11 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     actorComponent->setSize(16);
 
 
-    auto *abilityComponent = new AbilityComponent(entity);
+    auto *abilityComponent = new AbilityComponent();
     entity.addComponent(abilityComponent);
     abilityComponent->signal_ability_changed.connect(
             sigc::mem_fun(this, &CharacterComponent::abilityStatusChanged));
-    abilityComponent->signal_cooldown_activated.connect(
+    abilityComponent->signal_global_cooldown_activated.connect(
             sigc::mem_fun(this,
                           &CharacterComponent::abilityCooldownActivated));
 
@@ -186,8 +186,6 @@ void CharacterComponent::abilityCooldownActivated()
 
 void CharacterComponent::sendAbilityUpdate(Entity &entity)
 {
-    auto *beingComponent = entity.getComponent<BeingComponent>();
-
     auto &abilities = entity.getComponent<AbilityComponent>()->getAbilities();
 
     MessageOut msg(GPMSG_ABILITY_STATUS);
@@ -197,13 +195,8 @@ void CharacterComponent::sendAbilityUpdate(Entity &entity)
         if (it == abilities.end())
             continue; // got deleted
 
-        const double rechargeSpeed = beingComponent->getModifiedAttribute(
-                            it->second.abilityInfo->rechargeAttribute);
-
         msg.writeInt8(id);
-        msg.writeInt32(it->second.currentPoints);
-        msg.writeInt32(it->second.abilityInfo->neededPoints);
-        msg.writeInt32((int)rechargeSpeed);
+        msg.writeInt32(it->second.rechargeTimeout.remaining());
     }
 
     mModifiedAbilities.clear();
@@ -214,7 +207,7 @@ void CharacterComponent::sendAbilityCooldownUpdate(Entity &entity)
 {
     MessageOut msg(GPMSG_ABILITY_COOLDOWN);
     auto *abilityComponent = entity.getComponent<AbilityComponent>();
-    msg.writeInt16(abilityComponent->remainingCooldown());
+    msg.writeInt16(abilityComponent->globalCooldown());
     gameHandler->sendTo(mClient, msg);
     mSendAbilityCooldown = false;
 }

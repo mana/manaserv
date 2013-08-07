@@ -23,7 +23,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <set>
 
 #include "common/defines.h"
 #include "common/inventorydata.h"
@@ -55,19 +55,6 @@ struct AttributeValue
     { return modified; }
 };
 
-struct AbilityValue
-{
-    AbilityValue()
-        : currentPoints(0)
-    {}
-
-    AbilityValue(unsigned currentPoints)
-        : currentPoints(currentPoints)
-    {}
-
-    int currentPoints;
-};
-
 struct Status
 {
     Status()
@@ -81,11 +68,6 @@ struct Status
  * Stores attributes by their id.
  */
 typedef std::map<unsigned, AttributeValue> AttributeMap;
-
-/**
- * Stores abilitys by their id.
- */
-typedef std::map<unsigned, AbilityValue> AbilityMap;
 
 class CharacterData
 {
@@ -196,23 +178,13 @@ class CharacterData
         void setKillCount(int monsterId, int kills)
         { mKillCount[monsterId] = kills; }
 
-        /**
-         * Get / Set abilitys
-         */
-        int getAbilitySize() const
-        { return mAbilities.size(); }
-
-        AbilityMap::const_iterator getAbilityBegin() const
-        { return mAbilities.begin(); }
-
-        AbilityMap::const_iterator getAbilityEnd() const
-        { return mAbilities.end(); }
-
+        const std::set<int> &getAbilities() const
+        { return mAbilities; }
 
         void clearAbilities()
         { mAbilities.clear(); }
 
-        void giveAbility(int id, int currentMana);
+        void giveAbility(int id);
 
         /**
          * Gets the Id of the map that the character is on.
@@ -278,7 +250,7 @@ class CharacterData
         AttributeMap mAttributes; //!< Attributes.
         std::map<int, Status> mStatusEffects; //!< Status Effects
         std::map<int, int> mKillCount; //!< Kill Count
-        AbilityMap  mAbilities;
+        std::set<int> mAbilities;
         unsigned short mMapId;    //!< Map the being is on.
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.

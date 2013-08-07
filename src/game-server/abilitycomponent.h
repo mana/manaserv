@@ -31,13 +31,13 @@
 
 struct AbilityValue
 {
-    AbilityValue(unsigned currentMana,
-                 const AbilityManager::AbilityInfo *abilityInfo)
-        : currentPoints(currentMana)
+    AbilityValue(const AbilityManager::AbilityInfo *abilityInfo)
+        : recharged(false)
         , abilityInfo(abilityInfo)
     {}
 
-    unsigned currentPoints;
+    bool recharged;
+    Timeout rechargeTimeout;
     const AbilityManager::AbilityInfo *abilityInfo;
 };
 
@@ -52,7 +52,7 @@ class AbilityComponent: public Component
 public:
     static const ComponentType type = CT_Ability;
 
-    AbilityComponent(Entity &entity);
+    AbilityComponent();
 
     void update(Entity &entity);
 
@@ -68,25 +68,25 @@ public:
     const AbilityMap &getAbilities() const;
     void clearAbilities();
 
-    bool setAbilityMana(int id, int mana);
+    void setAbilityCooldown(int id, int ticks);
+    int abilityCooldown(int id);
 
-    void startCooldown(Entity &entity,
-                       const AbilityManager::AbilityInfo *abilityInfo);
-    int remainingCooldown() const;
+    void setGlobalCooldown(int ticks);
+    int globalCooldown() const;
 
     sigc::signal<void, int> signal_ability_changed;
     sigc::signal<void, int> signal_ability_took;
-    sigc::signal<void> signal_cooldown_activated;
+    sigc::signal<void> signal_global_cooldown_activated;
 
     // For informing clients
     int getLastUsedAbilityId() const;
     const Point &getLastTargetPoint() const;
     int getLastTargetBeingId() const;
+
 private:
     bool abilityUseCheck(AbilityMap::iterator it);
-    void attributeChanged(Entity *entity, unsigned attr);
 
-    Timeout mCooldown;
+    Timeout mGlobalCooldown;
 
     AbilityMap mAbilities;
 
@@ -126,9 +126,9 @@ inline const AbilityMap &AbilityComponent::getAbilities() const
     return mAbilities;
 }
 
-inline int AbilityComponent::remainingCooldown() const
+inline int AbilityComponent::globalCooldown() const
 {
-    return mCooldown.remaining();
+    return mGlobalCooldown.remaining();
 }
 
 inline int AbilityComponent::getLastUsedAbilityId() const

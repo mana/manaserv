@@ -110,7 +110,6 @@ CREATE TABLE mana_char_abilities
 (
     char_id                 INTEGER     NOT NULL,
     ability_id              INTEGER     NOT NULL,
-    ability_current_points  INTEGER     NOT NULL,
 	PRIMARY KEY (char_id, ability_id),
     FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
@@ -409,7 +408,7 @@ AS
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', strftime('%s','now'));
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', strftime('%s','now'));
-INSERT INTO mana_world_states VALUES('database_version',     -1,'23', strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     -1,'24', strftime('%s','now'));
 
 -- all known transaction codes
 

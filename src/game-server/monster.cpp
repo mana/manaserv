@@ -78,7 +78,7 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
     beingComponent->setGender(specy->getGender());
     beingComponent->setName(specy->getName());
 
-    AbilityComponent *abilityComponent = new AbilityComponent(entity);
+    AbilityComponent *abilityComponent = new AbilityComponent();
     entity.addComponent(abilityComponent);
     for (auto *abilitiyInfo : specy->getAbilities())
     {
