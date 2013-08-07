@@ -76,13 +76,10 @@ void serializeCharacterData(const T &data, MessageOut &msg)
     }
 
     // character abilities
-    AbilityMap::const_iterator abilitiy_it;
-    msg.writeInt16(data.getAbilitySize());
-    for (abilitiy_it = data.getAbilityBegin();
-         abilitiy_it != data.getAbilityEnd(); abilitiy_it++)
-    {
-        msg.writeInt32(abilitiy_it->first);
-        msg.writeInt32(abilitiy_it->second.currentPoints);
+    const std::set<int> &abilities = data.getAbilities();
+    msg.writeInt16(abilities.size());
+    for (auto &abilityId : abilities) {
+        msg.writeInt32(abilityId);
     }
 
     // inventory - must be last because size isn't transmitted
@@ -162,8 +159,7 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     for (int i = 0; i < abilitiesSize; i++)
     {
         const int id = msg.readInt32();
-        const int mana = msg.readInt32();
-        data.giveAbility(id, mana);
+        data.giveAbility(id);
     }
 
 

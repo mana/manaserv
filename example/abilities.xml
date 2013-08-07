@@ -4,10 +4,6 @@
         <ability
             id="1"
             name="Test Spell 1"
-            rechargeable="true"
-            needed="100"
-            rechargeattribute="6"
-            cooldownattribute="20"
             target="point"
             useaction="attack"
         />
@@ -16,9 +12,6 @@
         <ability
             id="2"
             name="Basic Monster strike"
-            rechargeable="true"
-            needed="100"
-            rechargeattribute="21"
             target="being"
             useaction="attack"
         />
@@ -27,10 +20,6 @@
         <ability
             id="3"
             name="debug"
-            rechargeable="true"
-            needed="1"
-            rechargeattribute="20"
-            cooldownattribute="20"
             target="point"
         />
     </ability-category>

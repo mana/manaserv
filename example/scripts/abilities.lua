@@ -34,6 +34,7 @@ spell1:on_use(function(user, x, y, abilityId)
             being:say("OUCH")
         end
     end
+    users:set_ability_cooldown(abilityId, 10)
 end)
 --spell1:on_recharged(function(ch) ch:say("Hoooooooo...") end)
 

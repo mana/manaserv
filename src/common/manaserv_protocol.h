@@ -29,8 +29,8 @@
 namespace ManaServ {
 
 enum {
-    PROTOCOL_VERSION = 4,
-    SUPPORTED_DB_VERSION = 23
+    PROTOCOL_VERSION = 5,
+    SUPPORTED_DB_VERSION = 24
 };
 
 /**
@@ -144,7 +144,7 @@ enum {
     GPMSG_BEING_ABILITY_POINT      = 0x0282, // W being id, B abilityId, W*2 point
     GPMSG_BEING_ABILITY_BEING      = 0x0283, // W being id, B abilityId, W target being id
     PGMSG_USE_ABILITY_ON_BEING     = 0x0292, // B abilityID, W being id
-    GPMSG_ABILITY_STATUS           = 0x0293, // { B abilityID, D current, D max, D recharge }
+    GPMSG_ABILITY_STATUS           = 0x0293, // { B abilityID, D remainingTicks }
     PGMSG_USE_ABILITY_ON_POINT     = 0x0294, // B abilityID, W*2 position
     GPMSG_ABILITY_REMOVED          = 0x0295, // B abilityID
     GPMSG_ABILITY_COOLDOWN         = 0x0296, // W ticks to wait

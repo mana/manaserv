@@ -1639,7 +1639,7 @@ static void handleRechargeAbility(Entity *player, std::string &args)
     if (character.empty() || ability.empty())
     {
         say("Invalid amount of arguments given.", player);
-        say("Usage: @rechargeability <character> <ability> [<mana>]", player);
+        say("Usage: @rechargeability <character> <ability>", player);
         return;
     }
 
@@ -1669,25 +1669,7 @@ static void handleRechargeAbility(Entity *player, std::string &args)
         say("Invalid ability.", player);
         return;
     }
-    int mana;
-    if (newMana.empty())
-    {
-        mana = info->neededPoints;
-    }
-    else
-    {
-        if (!utils::isNumeric(newMana))
-        {
-            say("Invalid mana amount given.", player);
-            return;
-        }
-        mana = utils::stringToInt(newMana);
-    }
-    if (!other->getComponent<AbilityComponent>()->setAbilityMana(abilityId, mana))
-    {
-        say("Character does not have ability.", player);
-        return;
-    }
+    other->getComponent<AbilityComponent>()->setAbilityCooldown(abilityId, 0);
 }
 
 static void handleListAbility(Entity *player, std::string &args)
@@ -1720,8 +1702,8 @@ static void handleListAbility(Entity *player, std::string &args)
     {
         const AbilityValue &info = abilityIt.second;
         std::stringstream str;
-        str << info.abilityInfo->id << ": " << info.abilityInfo->categoryName << "/"
-            << info.abilityInfo->name << " charge: " << info.currentPoints;
+        str << info.abilityInfo->id << ": " << info.abilityInfo->categoryName
+            << "/" << info.abilityInfo->name;
         say(str.str(), player);
     }
 }

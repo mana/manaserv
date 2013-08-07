@@ -164,6 +164,7 @@ end
 local function mob_attack(mob, target, ability_id)
     local config = mob_config[mob:name()]
     target:damage(mob, config.damage)
+    mob:set_ability_cooldown(ability_id, 10)
 end
 
 local function mob_recharged(mob, ability_id)

@@ -96,32 +96,10 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
         return;
     }
 
-    bool rechargeable = XML::getBoolProperty(abilityNode, "rechargeable", true);
-    int neededMana = XML::getProperty(abilityNode, "needed", 0);
-    int rechargeAttribute = XML::getProperty(abilityNode,
-                                             "rechargeattribute", 0);
-    int cooldownAttribute = XML::getProperty(abilityNode,
-                                             "cooldownattribute", 0);
-    bool autoconsume = XML::getBoolProperty(abilityNode, "autoconsume", true);
-
-    if (rechargeable && neededMana <= 0)
-    {
-        LOG_WARN("Invalid ability '" << name
-                 << "' (rechargable but no needed attribute) in category: "
-                 << categoryName);
-        return;
-    }
-
-
     AbilityInfo *newInfo = new AbilityManager::AbilityInfo;
     newInfo->categoryName = categoryName;
     newInfo->name = name;
     newInfo->id = id;
-    newInfo->rechargeable = rechargeable;
-    newInfo->neededPoints = neededMana;
-    newInfo->rechargeAttribute = rechargeAttribute;
-    newInfo->cooldownAttribute = cooldownAttribute;
-    newInfo->autoconsume = autoconsume;
 
     newInfo->target = getTargetByString(XML::getProperty(abilityNode, "target",
                                                          std::string()));

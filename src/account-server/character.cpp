@@ -45,10 +45,7 @@ void CharacterData::setAccount(Account *acc)
     mAccountLevel = acc->getLevel();
 }
 
-void CharacterData::giveAbility(int id, int currentMana)
+void CharacterData::giveAbility(int id)
 {
-    if (mAbilities.find(id) == mAbilities.end())
-    {
-        mAbilities[id] = AbilityValue(currentMana);
-    }
+    mAbilities.insert(id);
 }

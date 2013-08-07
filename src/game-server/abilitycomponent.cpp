@@ -27,12 +27,10 @@
 
 #include "utils/logger.h"
 
-AbilityComponent::AbilityComponent(Entity &entity):
+AbilityComponent::AbilityComponent():
     mLastUsedAbilityId(0),
     mLastTargetBeingId(0)
 {
-    entity.getComponent<BeingComponent>()->signal_attribute_changed.connect(
-            sigc::mem_fun(this, &AbilityComponent::attributeChanged));
 }
 
 void AbilityComponent::update(Entity &entity)
@@ -40,23 +38,14 @@ void AbilityComponent::update(Entity &entity)
     // Update ability recharge
     for (auto &it : mAbilities)
     {
-        AbilityValue &s = it.second;
-        if (s.abilityInfo->rechargeable &&
-            s.currentPoints < s.abilityInfo->neededPoints)
-        {
-            auto *beingComponent = entity.getComponent<BeingComponent>();
-            const double rechargeSpeed = beingComponent->getModifiedAttribute(
-                    s.abilityInfo->rechargeAttribute);
-            s.currentPoints += (int)rechargeSpeed;
-            if (s.currentPoints >= s.abilityInfo->neededPoints &&
-                    s.abilityInfo->rechargedCallback.isValid())
-            {
-                Script *script = ScriptManager::currentState();
-                script->prepare(s.abilityInfo->rechargedCallback);
-                script->push(&entity);
-                script->push(s.abilityInfo->id);
-                script->execute(entity.getMap());
-            }
+        auto &ability = it.second;
+        if (!ability.recharged && ability.rechargeTimeout.expired()) {
+            ability.recharged = true;
+            Script *script = ScriptManager::currentState();
+            script->prepare(ability.abilityInfo->rechargedCallback);
+            script->push(&entity);
+            script->push(ability.abilityInfo->id);
+            script->execute(entity.getMap());
         }
     }
 
@@ -79,7 +68,7 @@ bool AbilityComponent::takeAbility(int id)
 
 bool AbilityComponent::abilityUseCheck(AbilityMap::iterator it)
 {
-    if (!mCooldown.expired())
+    if (!mGlobalCooldown.expired())
         return false;
 
     if (it == mAbilities.end())
@@ -91,13 +80,12 @@ bool AbilityComponent::abilityUseCheck(AbilityMap::iterator it)
 
     //check if the ability is currently recharged
     AbilityValue &ability = it->second;
-    if (ability.abilityInfo->rechargeable &&
-            ability.currentPoints < ability.abilityInfo->neededPoints)
+    if (!ability.recharged)
     {
         LOG_INFO("Character uses ability " << it->first
                  << " which is not recharged. ("
-                 << ability.currentPoints << "/"
-                 << ability.abilityInfo->neededPoints << ")");
+                 << ability.rechargeTimeout.remaining()
+                 << " ticks are missing)");
         return false;
     }
 
@@ -124,12 +112,6 @@ bool AbilityComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
 
     if (ability.abilityInfo->target != AbilityManager::TARGET_BEING)
         return false;
-
-    if (ability.abilityInfo->autoconsume) {
-        ability.currentPoints = 0;
-        signal_ability_changed.emit(id);
-        startCooldown(user, ability.abilityInfo);
-    }
 
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
@@ -162,12 +144,6 @@ bool AbilityComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
 
     if (ability.abilityInfo->target != AbilityManager::TARGET_POINT)
         return false;
-
-    if (ability.abilityInfo->autoconsume) {
-        ability.currentPoints = 0;
-        signal_ability_changed.emit(id);
-        startCooldown(user, ability.abilityInfo);
-    }
 
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
@@ -207,46 +183,40 @@ bool AbilityComponent::giveAbility(const AbilityManager::AbilityInfo *info,
                                    int currentPoints)
 {
     bool added = mAbilities.insert(std::pair<int, AbilityValue>(info->id,
-                                   AbilityValue(currentPoints, info))).second;
+                                   AbilityValue(info))).second;
 
     signal_ability_changed.emit(info->id);
     return added;
 }
 
 /**
- * Sets new current mana + makes sure that the client will get informed.
+ * Sets cooldown time for this ability
  */
-bool AbilityComponent::setAbilityMana(int id, int mana)
+void AbilityComponent::setAbilityCooldown(int id, int ticks)
 {
     AbilityMap::iterator it = mAbilities.find(id);
     if (it != mAbilities.end())
     {
-        it->second.currentPoints = mana;
+        it->second.recharged = false;
+        it->second.rechargeTimeout.set(ticks);
         signal_ability_changed.emit(id);
-        return true;
     }
-    return false;
 }
 
-void AbilityComponent::startCooldown(
-        Entity &entity, const AbilityManager::AbilityInfo *abilityInfo)
+int AbilityComponent::abilityCooldown(int id)
 {
-    unsigned cooldownAttribute = abilityInfo->cooldownAttribute;
-    auto *bc = entity.getComponent<BeingComponent>();
-    int cooldown = (int)bc->getModifiedAttribute(cooldownAttribute);
+    AbilityMap::iterator it = mAbilities.find(id);
+    if (it != mAbilities.end() && !it->second.recharged)
+        return it->second.rechargeTimeout.remaining();
+
+    return 0;
+}
+
+void AbilityComponent::setGlobalCooldown(int ticks)
+{
     // Enforce a minimum cooldown of 1 tick to prevent syncing issues
-    cooldown = std::max(cooldown, 1);
-    mCooldown.set(cooldown);
-    signal_cooldown_activated.emit();
-}
-
-void AbilityComponent::attributeChanged(Entity *entity, unsigned attr)
-{
-    for (auto &abilityIt : mAbilities)
-    {
-        // Inform the client about rechargespeed changes
-        if (abilityIt.second.abilityInfo->rechargeAttribute == attr)
-            signal_ability_changed.emit(abilityIt.first);
-    }
+    ticks = std::max(ticks, 1);
+    mGlobalCooldown.set(ticks);
+    signal_global_cooldown_activated.emit();
 }
 

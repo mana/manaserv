@@ -456,7 +456,7 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
         // Load the ability status
         s.clear();
         s.str("");
-        s << "SELECT ability_id, ability_current_points FROM "
+        s << "SELECT ability_id FROM "
           << CHAR_ABILITIES_TBL_NAME
           << " WHERE char_id = " << character->getDatabaseID();
         const dal::RecordSet &abilitiesInfo = mDb->execSql(s.str());
@@ -465,8 +465,7 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
             const unsigned nRows = abilitiesInfo.rows();
             for (unsigned row = 0; row < nRows; row++)
             {
-                character->giveAbility(toUint(abilitiesInfo(row, 0)),
-                                       toUint(abilitiesInfo(row, 1)));
+                character->giveAbility(toUint(abilitiesInfo(row, 0)));
             }
         }
     }
@@ -760,18 +759,15 @@ bool Storage::updateCharacter(CharacterData *character)
                     << character->getDatabaseID() << "';";
         mDb->execSql(deleteSql.str());
         // In with the new
-        AbilityMap::const_iterator ability_it, ability_it_end;
-        for (ability_it = character->getAbilityBegin(),
-             ability_it_end = character->getAbilityEnd();
-             ability_it != ability_it_end; ++ability_it)
+        std::set<int>::const_iterator ability_it, ability_it_end;
+        for (int abilityId : character->getAbilities())
         {
             insertSql.str("");
             insertSql   << "INSERT INTO " << CHAR_ABILITIES_TBL_NAME
-                        << " (char_id, ability_id, ability_current_points)"
+                        << " (char_id, ability_id)"
                         << " VALUES ("
                         << " '" << character->getDatabaseID() << "',"
-                        << " '" << ability_it->first << "',"
-                        << " '" << ability_it->second.currentPoints
+                        << " '" << abilityId
                         << "');";
             mDb->execSql(insertSql.str());
         }

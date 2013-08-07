@@ -1277,29 +1277,22 @@ static int chr_set_quest(lua_State *s)
 }
 
 /** LUA entity:set_ability_mana (being)
- * entity:set_ability_mana(int abilityid, int new_mana)
- * entity:set_ability_mana(string abilityname, int new_mana)
+ * entity:set_ability_cooldown(int abilityid, int ticks)
+ * entity:set_ability_cooldown(string abilityname, int ticks)
  **
  * Valid only for character entities.
  *
- * Sets the mana (recharge status) of the ability to a new value for the
- * character.
+ * Sets the amout of ticks that a ability needs to cooldown.
  *
  * **Note:** When passing the `abilitynam` as parameter make sure that it is
  * formatted in this way: &lt;setname&gt;_&lt;abilityname&gt; (for eg. "Magic_Healingspell").
  */
-static int entity_set_ability_mana(lua_State *s)
+static int entity_set_ability_cooldown(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
     auto *abilityInfo = checkAbility(s, 2);
-    const int mana = luaL_checkint(s, 3);
-    if (!c->getComponent<AbilityComponent>()->setAbilityMana(abilityInfo->id,
-                                                             mana))
-    {
-        luaL_error(s,
-                   "set_ability_mana called with ability "
-                   "that is not owned by character.");
-    }
+    const int ticks = luaL_checkint(s, 3);
+    c->getComponent<AbilityComponent>()->setAbilityCooldown(abilityInfo->id, ticks);
     return 0;
 }
 
@@ -1307,43 +1300,47 @@ static int entity_set_ability_mana(lua_State *s)
  * entity:ability_mana(int abilityid)
  * entity:ability_mana(string abilityname)
  **
- * **Return value:** The mana (recharge status) of the ability that is owned by
- * the character.
+ * **Return value:** The remaining time of the ability cooldown.
  *
  * **Note:** When passing the `abilityname` as parameter make sure that it is
  * formatted in this way: &lt;setname&gt;_&lt;abilityname&gt; (for eg. "Magic_Healingspell").
  */
-static int entity_get_ability_mana(lua_State *s)
+static int entity_get_ability_cooldown(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
     auto *abilityComponent = c->getComponent<AbilityComponent>();
     auto *abilityInfo = checkAbility(s, 2);
-    AbilityMap::iterator it = abilityComponent->findAbility(abilityInfo->id);
-    luaL_argcheck(s, it != abilityComponent->getAbilities().end(), 2,
-                  "character does not have ability");
-    lua_pushinteger(s, it->second.currentPoints);
+    lua_pushinteger(s, abilityComponent->abilityCooldown(abilityInfo->id));
     return 1;
 }
 
-/** LUA entity:cooldown_ability (being)
- * entity:cooldown_ability(int abilityid)
- * entity:cooldown_ability(string abilityname)
+/** LUA entity:set_global_ability_cooldown (being)
+ * entity:set_global_ability_cooldown(int ticks)
  **
- * Starts the cooldown of the passed ability. No other ability will be useable
- * in this time.
+ * Valid only for character entities.
  *
- * You do not need to call this if the attribute is set to ''autoconsume''.
- *
- * **Note:** When passing the ''abilityname'' as parameter make sure that it is
- * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
+ * Sets the amount of ticks before any other ability can be used again
  */
-static int entity_cooldown_ability(lua_State *s)
+static int entity_set_global_ability_cooldown(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    auto *abilityComponent = c->getComponent<AbilityComponent>();
-    auto *abilityInfo = checkAbility(s, 2);
-    abilityComponent->startCooldown(*c, abilityInfo);
+    const int ticks = luaL_checkint(s, 3);
+    c->getComponent<AbilityComponent>()->setGlobalCooldown(ticks);
     return 0;
+}
+
+/** LUA entity:global_ability_cooldown (being)
+ * entity:global_ability_cooldown()
+ **
+ * Valid only for character entities.
+ *
+ * Gets the amount of ticks before any other ability can be used again
+ */
+static int entity_get_global_ability_cooldown(lua_State *s)
+{
+    Entity *c = checkCharacter(s, 1);
+    lua_pushinteger(s, c->getComponent<AbilityComponent>()->globalCooldown());
+    return 1;
 }
 
 /** LUA entity:walk (being)
@@ -2874,37 +2871,6 @@ static int abilityinfo_get_name(lua_State *s)
     return 1;
 }
 
-/** LUA abilityinfo:needed_mana (abilityinfo)
- * abilityinfo:needed_mana()
- **
- * ** Return value:** The mana that is needed to use the ability
- *
- * **Note:** See [get_ability_info](scripting.html#get_ability_info) for getting a
- * abilityinfo object.
- */
-static int abilityinfo_get_needed_mana(lua_State *s)
-{
-    auto *info = LuaAbilityInfo::check(s, 1);
-    lua_pushinteger(s, info->neededPoints);
-    return 1;
-}
-
-/** LUA abilityinfo:rechargeable (abilityinfo)
- * abilityinfo:rechargeable()
- **
- * ** Return value:** A boolean value that indicates whether the ability is
- * rechargeable or usuable without recharge.
- *
- * **Note:** See [get_ability_info](scripting.html#get_ability_info) for getting a
- * a abilityinfo object.
- */
-static int abilityinfo_is_rechargeable(lua_State *s)
-{
-    auto *info = LuaAbilityInfo::check(s, 1);
-    lua_pushboolean(s, info->rechargeable);
-    return 1;
-}
-
 /** LUA abilityinfo:on_use (abilityinfo)
  * abilityinfo:on_use(function callback)
  **
@@ -3388,9 +3354,10 @@ LuaScript::LuaScript():
         { "equip_item",                     entity_equip_item                 },
         { "unequip_slot",                   entity_unequip_slot               },
         { "unequip_item",                   entity_unequip_item               },
-        { "set_ability_mana",               entity_set_ability_mana           },
-        { "ability_mana",                   entity_get_ability_mana           },
-        { "cooldown_ability",               entity_cooldown_ability           },
+        { "set_ability_cooldown",           entity_set_ability_cooldown       },
+        { "ability_cooldown",               entity_get_ability_cooldown       },
+        { "set_global_ability_cooldown",    entity_set_global_ability_cooldown},
+        { "global_ability_cooldown",        entity_get_global_ability_cooldown},
         { "walk",                           entity_walk                       },
         { "destination",                    entity_destination                },
         { "look_at",                        entity_look_at                    },
@@ -3470,8 +3437,6 @@ LuaScript::LuaScript():
 
     static luaL_Reg const members_AbilityInfo[] = {
         { "name",                           abilityinfo_get_name              },
-        { "needed_mana",                    abilityinfo_get_needed_mana       },
-        { "rechargeable",                   abilityinfo_is_rechargeable       },
         { "on_use",                         abilityinfo_on_use                },
         { "on_recharged",                   abilityinfo_on_recharged          },
         { "category",                       abilitiyinfo_get_category         },

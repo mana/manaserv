@@ -89,10 +89,8 @@ public:
     void setKillCount(int monsterId, int kills);
 
     void clearAbilities();
-    void giveAbility(int id, int mana);
-    int getAbilitySize() const;
-    AbilityMap::const_iterator getAbilityBegin() const;
-    AbilityMap::const_iterator getAbilityEnd() const;
+    void giveAbility(int id);
+    const std::set<int> getAbilities() const;
 
     Possessions &getPossessions() const;
 
@@ -554,24 +552,21 @@ inline void CharacterData::clearAbilities()
     mEntity->getComponent<AbilityComponent>()->clearAbilities();
 }
 
-inline void CharacterData::giveAbility(int id, int mana)
+inline void CharacterData::giveAbility(int id)
 {
-    mEntity->getComponent<AbilityComponent>()->giveAbility(id, mana);
+    mEntity->getComponent<AbilityComponent>()->giveAbility(id);
 }
 
-inline int CharacterData::getAbilitySize() const
+inline const std::set<int> CharacterData::getAbilities() const
 {
-    return mEntity->getComponent<AbilityComponent>()->getAbilities().size();
-}
+    // TODO: remove this coping when removing the shared characterdata.h
+    std::set<int> abilities;
 
-inline AbilityMap::const_iterator CharacterData::getAbilityBegin() const
-{
-    return mEntity->getComponent<AbilityComponent>()->getAbilities().begin();
-}
+    for (auto &it : mEntity->getComponent<AbilityComponent>()->getAbilities()) {
+        abilities.insert(it.first);
+    }
 
-inline AbilityMap::const_iterator CharacterData::getAbilityEnd() const
-{
-    return mEntity->getComponent<AbilityComponent>()->getAbilities().end();
+    return abilities;
 }
 
 inline Possessions &CharacterData::getPossessions() const
