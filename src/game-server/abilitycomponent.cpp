@@ -41,11 +41,14 @@ void AbilityComponent::update(Entity &entity)
         auto &ability = it.second;
         if (!ability.recharged && ability.rechargeTimeout.expired()) {
             ability.recharged = true;
-            Script *script = ScriptManager::currentState();
-            script->prepare(ability.abilityInfo->rechargedCallback);
-            script->push(&entity);
-            script->push(ability.abilityInfo->id);
-            script->execute(entity.getMap());
+
+            if (ability.abilityInfo->rechargedCallback) {
+                Script *script = ScriptManager::currentState();
+                script->prepare(ability.abilityInfo->rechargedCallback);
+                script->push(&entity);
+                script->push(ability.abilityInfo->id);
+                script->execute(entity.getMap());
+            }
         }
     }
 
