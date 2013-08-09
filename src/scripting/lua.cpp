@@ -1285,7 +1285,7 @@ static int chr_set_quest(lua_State *s)
  * Sets the amout of ticks that a ability needs to cooldown.
  *
  * **Note:** When passing the `abilitynam` as parameter make sure that it is
- * formatted in this way: &lt;setname&gt;_&lt;abilityname&gt; (for eg. "Magic_Healingspell").
+ * formatted in this way: &lt;setname&gt;/&lt;abilityname&gt; (for eg. "Magic_Healingspell").
  */
 static int entity_set_ability_cooldown(lua_State *s)
 {
@@ -1303,7 +1303,7 @@ static int entity_set_ability_cooldown(lua_State *s)
  * **Return value:** The remaining time of the ability cooldown.
  *
  * **Note:** When passing the `abilityname` as parameter make sure that it is
- * formatted in this way: &lt;setname&gt;_&lt;abilityname&gt; (for eg. "Magic_Healingspell").
+ * formatted in this way: &lt;setname&gt;/&lt;abilityname&gt; (for eg. "Magic_Healingspell").
  */
 static int entity_get_ability_cooldown(lua_State *s)
 {
@@ -2847,7 +2847,7 @@ static int get_distance(lua_State *s)
  * See below for usage of that object.
  *
  * **Note:** When passing the `abilityName` as parameter make sure that it is
- * formatted in this way: &lt;setname&gt;_&lt;abilityname&gt; (for eg. "Magic_Healingspell").
+ * formatted in this way: &lt;setname&gt;/&lt;abilityname&gt; (for eg. "Magic_Healingspell").
  */
 static int get_ability_info(lua_State *s)
 {

@@ -106,7 +106,7 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
 
     mAbilitiesInfo[newInfo->id] = newInfo;
 
-    std::string keyName = categoryName + "_" + newInfo->name;
+    std::string keyName = categoryName + "/" + newInfo->name;
     mNamedAbilitiesInfo[keyName] = newInfo;
 }
 
@@ -134,7 +134,7 @@ void AbilityManager::clear()
 unsigned AbilityManager::getId(const std::string &category,
                                const std::string &name) const
 {
-    std::string key = utils::toLower(category) + "_" + utils::toLower(name);
+    std::string key = utils::toLower(category) + "/" + utils::toLower(name);
     return getId(key);
 }
 
@@ -168,7 +168,7 @@ AbilityManager::AbilityInfo *AbilityManager::getAbilityInfo(
         const std::string &category,
         const std::string &name) const
 {
-    std::string key = utils::toLower(category) + "_" + utils::toLower(name);
+    std::string key = utils::toLower(category) + "/" + utils::toLower(name);
     return getAbilityInfo(key);
 }
 
