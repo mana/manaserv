@@ -1702,8 +1702,7 @@ static void handleListAbility(Entity *player, std::string &args)
     {
         const AbilityValue &info = abilityIt.second;
         std::stringstream str;
-        str << info.abilityInfo->id << ": " << info.abilityInfo->categoryName
-            << "/" << info.abilityInfo->name;
+        str << info.abilityInfo->id << ": " << info.abilityInfo->name;
         say(str.str(), player);
     }
 }

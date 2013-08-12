@@ -36,32 +36,6 @@ static AbilityManager::TargetMode getTargetByString(const std::string &str)
     return AbilityManager::TARGET_BEING;
 }
 
-
-/**
- * Read a <special> element from settings.
- * Used by SettingsManager.
- */
-void AbilityManager::readAbilityCategoryNode(xmlNodePtr node,
-                                             const std::string &filename)
-{
-    std::string categoryName = XML::getProperty(node, "name", std::string());
-    if (categoryName.empty())
-    {
-        LOG_WARN("The " << filename << " file contains unamed "
-                 << "<ability-category> tags and will be ignored.");
-        return;
-    }
-
-    categoryName = utils::toLower(categoryName);
-
-    for_each_xml_child_node(specialNode, node)
-    {
-        if (xmlStrEqual(specialNode->name, BAD_CAST "ability")) {
-            readAbilityNode(specialNode, categoryName);
-        }
-    }
-}
-
 /**
  * Check the status of recently loaded configuration.
  */
@@ -70,9 +44,8 @@ void AbilityManager::checkStatus()
     LOG_INFO("Loaded " << mAbilitiesInfo.size() << " abilities");
 }
 
-
 void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
-                                     const std::string &categoryName)
+                                     const std::string &filename)
 {
     std::string name = utils::toLower(
                 XML::getProperty(abilityNode, "name", std::string()));
@@ -80,8 +53,7 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
 
     if (id <= 0 || name.empty())
     {
-        LOG_WARN("Invalid ability (empty name or id <= 0) in category: "
-                 << categoryName);
+        LOG_WARN("Invalid ability (empty name or id <= 0) in " << filename);
         return;
     }
 
@@ -97,7 +69,6 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
     }
 
     AbilityInfo *newInfo = new AbilityManager::AbilityInfo;
-    newInfo->categoryName = categoryName;
     newInfo->name = name;
     newInfo->id = id;
 
@@ -106,8 +77,7 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
 
     mAbilitiesInfo[newInfo->id] = newInfo;
 
-    std::string keyName = categoryName + "/" + newInfo->name;
-    mNamedAbilitiesInfo[keyName] = newInfo;
+    mNamedAbilitiesInfo[name] = newInfo;
 }
 
 void AbilityManager::initialize()
@@ -131,13 +101,6 @@ void AbilityManager::clear()
     mNamedAbilitiesInfo.clear();
 }
 
-unsigned AbilityManager::getId(const std::string &category,
-                               const std::string &name) const
-{
-    std::string key = utils::toLower(category) + "/" + utils::toLower(name);
-    return getId(key);
-}
-
 unsigned AbilityManager::getId(const std::string &abilityName) const
 {
     if (mNamedAbilitiesInfo.contains(abilityName))
@@ -152,24 +115,10 @@ const std::string AbilityManager::getAbilityName(int id) const
     return it != mAbilitiesInfo.end() ? it->second->name : "";
 }
 
-const std::string AbilityManager::getCategoryName(int id) const
-{
-    AbilitiesInfo::const_iterator it = mAbilitiesInfo.find(id);
-    return it != mAbilitiesInfo.end() ? it->second->categoryName : "";
-}
-
 AbilityManager::AbilityInfo *AbilityManager::getAbilityInfo(int id) const
 {
     AbilitiesInfo::const_iterator it = mAbilitiesInfo.find(id);
     return it != mAbilitiesInfo.end() ? it->second : 0;
-}
-
-AbilityManager::AbilityInfo *AbilityManager::getAbilityInfo(
-        const std::string &category,
-        const std::string &name) const
-{
-    std::string key = utils::toLower(category) + "/" + utils::toLower(name);
-    return getAbilityInfo(key);
 }
 
 AbilityManager::AbilityInfo *AbilityManager::getAbilityInfo(

@@ -1,26 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <abilities>
-    <ability-category name="Magic">
-        <ability
-            id="1"
-            name="Test Spell 1"
-            target="point"
-            useaction="attack"
-        />
-    </ability-category>
-    <ability-category name="Monster attack">
-        <ability
-            id="2"
-            name="Basic Monster strike"
-            target="being"
-            useaction="attack"
-        />
-    </ability-category>
-    <ability-category name="debug">
-        <ability
-            id="3"
-            name="debug"
-            target="point"
-        />
-    </ability-category>
+    <ability
+        id="1"
+        name="Magic/Test Spell 1"
+        target="point"
+        useaction="attack"
+    />
+    <ability
+        id="2"
+        name="Monster attack/Basic Monster strike"
+        target="being"
+        useaction="attack"
+    />
+    <ability
+        id="3"
+        name="debug"
+        target="point"
+    />
 </abilities>
