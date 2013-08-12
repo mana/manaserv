@@ -172,7 +172,7 @@ local function mob_recharged(mob, ability_id)
 end
 
 local mob_attack_ability =
-        get_ability_info("Monster attack_Basic Monster strike")
+        get_ability_info("Monster attack/Basic Monster strike")
 mob_attack_ability:on_use(mob_attack)
 mob_attack_ability:on_recharged(mob_recharged)
 

@@ -2907,22 +2907,6 @@ static int abilityinfo_on_recharged(lua_State *s)
     return 0;
 }
 
-/** LUA abilityinfo:category (abilityinfo)
- * abilityinfo:category(function callback)
- **
- * **Return value:** The set-name of the ability as defined in the
- * [abilities.xml](abilities.xml.html)
- *
- * **Note:** See [get_ability_info](scripting.html#get_ability_info) for getting
- * a abilityinfo object.
- */
-static int abilitiyinfo_get_category(lua_State *s)
-{
-    auto *info = LuaAbilityInfo::check(s, 1);
-    push(s, info->categoryName);
-    return 1;
-}
-
 
 /** LUA_CATEGORY Status effect class (statuseffectclass)
  */
@@ -3439,7 +3423,6 @@ LuaScript::LuaScript():
         { "name",                           abilityinfo_get_name              },
         { "on_use",                         abilityinfo_on_use                },
         { "on_recharged",                   abilityinfo_on_recharged          },
-        { "category",                       abilitiyinfo_get_category         },
         { nullptr, nullptr}
     };
 

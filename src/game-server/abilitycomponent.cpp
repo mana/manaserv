@@ -42,7 +42,7 @@ void AbilityComponent::update(Entity &entity)
         if (!ability.recharged && ability.rechargeTimeout.expired()) {
             ability.recharged = true;
 
-            if (ability.abilityInfo->rechargedCallback) {
+            if (ability.abilityInfo->rechargedCallback.isValid()) {
                 Script *script = ScriptManager::currentState();
                 script->prepare(ability.abilityInfo->rechargedCallback);
                 script->push(&entity);
@@ -95,7 +95,6 @@ bool AbilityComponent::abilityUseCheck(AbilityMap::iterator it)
     if (!ability.abilityInfo->useCallback.isValid())
     {
         LOG_WARN("No callback for use of ability "
-                 << ability.abilityInfo->categoryName << "/"
                  << ability.abilityInfo->name << ". Ignoring ability.");
         return false;
     }

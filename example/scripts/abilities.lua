@@ -8,7 +8,7 @@
 
 --]]
 
-local spell1 = get_ability_info("Magic_Test Spell 1")
+local spell1 = get_ability_info("Magic/Test Spell 1")
 spell1:on_use(function(user, x, y, abilityId)
     target = target or user
     local s_x, s_y = user:position()
@@ -38,7 +38,7 @@ spell1:on_use(function(user, x, y, abilityId)
 end)
 --spell1:on_recharged(function(ch) ch:say("Hoooooooo...") end)
 
-local debugspell = get_ability_info("debug_debug")
+local debugspell = get_ability_info("debug")
 debugspell:on_use(function(user)
     WARN("USED")
     user:give_experience(10)

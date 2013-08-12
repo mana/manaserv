@@ -135,10 +135,10 @@ void SettingsManager::loadFile(const std::string &filename)
             // attribute config
             attributeManager->readAttributeNode(childNode);
         }
-        else if (xmlStrEqual(childNode->name, BAD_CAST "ability-category"))
+        else if (xmlStrEqual(childNode->name, BAD_CAST "ability"))
         {
             // ability config
-            abilityManager->readAbilityCategoryNode(childNode, filename);
+            abilityManager->readAbilityNode(childNode, filename);
         }
         else if (xmlStrEqual(childNode->name, BAD_CAST "slot"))
         {
