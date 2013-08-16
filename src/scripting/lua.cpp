@@ -2308,6 +2308,7 @@ static int entity_take_ability(lua_State *s)
 
 /** LUA entity:use_ability (being)
  * entity:use_ability(int ability)
+ * entity:use_ability(string ability)
  **
  * Valid only for character and monster entities.
  *
@@ -2319,21 +2320,22 @@ static int entity_take_ability(lua_State *s)
 static int entity_use_ability(lua_State *s)
 {
     Entity *b = checkBeing(s, 1);
-    const int ability = luaL_checkint(s, 2);
+    auto abilityInfo = checkAbility(s, 2);
+    const int id = abilityInfo->id;
     bool targetIsBeing = lua_gettop(s) == 3;
 
     auto *abilityComponent = b->getComponent<AbilityComponent>();
     if (targetIsBeing)
     {
         Entity *target = checkBeing(s, 3);
-        lua_pushboolean(s, abilityComponent->useAbilityOnBeing(*b, ability,
+        lua_pushboolean(s, abilityComponent->useAbilityOnBeing(*b, id,
                                                                target));
     }
     else
     {
         const int x = luaL_checkint(s, 3);
         const int y = luaL_checkint(s, 4);
-        lua_pushboolean(s, abilityComponent->useAbilityOnPoint(*b, ability,
+        lua_pushboolean(s, abilityComponent->useAbilityOnPoint(*b, id,
                                                                x, y));
     }
 
