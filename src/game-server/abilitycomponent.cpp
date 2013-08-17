@@ -76,8 +76,7 @@ bool AbilityComponent::abilityUseCheck(AbilityMap::iterator it)
 
     if (it == mAbilities.end())
     {
-        LOG_INFO("Entity uses ability " << it->first
-                 << " without authorization.");
+        LOG_INFO("Entity uses ability without authorization.");
         return false;
     }
 
