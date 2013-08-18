@@ -131,7 +131,6 @@ SET(SRCS
     net/messageout.cpp
     net/netcomputer.h
     net/netcomputer.cpp
-    serialize/characterdata.h
     utils/logger.h
     utils/logger.cpp
     utils/point.h

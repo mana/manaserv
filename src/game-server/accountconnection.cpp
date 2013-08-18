@@ -32,7 +32,6 @@
 #include "game-server/quest.h"
 #include "game-server/state.h"
 #include "net/messagein.h"
-#include "serialize/characterdata.h"
 #include "utils/logger.h"
 #include "utils/tokendispenser.h"
 #include "utils/tokencollector.h"
@@ -107,7 +106,7 @@ void AccountConnection::sendCharacterData(Entity *p)
     MessageOut msg(GAMSG_PLAYER_DATA);
     auto *characterComponent = p->getComponent<CharacterComponent>();
     msg.writeInt32(characterComponent->getDatabaseID());
-    serializeCharacterData(CharacterData(p, characterComponent), msg);
+    characterComponent->serialize(*p, msg);
     send(msg);
 }
 

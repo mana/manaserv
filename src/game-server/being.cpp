@@ -405,13 +405,6 @@ double BeingComponent::getModifiedAttribute(unsigned id) const
     return ret->second.getModifiedAttribute();
 }
 
-void BeingComponent::setModAttribute(unsigned, double)
-{
-    // No-op to satisfy shared structure.
-    // The game-server calculates this manually.
-    return;
-}
-
 void BeingComponent::recalculateBaseAttribute(Entity &entity, unsigned attr)
 {
     LOG_DEBUG("Being: Received update attribute recalculation request for "

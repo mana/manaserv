@@ -47,59 +47,6 @@ class MessageOut;
 class Point;
 class Trade;
 
-
-class CharacterData
-{
-public:
-    CharacterData(Entity *entity, CharacterComponent *characterComponent);
-
-    void setGender(BeingGender);
-    BeingGender getGender() const;
-
-    void setMapId(int id);
-    int getMapId() const;
-    void setPosition(Point &point);
-    const Point &getPosition() const;
-
-    void setAttribute(int id, int base);
-    void setModAttribute(int id, int mod);
-    const AttributeMap &getAttributes() const;
-    void setAttributePoints(int characterPoints);
-    int getAttributePoints() const;
-    void setCorrectionPoints(int correctionPoints);
-    int getCorrectionPoints() const;
-
-    int getAccountLevel() const;
-
-    void setHairStyle(int style);
-    int getHairStyle() const;
-    void setHairColor(int color);
-    int getHairColor() const;
-
-    void setAccountLevel(int level);
-
-    void applyStatusEffect(int status, int time);
-    int getStatusEffectSize() const;
-    const std::map<int, Status>::const_iterator getStatusEffectBegin() const;
-    const std::map<int, Status>::const_iterator getStatusEffectEnd() const;
-
-    int getKillCountSize() const;
-    const std::map<int, int>::const_iterator getKillCountBegin() const;
-    const std::map<int, int>::const_iterator getKillCountEnd() const;
-    void setKillCount(int monsterId, int kills);
-
-    void clearAbilities();
-    void giveAbility(int id);
-    const std::set<int> getAbilities() const;
-
-    Possessions &getPossessions() const;
-
-private:
-    Entity *mEntity;
-    CharacterComponent *mCharacterComponent;
-};
-
-
 /**
  * The representation of a player's character in the game world.
  */
@@ -336,7 +283,11 @@ class CharacterComponent : public Component
 
         sigc::signal<void, Entity &> signal_disconnected;
 
+        void serialize(Entity &entity, MessageOut &msg);
+
     private:
+        void deserialize(Entity &entity, MessageIn &msg);
+
         double getAttrBase(AttributeMap::const_iterator it) const
         { return it->second.getBase(); }
         double getAttrMod(AttributeMap::const_iterator it) const
@@ -404,175 +355,6 @@ class CharacterComponent : public Component
         static Script::Ref mDeathAcceptedCallback;
         static Script::Ref mLoginCallback;
 };
-
-
-inline CharacterData::CharacterData(Entity *entity,
-                                    CharacterComponent *characterComponent):
-        mEntity(entity),
-        mCharacterComponent(characterComponent)
-{}
-
-inline void CharacterData::setGender(BeingGender gender)
-{
-    mEntity->getComponent<BeingComponent>()->setGender(gender);
-}
-
-inline BeingGender CharacterData::getGender() const
-{
-    return mEntity->getComponent<BeingComponent>()->getGender();
-}
-
-inline void CharacterData::setMapId(int id)
-{
-    mEntity->setMap(MapManager::getMap(id));
-}
-
-inline int CharacterData::getMapId() const
-{
-    return mEntity->getMap()->getID();
-}
-
-inline void CharacterData::setPosition(Point &point)
-{
-    mEntity->getComponent<ActorComponent>()->setPosition(*mEntity, point);
-}
-
-inline const Point &CharacterData::getPosition() const
-{
-    return mEntity->getComponent<ActorComponent>()->getPosition();
-}
-
-inline void CharacterData::setAttribute(int id, int base)
-{
-    mEntity->getComponent<BeingComponent>()->setAttribute(*mEntity, id, base);
-}
-
-inline void CharacterData::setModAttribute(int id, int mod)
-{
-    mEntity->getComponent<BeingComponent>()->setModAttribute(id, mod);
-}
-
-inline const AttributeMap &CharacterData::getAttributes() const
-{
-    return mEntity->getComponent<BeingComponent>()->getAttributes();
-}
-
-inline void CharacterData::setAttributePoints(int characterPoints)
-{
-    mCharacterComponent->setAttributePoints(characterPoints);
-}
-
-inline int CharacterData::getAttributePoints() const
-{
-    return mCharacterComponent->getAttributePoints();
-}
-
-inline void CharacterData::setCorrectionPoints(int correctionPoints)
-{
-    mCharacterComponent->setCorrectionPoints(correctionPoints);
-}
-
-inline int CharacterData::getCorrectionPoints() const
-{
-    return mCharacterComponent->getCorrectionPoints();
-}
-
-inline int CharacterData::getAccountLevel() const
-{
-    return mCharacterComponent->getAccountLevel();
-}
-
-inline void CharacterData::setHairStyle(int style)
-{
-    mCharacterComponent->setHairStyle(style);
-}
-
-inline int CharacterData::getHairStyle() const
-{
-    return mCharacterComponent->getHairStyle();
-}
-
-inline void CharacterData::setHairColor(int color)
-{
-    mCharacterComponent->setHairColor(color);
-}
-
-inline int CharacterData::getHairColor() const
-{
-    return mCharacterComponent->getHairColor();
-}
-
-inline void CharacterData::setAccountLevel(int level)
-{
-    mCharacterComponent->setAccountLevel(level);
-}
-
-inline void CharacterData::applyStatusEffect(int status, int time)
-{
-    mEntity->getComponent<BeingComponent>()->applyStatusEffect(status, time);
-}
-
-inline int CharacterData::getStatusEffectSize() const
-{
-    return mEntity->getComponent<BeingComponent>()->getStatusEffects().size();
-}
-
-inline const std::map<int, Status>::const_iterator CharacterData::getStatusEffectBegin() const
-{
-    return mEntity->getComponent<BeingComponent>()->getStatusEffects().begin();
-}
-
-inline const std::map<int, Status>::const_iterator CharacterData::getStatusEffectEnd() const
-{
-    return mEntity->getComponent<BeingComponent>()->getStatusEffects().end();
-}
-
-inline int CharacterData::getKillCountSize() const
-{
-    return mCharacterComponent->getKillCountSize();
-}
-
-inline const std::map<int, int>::const_iterator CharacterData::getKillCountBegin() const
-{
-    return mCharacterComponent->getKillCountBegin();
-}
-
-inline const std::map<int, int>::const_iterator CharacterData::getKillCountEnd() const
-{
-    return mCharacterComponent->getKillCountEnd();
-}
-
-inline void CharacterData::setKillCount(int monsterId, int kills)
-{
-    mCharacterComponent->setKillCount(monsterId, kills);
-}
-
-inline void CharacterData::clearAbilities()
-{
-    mEntity->getComponent<AbilityComponent>()->clearAbilities();
-}
-
-inline void CharacterData::giveAbility(int id)
-{
-    mEntity->getComponent<AbilityComponent>()->giveAbility(id);
-}
-
-inline const std::set<int> CharacterData::getAbilities() const
-{
-    // TODO: remove this coping when removing the shared characterdata.h
-    std::set<int> abilities;
-
-    for (auto &it : mEntity->getComponent<AbilityComponent>()->getAbilities()) {
-        abilities.insert(it.first);
-    }
-
-    return abilities;
-}
-
-inline Possessions &CharacterData::getPossessions() const
-{
-    return mCharacterComponent->getPossessions();
-}
 
 
 inline void CharacterComponent::setAttributePoints(int points)
