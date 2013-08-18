@@ -39,7 +39,6 @@
 #include "net/connectionhandler.h"
 #include "net/messageout.h"
 #include "net/netcomputer.h"
-#include "serialize/characterdata.h"
 #include "utils/logger.h"
 #include "utils/tokendispenser.h"
 
@@ -162,7 +161,7 @@ static void registerGameClient(GameServer *s, const std::string &token,
     msg.writeString(token, MAGIC_TOKEN_LENGTH);
     msg.writeInt32(ptr->getDatabaseID());
     msg.writeString(ptr->getName());
-    serializeCharacterData(*ptr, msg);
+    ptr->serialize(msg);
     s->send(msg);
 }
 
@@ -291,7 +290,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int id = msg.readInt32();
             if (CharacterData *ptr = storage->getCharacter(id, nullptr))
             {
-                deserializeCharacterData(*ptr, msg);
+                ptr->deserialize(msg);
                 if (!storage->updateCharacter(ptr))
                 {
                     LOG_ERROR("Failed to update character "

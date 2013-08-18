@@ -173,13 +173,6 @@ class BeingComponent : public Component
         double getModifiedAttribute(unsigned id) const;
 
         /**
-         * No-op to satisfy shared structure.
-         * @note The game server calculates this manually, so nothing happens
-         *       here.
-         */
-        void setModAttribute(unsigned, double);
-
-        /**
          * Checks whether or not an attribute exists in this being.
          * @returns True if the attribute is present in the being, false otherwise.
          */

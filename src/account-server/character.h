@@ -72,8 +72,10 @@ typedef std::map<unsigned, AttributeValue> AttributeMap;
 class CharacterData
 {
     public:
-
         CharacterData(const std::string &name, int id = -1);
+
+        void serialize(MessageOut &msg);
+        void deserialize(MessageIn &msg);
 
         /**
          * Gets the database id of the character.
