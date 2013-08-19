@@ -30,8 +30,10 @@
 
 #include <algorithm>
 
-BuySell::BuySell(Entity *c, bool sell):
-    mCurrencyId(ATTR_GP), mChar(c), mSell(sell)
+BuySell::BuySell(Entity *c, bool sell)
+    : mCurrency(attributeManager->getAttributeInfo(ATTR_GP))
+    , mChar(c)
+    , mSell(sell)
 {
     c->getComponent<CharacterComponent>()->setBuySell(this);
 }
@@ -167,17 +169,17 @@ void BuySell::perform(unsigned id, int amount)
         {
             amount -= inv.remove(id, amount);
             const double currentMoney =
-                    beingComponent->getAttributeBase(mCurrencyId);
-            beingComponent->setAttribute(*mChar, mCurrencyId,
+                    beingComponent->getAttributeBase(mCurrency);
+            beingComponent->setAttribute(*mChar, mCurrency,
                                          currentMoney + amount * i->cost);
         }
         else
         {
             const double currentMoney =
-                    beingComponent->getAttributeBase(mCurrencyId);
+                    beingComponent->getAttributeBase(mCurrency);
             amount = std::min(amount, ((int)currentMoney) / i->cost);
             amount -= inv.insert(id, amount);
-            beingComponent->setAttribute(*mChar, mCurrencyId,
+            beingComponent->setAttribute(*mChar, mCurrency,
                                          currentMoney - amount * i->cost);
         }
         if (i->amount)

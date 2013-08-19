@@ -671,9 +671,11 @@ static void handleMoney(Entity *player, std::string &args)
 
     auto *beingComponent = other->getComponent<BeingComponent>();
 
+    auto *moneyAttribute = attributeManager->getAttributeInfo(ATTR_GP);
+
     // change how much money the player has
-    const double previousMoney = beingComponent->getAttributeBase(ATTR_GP);
-    beingComponent->setAttribute(*player, ATTR_GP , previousMoney + value);
+    const double previousMoney = beingComponent->getAttributeBase(moneyAttribute);
+    beingComponent->setAttribute(*player, moneyAttribute , previousMoney + value);
 
     // log transaction
     std::string msg = "User created " + valuestr + " money";
@@ -1065,7 +1067,6 @@ static void handleTakePermission(Entity *player, std::string &args)
 static void handleAttribute(Entity *player, std::string &args)
 {
     Entity *other;
-    int attr, value;
 
     // get arguments
     std::string character = getArgument(args);
@@ -1104,16 +1105,16 @@ static void handleAttribute(Entity *player, std::string &args)
     }
 
     // put the attribute into an integer
-    attr = utils::stringToInt(attrstr);
+    int attributeId = utils::stringToInt(attrstr);
 
-    if (attr < 0)
+    if (attributeId < 0)
     {
         say("Invalid Attribute", player);
         return;
     }
 
     // put the value into an integer
-    value = utils::stringToInt(valuestr);
+    int value = utils::stringToInt(valuestr);
 
     if (value < 0)
     {
@@ -1123,12 +1124,14 @@ static void handleAttribute(Entity *player, std::string &args)
 
     auto *beingComponent = other->getComponent<BeingComponent>();
 
+    auto *attribute = attributeManager->getAttributeInfo(attributeId);
+
     // change the player's attribute
-    beingComponent->setAttribute(*other, attr, value);
+    beingComponent->setAttribute(*other, attribute, value);
 
     // log transaction
     std::stringstream msg;
-    msg << "User changed attribute " << attr << " of player "
+    msg << "User changed attribute " << attribute->id << " of player "
         << beingComponent->getName()
         << " to " << value;
     int databaseId =
@@ -1264,7 +1267,8 @@ static void handleMute(Entity *player, std::string &args)
 
 static void handleDie(Entity *player, std::string &)
 {
-    player->getComponent<BeingComponent>()->setAttribute(*player, ATTR_HP, 0);
+    auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_HP);
+    player->getComponent<BeingComponent>()->setAttribute(*player, hpAttribute, 0);
     say("You've killed yourself.", player);
 }
 
@@ -1284,7 +1288,8 @@ static void handleKill(Entity *player, std::string &args)
     }
 
     // kill the player
-    other->getComponent<BeingComponent>()->setAttribute(*player, ATTR_HP, 0);
+    auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_HP);
+    other->getComponent<BeingComponent>()->setAttribute(*player, hpAttribute, 0);
 
     // feedback
     std::stringstream targetMsg;

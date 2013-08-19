@@ -178,7 +178,7 @@ class CharacterComponent : public Component
          * @param being th being of which the attribute was changed
          * @param attributeId the changed id
          */
-        void attributeChanged(Entity *being, unsigned attributeId);
+        void attributeChanged(Entity *being, AttributeManager::AttributeInfo *);
 
         /**
          * Calls all the "disconnected" listener.
@@ -221,14 +221,14 @@ class CharacterComponent : public Component
          * basic attribute
          */
         AttribmodResponseCode useCharacterPoint(Entity &entity,
-                                                int attribute);
+                                                AttributeManager::AttributeInfo *);
 
         /**
          * Tries to use a correction point to reduce a
          * basic attribute and regain a character point
          */
         AttribmodResponseCode useCorrectionPoint(Entity &entity,
-                                                 int attribute);
+                                                 AttributeManager::AttributeInfo *);
 
         void setAttributePoints(int points);
         int getAttributePoints() const;
@@ -320,7 +320,7 @@ class CharacterComponent : public Component
         Possessions mPossessions;    /**< Possesssions of the character. */
 
         /** Attributes modified since last update. */
-        std::set<size_t> mModifiedAttributes;
+        std::set<AttributeManager::AttributeInfo *> mModifiedAttributes;
 
         std::set<unsigned> mModifiedAbilities;
 

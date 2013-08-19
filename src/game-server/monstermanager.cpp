@@ -166,7 +166,7 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
         {
             std::string attributeIdString = XML::getProperty(subnode, "id",
                                                              std::string());
-            const AttributeManager::AttributeInfo *info;
+            AttributeManager::AttributeInfo *info = nullptr;
             if (utils::isNumeric(attributeIdString))
             {
                 const int attributeId = utils::stringToInt(attributeIdString);

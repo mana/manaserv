@@ -28,7 +28,7 @@ spell1:on_use(function(user, x, y, abilityId)
             local damage = {
                 base = 10,
                 delta = 5,
-                chance_to_hit = user:modified_attribute(ATTR_STR),
+                chance_to_hit = user:modified_attribute("Strength"),
             }
             being:damage(user, damage)
             being:say("OUCH")

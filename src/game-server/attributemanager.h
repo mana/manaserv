@@ -21,10 +21,11 @@
 #ifndef ATTRIBUTEMANAGER_H
 #define ATTRIBUTEMANAGER_H
 
-#include <map>
-#include <vector>
-#include <string>
 #include <limits>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "utils/string.h"
 #include "utils/xml.h"
@@ -91,14 +92,16 @@ class AttributeManager
 {
     public:
         struct AttributeInfo {
-            AttributeInfo():
-                id(0),
+            AttributeInfo(int id, const std::string &name):
+                id(id),
+                name(name),
                 minimum(std::numeric_limits<double>::min()),
                 maximum(std::numeric_limits<double>::max()),
                 modifiable(false)
             {}
 
             int id;
+            std::string name;
 
             /** The minimum and maximum permitted attribute values. */
             double minimum;
@@ -123,12 +126,10 @@ class AttributeManager
         void reload();
         void deinitialize();
 
-        const AttributeInfo *getAttributeInfo(int id) const;
-        const AttributeInfo *getAttributeInfo(const std::string &name) const;
+        AttributeInfo *getAttributeInfo(int id) const;
+        AttributeInfo *getAttributeInfo(const std::string &name) const;
 
-        const std::map<int, AttributeInfo *> &getAttributeScope(ScopeType) const;
-
-        bool isAttributeDirectlyModifiable(int id) const;
+        const std::set<AttributeInfo *> &getAttributeScope(ScopeType) const;
 
         ModifierLocation getLocation(const std::string &tag) const;
 
@@ -142,7 +143,7 @@ class AttributeManager
         void readModifierNode(xmlNodePtr modifierNode, int attributeId,
                               AttributeInfo *info);
 
-        std::map<int, AttributeInfo *> mAttributeScopes[MaxScope];
+        std::set<AttributeInfo *> mAttributeScopes[MaxScope];
 
         std::map<int, AttributeInfo *> mAttributeMap;
         utils::NameMap<AttributeInfo *> mAttributeNameMap;

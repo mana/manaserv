@@ -37,8 +37,13 @@
  * TRADE_AGREE_WAIT : One player has agreed, waiting for the other one
  */
 
-Trade::Trade(Entity *c1, Entity *c2):
-    mChar1(c1), mChar2(c2), mMoney1(0), mMoney2(0), mState(TRADE_INIT), mCurrencyId(ATTR_GP)
+Trade::Trade(Entity *c1, Entity *c2)
+    : mChar1(c1)
+    , mChar2(c2)
+    , mMoney1(0)
+    , mMoney2(0)
+    , mState(TRADE_INIT)
+    , mCurrencyAttribute(attributeManager->getAttributeInfo(ATTR_GP))
 {
     MessageOut msg(GPMSG_TRADE_REQUEST);
     msg.writeInt16(c1->getComponent<ActorComponent>()->getPublicID());
@@ -134,9 +139,9 @@ void Trade::agree(Entity *c)
     Inventory v1(mChar1), v2(mChar2);
 
     const double moneyChar1 = mChar1->getComponent<BeingComponent>()
-            ->getAttributeBase(mCurrencyId);
+            ->getAttributeBase(mCurrencyAttribute);
     const double moneyChar2 = mChar2->getComponent<BeingComponent>()
-            ->getAttributeBase(mCurrencyId);
+            ->getAttributeBase(mCurrencyAttribute);
 
     if (moneyChar1 >= mMoney1 - mMoney2 &&
         moneyChar2 >= mMoney2 - mMoney1 &&
@@ -144,10 +149,10 @@ void Trade::agree(Entity *c)
         perform(mItems2, v2, v1))
     {
         mChar1->getComponent<BeingComponent>()
-                ->setAttribute(*mChar1, mCurrencyId,
+                ->setAttribute(*mChar1, mCurrencyAttribute,
                                moneyChar1 - mMoney1 + mMoney2);
         mChar2->getComponent<BeingComponent>()
-                ->setAttribute(*mChar2, mCurrencyId,
+                ->setAttribute(*mChar2, mCurrencyAttribute,
                                moneyChar2 - mMoney2 + mMoney1);
     }
     else

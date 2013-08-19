@@ -47,7 +47,7 @@ void AttributeManager::deinitialize()
         mAttributeScopes[i].clear();
 }
 
-const AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
+AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
         int id) const
 {
     auto ret = mAttributeMap.find(id);
@@ -56,7 +56,7 @@ const AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
     return ret->second;
 }
 
-const AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
+AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
         const std::string &name) const
 {
     if (mAttributeNameMap.contains(name))
@@ -64,18 +64,10 @@ const AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
     return 0;
 }
 
-const std::map<int, AttributeManager::AttributeInfo *>
+const std::set<AttributeManager::AttributeInfo *>
 &AttributeManager::getAttributeScope(ScopeType type) const
 {
     return mAttributeScopes[type];
-}
-
-bool AttributeManager::isAttributeDirectlyModifiable(int id) const
-{
-    auto ret = mAttributeMap.find(id);
-    if (ret == mAttributeMap.end())
-        return false;
-    return ret->second->modifiable;
 }
 
 ModifierLocation AttributeManager::getLocation(const std::string &tag) const
@@ -111,9 +103,16 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
         return;
     }
 
-    AttributeInfo *attribute = new AttributeInfo;
+    std::string name = XML::getProperty(attributeNode, "name", std::string());
+    if (name.empty())
+    {
+        LOG_WARN("Attribute manager: attribute '" << id
+                 << "' does not have a name! Skipping...");
+        return;
+    }
 
-    attribute->id = id;
+    AttributeInfo *attribute = new AttributeInfo(id, name);
+
     attribute->modifiers = std::vector<AttributeModifier>();
     attribute->minimum = XML::getFloatProperty(attributeNode, "minimum",
                                            std::numeric_limits<double>::min());
@@ -122,15 +121,6 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
     attribute->modifiable = XML::getBoolProperty(attributeNode, "modifiable",
                                                  false);
 
-    std::string name = XML::getProperty(attributeNode, "name", std::string());
-    if (name.empty())
-    {
-        LOG_WARN("Attribute manager: attribute '" << id
-                 << "' does not have a name! Skipping...");
-        delete attribute;
-        return;
-    }
-
     const std::string scope = utils::toUpper(
                 XML::getProperty(attributeNode, "scope", std::string()));
 
@@ -138,21 +128,21 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
 
     if (scope.find("CHARACTER") != std::string::npos)
     {
-        mAttributeScopes[CharacterScope][id] = attribute;
+        mAttributeScopes[CharacterScope].insert(attribute);
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default character scope.");
         hasScope = true;
     }
     if (scope.find("MONSTER") != std::string::npos)
     {
-        mAttributeScopes[MonsterScope][id] = attribute;
+        mAttributeScopes[MonsterScope].insert(attribute);
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default monster scope.");
         hasScope = true;
     }
     if (scope == "BEING")
     {
-        mAttributeScopes[BeingScope][id] = attribute;
+        mAttributeScopes[BeingScope].insert(attribute);
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default being scope.");
         hasScope = true;
