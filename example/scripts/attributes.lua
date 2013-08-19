@@ -7,78 +7,76 @@
 
 --]]
 
-local ATTR_EXP = 22
-local ATTR_LEVEL = 23
-
-local function recalculate_base_attribute(being, attribute)
-    local old_base = being:base_attribute(attribute)
+local function recalculate_base_attribute(being, attribute_name)
+    local old_base = being:base_attribute(attribute_name)
     local new_base = old_base
-    if attribute == ATTR_ACCURACY then
+    if attribute == "Accuracy" then
         -- Provisional
-        new_base = being:modified_attribute(ATTR_DEX)
-    elseif attribute == ATTR_DEFENSE then
-        new_base = 0.3 * being:modified_attribute(ATTR_VIT)
-    elseif attribute == ATTR_DODGE then
+        new_base = being:modified_attribute("Dexterity")
+    elseif attribute == "Defense" then
+        new_base = 0.3 * being:modified_attribute("Vitality")
+    elseif attribute == "Dodge" then
         -- Provisional
-        new_base = being:modified_attribute(ATTR_AGI)
-    elseif attribute == ATTR_MAGIC_DODGE then
+        new_base = being:modified_attribute("Agility")
+    elseif attribute == "M. dodge" then
         -- TODO
         new_base = 1
-    elseif attribute == ATTR_MAGIC_DEFENSE then
+    elseif attribute == "M. defense" then
         -- TODO
         new_base = 0
-    elseif attribute == ATTR_BONUS_ASPD then
+    elseif attribute == "Bonus att. speed" then
         -- TODO
         new_base = 0
-    elseif attribute == ATTR_HP_REGEN then
-        local hp_per_sec = being:modified_attribute(ATTR_VIT) * 0.05
+    elseif attribute == "HP regeneration" then
+        local hp_per_sec = being:modified_attribute("Vitality") * 0.05
         new_base = hp_per_sec * TICKS_PER_HP_REGENERATION / 10
-    elseif attribute == ATTR_HP then
-        local hp = being:modified_attribute(ATTR_HP)
-        local max_hp = being:modified_attribute(ATTR_MAX_HP)
+    elseif attribute == "HP" then
+        local hp = being:modified_attribute("HP")
+        local max_hp = being:modified_attribute("Max HP")
 
         if hp > max_hp then
             new_base = new_base - hp - max_hp
         end
-    elseif attribute == ATTR_MAX_HP then
-        local vit = being:modified_attribute(ATTR_VIT)
+    elseif attribute == "Max HP" then
+        local vit = being:modified_attribute("Vitality")
         new_base = (vit + 3) * (vit + 20) * 0.125
-    elseif attribute == ATTR_MOVE_SPEED_TPS then
+    elseif attribute == "Movement speed" then
         -- Provisional
-        new_base = 3.0 + being:modified_attribute(ATTR_AGI) * 0.08
-    elseif attribute == ATTR_INV_CAPACITY then
+        new_base = 3.0 + being:modified_attribute("Agility") * 0.08
+    elseif attribute == "Capacity" then
         -- Provisional
-        new_base = 2000 + being:modified_attribute(ATTR_STR) * 180
-    elseif attribute == ATTR_ABILITY_COOLDOWN then
+        new_base = 2000 + being:modified_attribute("Strength") * 180
+    elseif attribute == "Global ability cooldown" then
         -- Provisional
-        new_base = 100 - being:modified_attribute(ATTR_WIL)
-    elseif attribute == ATTR_LEVEL then
+        new_base = 100 - being:modified_attribute("Willpower")
+    elseif attribute == "Level" then
         -- Provisional
-        --new_base = 100 - 100 * math.pow(0.99999, being:base_attribute(ATTR_EXP))
-        new_base = being:base_attribute(ATTR_EXP) / 20
+        --new_base = 100 - 100 * math.pow(0.99999, being:base_attribute("XP"))
+        new_base = being:base_attribute("XP") / 20
     end
 
     if new_base ~= old_base then
-        being:set_base_attribute(attribute, new_base)
+        being:set_base_attribute(attribute_name, new_base)
     end
 
 end
 
 local function update_derived_attributes(being, attribute)
-    if attribute == ATTR_STR then
-        recalculate_base_attribute(being, ATTR_INV_CAPACITY)
-    elseif attribute == ATTR_AGI then
-        recalculate_base_attribute(being, ATTR_DODGE)
-    elseif attribute == ATTR_VIT then
-        recalculate_base_attribute(being, ATTR_MAX_HP)
-        recalculate_base_attribute(being, ATTR_HP_REGEN)
-        recalculate_base_attribute(being, ATTR_DEFENSE)
-    elseif attribute == ATTR_INT then
+    local attribute_name = attribute:name()
+    if attribute_name == "Strength" then
+        recalculate_base_attribute(being, "Capacity")
+    elseif attribute_name == "Agility" then
+        recalculate_base_attribute(being, "Dodge")
+    elseif attribute_name == "Vitality" then
+        recalculate_base_attribute(being, "Max HP")
+        recalculate_base_attribute(being, "HP regeneration")
+        recalculate_base_attribute(being, "Defense")
+    elseif attribute_name == "Intelligence" then
         -- unimplemented
-    elseif attribute == ATTR_WIL then
-        recalculate_base_attribute(being, ATTR_ABILITY_COOLDOWN)
-    elseif attribute == ATTR_EXP then
-        recalculate_base_attribute(being, ATTR_LEVEL)
+    elseif attribute_name == "Willpower" then
+        recalculate_base_attribute(being, "Global ability cooldown")
+    elseif attribute_name == "XP" then
+        recalculate_base_attribute(being, "Level")
     end
 end
 
@@ -86,13 +84,13 @@ on_recalculate_base_attribute(recalculate_base_attribute)
 on_update_derived_attribute(update_derived_attributes)
 
 function Entity:level()
-    return math.floor(self:base_attribute(ATTR_LEVEL))
+    return math.floor(self:base_attribute("Level"))
 end
 
 function Entity:give_experience(experience)
-    local old_experience = self:base_attribute(ATTR_EXP)
+    local old_experience = self:base_attribute("XP")
     local old_level = self:level()
-    self:set_base_attribute(ATTR_EXP, old_experience + experience)
+    self:set_base_attribute("XP", old_experience + experience)
     if self:level() > old_level then
         self:say("LEVELUP!!! " .. self:level())
         self:set_attribute_points(self:attribute_points() + 1)
@@ -128,7 +126,7 @@ local function monster_damaged(mob, source, damage)
         receiver.total = receiver.total + damage
     end
 
-    if mob:base_attribute(ATTR_HP) == 0 then
+    if mob:base_attribute("HP") == 0 then
         local mob_config = mobs_config[mob:name()]
         local experience = mob_config.experience or 0
         for char, damage in pairs(receiver.chars) do

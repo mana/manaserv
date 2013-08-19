@@ -464,7 +464,7 @@ void AccountConnection::updateCharacterPoints(int charId, int charPoints,
 }
 
 void AccountConnection::updateAttributes(int charId, int attrId, double base,
-                              double mod)
+                                         double mod)
 {
     ++mSyncMessages;
     mSyncBuffer->writeInt8(SYNC_CHARACTER_ATTRIBUTE);

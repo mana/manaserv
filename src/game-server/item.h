@@ -110,21 +110,25 @@ class ItemEffectInfo
 class ItemEffectAttrMod : public ItemEffectInfo
 {
     public:
-        ItemEffectAttrMod(unsigned attrId, unsigned layer, double value,
-                          unsigned id, unsigned duration = 0) :
-                        mAttributeId(attrId), mAttributeLayer(layer),
-                        mMod(value), mDuration(duration), mId(id)
+        ItemEffectAttrMod(AttributeManager::AttributeInfo *attribute,
+                          unsigned layer, double value, unsigned modId,
+                          unsigned duration = 0)
+                : mAttribute(attribute)
+                , mAttributeLayer(layer)
+                , mMod(value)
+                , mDuration(duration)
+                , mModId(modId)
         {}
 
         bool apply(Entity *itemUser);
         void dispell(Entity *itemUser);
 
     private:
-        unsigned mAttributeId;
+        AttributeManager::AttributeInfo *mAttribute;
         unsigned mAttributeLayer;
         double mMod;
         unsigned mDuration;
-        unsigned mId;
+        unsigned mModId;
 };
 
 class ItemEffectConsumes : public ItemEffectInfo

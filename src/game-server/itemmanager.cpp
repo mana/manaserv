@@ -338,7 +338,9 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
                                                      0);
             ModifierLocation location = attributeManager->getLocation(tag);
             double value = XML::getFloatProperty(subNode, "value", 0.0);
-            item->addEffect(new ItemEffectAttrMod(location.attributeId,
+
+            auto *attribute = attributeManager->getAttributeInfo(location.attributeId);
+            item->addEffect(new ItemEffectAttrMod(attribute,
                                                   location.layer,
                                                   value,
                                                   item->getDatabaseID(),

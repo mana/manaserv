@@ -54,12 +54,10 @@ class LuaScript : public Script
         void prepareResume(Thread *thread);
 
         void push(int);
-
         void push(const std::string &);
-
         void push(Entity *);
-
         void push(const std::list<InventoryItem> &itemList);
+        void push(AttributeManager::AttributeInfo *);
 
         int execute(const Context &context = Context());
 

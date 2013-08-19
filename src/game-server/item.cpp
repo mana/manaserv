@@ -35,9 +35,11 @@ bool ItemEffectAttrMod::apply(Entity *itemUser)
 {
     LOG_DEBUG("Applying modifier.");
     itemUser->getComponent<BeingComponent>()->applyModifier(*itemUser,
-                                                            mAttributeId, mMod,
+                                                            mAttribute,
+                                                            mMod,
                                                             mAttributeLayer,
-                                                            mDuration, mId);
+                                                            mDuration,
+                                                            mModId);
     return false;
 }
 
@@ -45,10 +47,11 @@ void ItemEffectAttrMod::dispell(Entity *itemUser)
 {
     LOG_DEBUG("Dispelling modifier.");
     itemUser->getComponent<BeingComponent>()->removeModifier(*itemUser,
-                                                             mAttributeId,
+                                                             mAttribute,
                                                              mMod,
                                                              mAttributeLayer,
-                                                             mId, !mDuration);
+                                                             mModId,
+                                                             !mDuration);
 }
 
 ItemEffectScript::~ItemEffectScript()

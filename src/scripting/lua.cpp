@@ -289,8 +289,10 @@ static int npc_create(lua_State *s)
     npc->addComponent(beingComponent);
     npc->addComponent(npcComponent);
     // some health so it doesn't spawn dead
-    beingComponent->setAttribute(*npc, ATTR_MAX_HP, 100);
-    beingComponent->setAttribute(*npc, ATTR_HP, 100);
+    auto *maxHpAttribute = attributeManager->getAttributeInfo(ATTR_MAX_HP);
+    beingComponent->setAttribute(*npc, maxHpAttribute, 100);
+    auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_HP);
+    beingComponent->setAttribute(*npc, hpAttribute, 100);
     beingComponent->setName(name);
     beingComponent->setGender(getGender(gender));
 
@@ -1367,11 +1369,8 @@ static int entity_walk(lua_State *s)
     if (lua_gettop(s) >= 4)
     {
         const double speedTps = luaL_checknumber(s, 4);
-        beingComponent->setAttribute(*being, ATTR_MOVE_SPEED_TPS, speedTps);
-        const double modifiedSpeedTps =
-                beingComponent->getModifiedAttribute(ATTR_MOVE_SPEED_TPS);
-        beingComponent->setAttribute(*being, ATTR_MOVE_SPEED_RAW,
-                                     utils::tpsToRawSpeed(modifiedSpeedTps));
+        auto *tpsSpeedAttribute = attributeManager->getAttributeInfo(ATTR_MOVE_SPEED_TPS);
+        beingComponent->setAttribute(*being, tpsSpeedAttribute, speedTps);
     }
 
     return 0;
@@ -1724,10 +1723,9 @@ static int entity_get_y(lua_State *s)
 static int entity_get_base_attribute(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
-    int attr = checkAttribute(s, 2)->id;
-    luaL_argcheck(s, attr > 0, 2, "invalid attribute id");
+    auto *attribute = checkAttribute(s, 2);
 
-    lua_pushinteger(s, being->getComponent<BeingComponent>()->getAttributeBase(attr));
+    lua_pushinteger(s, being->getComponent<BeingComponent>()->getAttributeBase(attribute));
     return 1;
 }
 
@@ -1742,10 +1740,10 @@ static int entity_get_base_attribute(lua_State *s)
 static int entity_set_base_attribute(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
-    int attr = checkAttribute(s, 2)->id;
+    auto *attribute = checkAttribute(s, 2);
     double value = luaL_checknumber(s, 3);
 
-    being->getComponent<BeingComponent>()->setAttribute(*being, attr, value);
+    being->getComponent<BeingComponent>()->setAttribute(*being, attribute, value);
     return 0;
 }
 
@@ -1772,11 +1770,10 @@ static int entity_set_base_attribute(lua_State *s)
 static int entity_get_modified_attribute(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
-    int attr = checkAttribute(s, 2)->id;
-    luaL_argcheck(s, attr > 0, 2, "invalid attribute id");
+    auto *attribute = checkAttribute(s, 2);
 
     const double value =
-            being->getComponent<BeingComponent>()->getModifiedAttribute(attr);
+            being->getComponent<BeingComponent>()->getModifiedAttribute(attribute);
     lua_pushinteger(s, value);
     return 1;
 }
@@ -1802,15 +1799,15 @@ static int entity_get_modified_attribute(lua_State *s)
 static int entity_apply_attribute_modifier(lua_State *s)
 {
     Entity *being   = checkBeing(s, 1);
-    int attr        = checkAttribute(s, 2)->id;
+    auto *attribute = checkAttribute(s, 2);
     double value    = luaL_checknumber(s, 3);
     int layer       = luaL_checkint(s, 4);
     int duration    = luaL_optint(s, 5, 0);
     int effectId    = luaL_optint(s, 6, 0);
 
-    being->getComponent<BeingComponent>()->applyModifier(*being, attr, value,
-                                                         layer, duration,
-                                                         effectId);
+    being->getComponent<BeingComponent>()->applyModifier(*being, attribute,
+                                                         value, layer,
+                                                         duration, effectId);
     return 0;
 }
 
@@ -1825,13 +1822,14 @@ static int entity_apply_attribute_modifier(lua_State *s)
 static int entity_remove_attribute_modifier(lua_State *s)
 {
     Entity *being   = checkBeing(s, 1);
-    int attr        = checkAttribute(s, 2)->id;
+    auto *attribute = checkAttribute(s, 2);
     double value    = luaL_checknumber(s, 3);
     int layer       = luaL_checkint(s, 4);
     int effectId    = luaL_optint(s, 5, 0);
 
-    being->getComponent<BeingComponent>()->removeModifier(*being, attr, value,
-                                                          layer, effectId);
+    being->getComponent<BeingComponent>()->removeModifier(*being, attribute,
+                                                          value, layer,
+                                                          effectId);
     return 0;
 }
 
@@ -2910,6 +2908,47 @@ static int abilityinfo_on_recharged(lua_State *s)
 }
 
 
+/** LUA_CATEGORY AttributeInfo class (attributeinfoclass)
+ */
+
+/** LUA get_attribute_info (attributeinfoclass)
+ * local attributeinfo = get_attribute_info(string name)
+ * local attributeinfo = get_attribute_info(int id)
+ **
+ * **Return value:** The attribute info of the passed attribute.
+ */
+static int get_attribute_info(lua_State *s)
+{
+    auto *attributeInfo = checkAttribute(s, 1);
+    LuaAttributeInfo::push(s, attributeInfo);
+    return 1;
+}
+
+/** LUA attributeinfo:name (attributeinfoclass)
+ * local id = attributeinfo:id()
+ **
+ * **Return value:** The id of the `attributeinfo`.
+ */
+static int attributeinfo_get_id(lua_State *s)
+{
+    auto *attributeInfo = LuaAttributeInfo::check(s, 1);
+    lua_pushinteger(s, attributeInfo->id);
+    return 1;
+}
+
+/** LUA attributeinfo:name (attributeinfoclass)
+ * local name = attributeinfo:name()
+ **
+ * **Return value:** The name of the `attributeinfo`.
+ */
+static int attributeinfo_get_name(lua_State *s)
+{
+    auto *attributeInfo = LuaAttributeInfo::check(s, 1);
+    lua_pushstring(s, attributeInfo->name.c_str());
+    return 1;
+}
+
+
 /** LUA_CATEGORY Status effect class (statuseffectclass)
  */
 
@@ -3317,6 +3356,7 @@ LuaScript::LuaScript():
         { "map_get_objects",                map_get_objects                   },
         { "announce",                       announce                          },
         { "get_ability_info",               get_ability_info                  },
+        { "get_attribute_info",             get_attribute_info                },
         { nullptr, nullptr }
     };
 #if LUA_VERSION_NUM < 502
@@ -3428,12 +3468,19 @@ LuaScript::LuaScript():
         { nullptr, nullptr}
     };
 
+    static luaL_Reg const members_AttributeInfo[] = {
+        { "id",                             attributeinfo_get_id              },
+        { "name",                           attributeinfo_get_name            },
+        { nullptr, nullptr}
+    };
+
     LuaEntity::registerType(mRootState, "Entity", members_Entity);
     LuaItemClass::registerType(mRootState, "ItemClass", members_ItemClass);
     LuaMapObject::registerType(mRootState, "MapObject", members_MapObject);
     LuaMonsterClass::registerType(mRootState, "MonsterClass", members_MonsterClass);
     LuaStatusEffect::registerType(mRootState, "StatusEffect", members_StatusEffect);
     LuaAbilityInfo::registerType(mRootState, "AbilityInfo", members_AbilityInfo);
+    LuaAttributeInfo::registerType(mRootState, "AttributeInfo", members_AttributeInfo);
 
     // Make script object available to callback functions.
     lua_pushlightuserdata(mRootState, const_cast<char *>(&registryKey));

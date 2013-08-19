@@ -71,7 +71,8 @@ void SpawnAreaComponent::update(Entity &entity)
         being->addComponent(beingComponent);
         being->addComponent(new MonsterComponent(*being, mSpecy));
 
-        if (beingComponent->getModifiedAttribute(ATTR_MAX_HP) <= 0)
+        auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_MAX_HP);
+        if (beingComponent->getModifiedAttribute(hpAttribute) <= 0)
         {
             LOG_WARN("Refusing to spawn dead monster " << mSpecy->getId());
             delete being;

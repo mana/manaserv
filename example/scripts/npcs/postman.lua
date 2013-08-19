@@ -12,7 +12,7 @@
 
 function post_talk(npc, ch)
   say("Hello " .. ch:name())
-  local strength = being_get_attribute(ch, ATTR_STRENGTH)
+  local strength = being_get_attribute(ch, "Strength"ENGTH)
   say("You have " .. tostring(strength) .. " strength")
   say("What would you like to do?")
   local answer = ask("View Mail", "Send Mail", "Nothing")

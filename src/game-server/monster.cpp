@@ -51,9 +51,9 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
      */
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    for (auto attrInfo : attributeManager->getAttributeScope(MonsterScope))
+    for (auto attribute : attributeManager->getAttributeScope(MonsterScope))
     {
-        beingComponent->createAttribute(attrInfo.first, attrInfo.second);
+        beingComponent->createAttribute(attribute);
     }
 
     /*
@@ -63,15 +63,15 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
 
     int mutation = specy->getMutation();
 
-    for (auto &attribute : specy->getAttributes())
+    for (auto &attributeIt : specy->getAttributes())
     {
-        double attributeValue = attribute.second;
+        double attributeValue = attributeIt.second;
         if (mutation != 0)
         {
             double factor = 100 + (rand() % (mutation * 2)) - mutation;
             attributeValue = attributeValue * factor / 100.0;
         }
-        beingComponent->setAttribute(entity, attribute.first->id,
+        beingComponent->setAttribute(entity, attributeIt.first,
                                      attributeValue);
     }
 

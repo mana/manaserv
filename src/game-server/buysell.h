@@ -23,6 +23,8 @@
 
 #include <vector>
 
+#include "game-server/attributemanager.h"
+
 class Entity;
 
 class BuySell
@@ -77,7 +79,7 @@ class BuySell
         typedef std::vector< TradedItem > TradedItems;
 
         /** The attribute ID of the currency to use. Hardcoded for now (FIXME) */
-        unsigned mCurrencyId;
+        AttributeManager::AttributeInfo *mCurrency;
 
         Entity *mChar;      /**< Character involved. */
         TradedItems mItems; /**< Traded items. */

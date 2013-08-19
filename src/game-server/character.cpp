@@ -83,8 +83,8 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     auto &attributeScope = attributeManager->getAttributeScope(CharacterScope);
     LOG_DEBUG("Character creation: initialisation of "
               << attributeScope.size() << " attributes.");
-    for (auto &attributeIt : attributeScope)
-        beingComponent->createAttribute(attributeIt.first, attributeIt.second);
+    for (auto &attribute : attributeScope)
+        beingComponent->createAttribute(attribute);
 
     auto *actorComponent = entity.getComponent<ActorComponent>();
     actorComponent->setWalkMask(Map::BLOCKMASK_WALL);
@@ -139,7 +139,8 @@ void CharacterComponent::deserialize(Entity &entity, MessageIn &msg)
     {
         unsigned id = msg.readInt16();
         double base = msg.readDouble();
-        beingComponent->setAttribute(entity, id, base);
+        auto *attributeInfo = attributeManager->getAttributeInfo(id);
+        beingComponent->setAttribute(entity, attributeInfo, base);
     }
 
     // status effects currently affecting the character
@@ -224,7 +225,7 @@ void CharacterComponent::serialize(Entity &entity, MessageOut &msg)
     msg.writeInt16(attributes.size());
     for (auto attributeIt : attributes)
     {
-        msg.writeInt16(attributeIt.first);
+        msg.writeInt16(attributeIt.first->id);
         msg.writeDouble(attributeIt.second.getBase());
         msg.writeDouble(attributeIt.second.getModifiedAttribute());
     }
@@ -321,8 +322,11 @@ void CharacterComponent::respawn(Entity &entity)
         return;
 
     // No script respawn callback set - fall back to hardcoded logic
-    const double maxHp = beingComponent->getModifiedAttribute(ATTR_MAX_HP);
-    beingComponent->setAttribute(entity, ATTR_HP, maxHp);
+    const double maxHp = beingComponent->getModifiedAttribute(
+            attributeManager->getAttributeInfo(ATTR_MAX_HP));
+    beingComponent->setAttribute(entity,
+                                 attributeManager->getAttributeInfo(ATTR_HP),
+                                 maxHp);
     // Warp back to spawn point.
     int spawnMap = Configuration::getValue("char_respawnMap", 1);
     int spawnX = Configuration::getValue("char_respawnX", 1024);
@@ -442,13 +446,11 @@ void CharacterComponent::sendStatus(Entity &entity)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
     MessageOut attribMsg(GPMSG_PLAYER_ATTRIBUTE_CHANGE);
-    for (std::set<size_t>::const_iterator i = mModifiedAttributes.begin(),
-         i_end = mModifiedAttributes.end(); i != i_end; ++i)
+    for (AttributeManager::AttributeInfo *attribute : mModifiedAttributes)
     {
-        int attr = *i;
-        attribMsg.writeInt16(attr);
-        attribMsg.writeInt32(beingComponent->getAttributeBase(attr) * 256);
-        attribMsg.writeInt32(beingComponent->getModifiedAttribute(attr) * 256);
+        attribMsg.writeInt16(attribute->id);
+        attribMsg.writeInt32(beingComponent->getAttributeBase(attribute) * 256);
+        attribMsg.writeInt32(beingComponent->getModifiedAttribute(attribute) * 256);
     }
     if (attribMsg.getLength() > 2) gameHandler->sendTo(mClient, attribMsg);
     mModifiedAttributes.clear();
@@ -466,15 +468,16 @@ void CharacterComponent::modifiedAllAttributes(Entity &entity)
     }
 }
 
-void CharacterComponent::attributeChanged(Entity *entity, unsigned attr)
+void CharacterComponent::attributeChanged(Entity *entity,
+                                          AttributeManager::AttributeInfo *attribute)
 {
     auto *beingComponent = entity->getComponent<BeingComponent>();
 
     // Inform the client of this attribute modification.
-    accountHandler->updateAttributes(getDatabaseID(), attr,
-                                   beingComponent->getAttributeBase(attr),
-                                   beingComponent->getModifiedAttribute(attr));
-    mModifiedAttributes.insert(attr);
+    accountHandler->updateAttributes(getDatabaseID(), attribute->id,
+                                     beingComponent->getAttributeBase(attribute),
+                                     beingComponent->getModifiedAttribute(attribute));
+    mModifiedAttributes.insert(attribute);
 }
 
 void CharacterComponent::incrementKillCount(int monsterType)
@@ -501,11 +504,11 @@ int CharacterComponent::getKillCount(int monsterType) const
 }
 
 AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
-                                                            int attribute)
+                                                            AttributeManager::AttributeInfo *attribute)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    if (!attributeManager->isAttributeDirectlyModifiable(attribute))
+    if (!attribute->modifiable)
         return ATTRIBMOD_INVALID_ATTRIBUTE;
     if (!mAttributePoints)
         return ATTRIBMOD_NO_POINTS_LEFT;
@@ -519,11 +522,11 @@ AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
 }
 
 AttribmodResponseCode CharacterComponent::useCorrectionPoint(Entity &entity,
-                                                             int attribute)
+                                                             AttributeManager::AttributeInfo *attribute)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    if (!attributeManager->isAttributeDirectlyModifiable(attribute))
+    if (!attribute->modifiable)
         return ATTRIBMOD_INVALID_ATTRIBUTE;
     if (!mCorrectionPoints)
         return ATTRIBMOD_NO_POINTS_LEFT;

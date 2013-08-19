@@ -226,13 +226,22 @@ AbilityManager::AbilityInfo *checkAbility(lua_State *s, int p)
     return abilityInfo;
 }
 
-const AttributeManager::AttributeInfo *checkAttribute(lua_State *s, int p)
+AttributeManager::AttributeInfo *checkAttribute(lua_State *s, int p)
 {
-    const AttributeManager::AttributeInfo *attributeInfo;
-    if (lua_isnumber(s, p))
+    AttributeManager::AttributeInfo *attributeInfo;
+
+    switch (lua_type(s, p))
+    {
+    case LUA_TNUMBER:
         attributeInfo = attributeManager->getAttributeInfo(luaL_checkint(s, p));
-    else
+        break;
+    case LUA_TSTRING:
         attributeInfo = attributeManager->getAttributeInfo(luaL_checkstring(s, p));
+        break;
+    case LUA_TUSERDATA:
+        attributeInfo = LuaAttributeInfo::check(s, p);
+        break;
+    }
 
     luaL_argcheck(s, attributeInfo != nullptr, p, "invalid attribute");
     return attributeInfo;

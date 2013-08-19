@@ -342,9 +342,10 @@ static void informPlayer(MapComposite *map, Entity *p)
             // We multiply the sent speed (in tiles per second) by ten
             // to get it within a byte with decimal precision.
             // For instance, a value of 4.5 will be sent as 45.
+            auto *tpsSpeedAttribute = attributeManager->getAttributeInfo(ATTR_MOVE_SPEED_TPS);
             moveMsg.writeInt8((unsigned short)
                 (o->getComponent<BeingComponent>()
-                        ->getModifiedAttribute(ATTR_MOVE_SPEED_TPS) * 10));
+                        ->getModifiedAttribute(tpsSpeedAttribute) * 10));
         }
     }
 
@@ -379,10 +380,12 @@ static void informPlayer(MapComposite *map, Entity *p)
                 MessageOut healthMsg(GPMSG_BEING_HEALTH_CHANGE);
                 healthMsg.writeInt16(
                         c->getComponent<ActorComponent>()->getPublicID());
+                auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_HP);
                 healthMsg.writeInt16(
-                        beingComponent->getModifiedAttribute(ATTR_HP));
+                        beingComponent->getModifiedAttribute(hpAttribute));
+                auto *maxHpAttribute = attributeManager->getAttributeInfo(ATTR_MAX_HP);
                 healthMsg.writeInt16(
-                        beingComponent->getModifiedAttribute(ATTR_MAX_HP));
+                        beingComponent->getModifiedAttribute(maxHpAttribute));
                 gameHandler->sendTo(p, healthMsg);
             }
         }
