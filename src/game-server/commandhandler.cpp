@@ -1126,6 +1126,12 @@ static void handleAttribute(Entity *player, std::string &args)
 
     auto *attribute = attributeManager->getAttributeInfo(attributeId);
 
+    if (!attribute)
+    {
+        say("Invalid attribute", player);
+        return;
+    }
+
     // change the player's attribute
     beingComponent->setAttribute(*other, attribute, value);
 

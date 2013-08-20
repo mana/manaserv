@@ -879,8 +879,12 @@ void GameHandler::handleRaiseAttribute(GameClient &client, MessageIn &message)
     const int attributeId = message.readInt16();
     auto *attribute = attributeManager->getAttributeInfo(attributeId);
     AttribmodResponseCode retCode;
-    retCode = characterComponent->useCharacterPoint(*client.character,
-                                                    attribute);
+    if (attribute) {
+        retCode = characterComponent->useCharacterPoint(*client.character,
+                                                        attribute);
+    } else {
+        retCode = ATTRIBMOD_INVALID_ATTRIBUTE;
+    }
 
     MessageOut result(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
     result.writeInt8(retCode);
@@ -910,8 +914,13 @@ void GameHandler::handleLowerAttribute(GameClient &client, MessageIn &message)
     const int attributeId = message.readInt32();
     auto *attribute = attributeManager->getAttributeInfo(attributeId);
     AttribmodResponseCode retCode;
-    retCode = characterComponent->useCorrectionPoint(*client.character,
-                                                     attribute);
+
+    if (attribute) {
+        retCode = characterComponent->useCorrectionPoint(*client.character,
+                                                         attribute);
+    } else {
+        retCode = ATTRIBMOD_INVALID_ATTRIBUTE;
+    }
 
     MessageOut result(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
     result.writeInt8(retCode);

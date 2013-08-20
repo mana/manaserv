@@ -140,7 +140,8 @@ void CharacterComponent::deserialize(Entity &entity, MessageIn &msg)
         unsigned id = msg.readInt16();
         double base = msg.readDouble();
         auto *attributeInfo = attributeManager->getAttributeInfo(id);
-        beingComponent->setAttribute(entity, attributeInfo, base);
+        if (attributeInfo)
+            beingComponent->setAttribute(entity, attributeInfo, base);
     }
 
     // status effects currently affecting the character
