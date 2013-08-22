@@ -51,7 +51,6 @@ CREATE TABLE mana_characters
    gender       INTEGER     NOT NULL,
    hair_style   INTEGER     NOT NULL,
    hair_color   INTEGER     NOT NULL,
-   level        INTEGER     NOT NULL,
    char_pts     INTEGER     NOT NULL,
    correct_pts  INTEGER     NOT NULL,
    x            INTEGER     NOT NULL,
@@ -81,19 +80,6 @@ CREATE INDEX mana_char_attr_char ON mana_char_attr ( char_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE mana_char_skills
-(
-    char_id     INTEGER     NOT NULL,
-    skill_id    INTEGER     NOT NULL,
-    skill_exp   INTEGER     NOT NULL,
-    --
-    FOREIGN KEY (char_id) REFERENCES mana_characters(id)
-);
-
-CREATE INDEX mana_char_skills_char ON mana_char_skills ( char_id );
-
------------------------------------------------------------------------------
-
 CREATE TABLE mana_char_status_effects
 (
     char_id     INTEGER     NOT NULL,
@@ -120,16 +106,15 @@ CREATE INDEX mana_char_kill_stats_char on mana_char_kill_stats ( char_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE mana_char_specials
+CREATE TABLE mana_char_abilities
 (
-    char_id               INTEGER     NOT NULL,
-    special_id            INTEGER     NOT NULL,
-    special_current_mana  INTEGER     NOT NULL,
-	PRIMARY KEY (char_id, special_id),
+    char_id                 INTEGER     NOT NULL,
+    ability_id              INTEGER     NOT NULL,
+	PRIMARY KEY (char_id, ability_id),
     FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX mana_char_specials_char on mana_char_specials ( char_id );
+CREATE INDEX mana_char_abilities_char on mana_char_abilities ( char_id );
 
 -----------------------------------------------------------------------------
 
@@ -387,7 +372,6 @@ AS
           c.user_id    as user_id,
           c.name       as name,
           c.gender     as gender,
-          c.level      as level,
           c.map_id     as map_id
      FROM mana_online_list l
      JOIN mana_characters c
@@ -424,7 +408,7 @@ AS
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', strftime('%s','now'));
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', strftime('%s','now'));
-INSERT INTO mana_world_states VALUES('database_version',     -1,'21', strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     -1,'24', strftime('%s','now'));
 
 -- all known transaction codes
 
@@ -461,7 +445,6 @@ INSERT INTO mana_transaction_codes VALUES ( 30, 'Trade items',              'Act
 INSERT INTO mana_transaction_codes VALUES ( 31, 'Attribute increased',      'Character' );
 INSERT INTO mana_transaction_codes VALUES ( 32, 'Attribute decreased',      'Character' );
 INSERT INTO mana_transaction_codes VALUES ( 33, 'Command MUTE',             'Commands' );
-INSERT INTO mana_transaction_codes VALUES ( 34, 'Command EXP',              'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 35, 'Command INVISIBLE',        'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 36, 'Command COMBAT',           'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 37, 'Command ANNOUNCE',         'Commands' );

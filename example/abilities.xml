@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<abilities>
+    <ability
+        id="1"
+        name="Magic/Test Spell 1"
+        target="point"
+        useaction="attack"
+    />
+    <ability
+        id="2"
+        name="Monster attack/Basic Monster strike"
+        target="being"
+        useaction="attack"
+    />
+    <ability
+        id="3"
+        name="debug"
+        target="point"
+    />
+</abilities>

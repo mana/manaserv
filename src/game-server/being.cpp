@@ -27,10 +27,8 @@
 #include "game-server/attributemanager.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/effect.h"
-#include "game-server/skillmanager.h"
 #include "game-server/statuseffect.h"
 #include "game-server/statusmanager.h"
 #include "utils/logger.h"
@@ -48,18 +46,14 @@ BeingComponent::BeingComponent(Entity &entity):
     mDirection(DOWN),
     mEmoteId(0)
 {
-    const AttributeManager::AttributeScope &attr = attributeManager->getAttributeScope(BeingScope);
-    LOG_DEBUG("Being creation: initialisation of " << attr.size() << " attributes.");
-    for (AttributeManager::AttributeScope::const_iterator it1 = attr.begin(),
-         it1_end = attr.end();
-        it1 != it1_end;
-        ++it1)
+    auto &attributeScope = attributeManager->getAttributeScope(BeingScope);
+    LOG_DEBUG("Being creation: initialisation of " << attributeScope.size()
+              << " attributes.");
+    for (auto &attribute : attributeScope)
     {
-        if (mAttributes.count(it1->first))
-            LOG_WARN("Redefinition of attribute '" << it1->first << "'!");
-        LOG_DEBUG("Attempting to create attribute '" << it1->first << "'.");
-        mAttributes.insert(std::make_pair(it1->first,
-                                          Attribute(*it1->second)));
+        LOG_DEBUG("Attempting to create attribute '"
+                  << attribute->id << "'.");
+        mAttributes.insert(std::make_pair(attribute, Attribute(attribute)));
     }
 
     clearDestination(entity);
@@ -92,27 +86,30 @@ void BeingComponent::triggerEmote(Entity &entity, int id)
 
 void BeingComponent::heal(Entity &entity)
 {
-    Attribute &hp = mAttributes.at(ATTR_HP);
-    Attribute &maxHp = mAttributes.at(ATTR_MAX_HP);
+    auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_HP);
+    Attribute &hp = mAttributes.at(hpAttribute);
+    Attribute &maxHp = mAttributes.at(attributeManager->getAttributeInfo(ATTR_MAX_HP));
     if (maxHp.getModifiedAttribute() == hp.getModifiedAttribute())
         return; // Full hp, do nothing.
 
     // Reset all modifications present in hp.
     hp.clearMods();
-    setAttribute(entity, ATTR_HP, maxHp.getModifiedAttribute());
+    setAttribute(entity, hpAttribute, maxHp.getModifiedAttribute());
 }
 
 void BeingComponent::heal(Entity &entity, int gain)
 {
-    Attribute &hp = mAttributes.at(ATTR_HP);
-    Attribute &maxHp = mAttributes.at(ATTR_MAX_HP);
+    auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_HP);
+    auto *maxHpAttribute = attributeManager->getAttributeInfo(ATTR_MAX_HP);
+    Attribute &hp = mAttributes.at(hpAttribute);
+    Attribute &maxHp = mAttributes.at(maxHpAttribute);
     if (maxHp.getModifiedAttribute() == hp.getModifiedAttribute())
         return; // Full hp, do nothing.
 
     // Cannot go over maximum hitpoints.
-    setAttribute(entity, ATTR_HP, hp.getBase() + gain);
+    setAttribute(entity, hpAttribute, hp.getBase() + gain);
     if (hp.getModifiedAttribute() > maxHp.getModifiedAttribute())
-        setAttribute(entity, ATTR_HP, maxHp.getModifiedAttribute());
+        setAttribute(entity, hpAttribute, maxHp.getModifiedAttribute());
 }
 
 void BeingComponent::died(Entity &entity)
@@ -187,8 +184,8 @@ void BeingComponent::updateDirection(Entity &entity,
 void BeingComponent::move(Entity &entity)
 {
     // Immobile beings cannot move.
-    if (!checkAttributeExists(ATTR_MOVE_SPEED_RAW)
-        || !getModifiedAttribute(ATTR_MOVE_SPEED_RAW))
+    if (!checkAttributeExists(attributeManager->getAttributeInfo(ATTR_MOVE_SPEED_RAW))
+        || !getModifiedAttribute(attributeManager->getAttributeInfo(ATTR_MOVE_SPEED_RAW)))
           return;
 
     // Remember the current position before moving. This is used by
@@ -270,10 +267,12 @@ void BeingComponent::move(Entity &entity)
     {
         Point next = mPath.front();
         mPath.pop_front();
+
+        auto *rawSpeedAttribute = attributeManager->getAttributeInfo(ATTR_MOVE_SPEED_RAW);
         // SQRT2 is used for diagonal movement.
         mMoveTime += (prev.x == next.x || prev.y == next.y) ?
-                       getModifiedAttribute(ATTR_MOVE_SPEED_RAW) :
-                       getModifiedAttribute(ATTR_MOVE_SPEED_RAW) * SQRT2;
+                       getModifiedAttribute(rawSpeedAttribute) :
+                       getModifiedAttribute(rawSpeedAttribute) * SQRT2;
 
         if (mPath.empty())
         {
@@ -310,28 +309,28 @@ int BeingComponent::directionToAngle(int direction)
 void BeingComponent::setAction(Entity &entity, BeingAction action)
 {
     mAction = action;
-    if (action != ATTACK && // The players are informed about these actions
-        action != WALK)     // by other messages
+    // The players are informed about these actions by other messages
+    if (action != WALK)
     {
         entity.getComponent<ActorComponent>()->raiseUpdateFlags(
                 UPDATEFLAG_ACTIONCHANGE);
     }
 }
 
-void BeingComponent::applyModifier(Entity &entity, unsigned attr, double value,
-                                   unsigned layer, unsigned duration,
-                                   unsigned id)
+void BeingComponent::applyModifier(Entity &entity, AttributeManager::AttributeInfo *attribute,
+                                   double value, unsigned layer,
+                                   unsigned duration, unsigned id)
 {
-    mAttributes.at(attr).add(duration, value, layer, id);
-    updateDerivedAttributes(entity, attr);
+    mAttributes.at(attribute).add(duration, value, layer, id);
+    updateDerivedAttributes(entity, attribute);
 }
 
-bool BeingComponent::removeModifier(Entity &entity, unsigned attr,
+bool BeingComponent::removeModifier(Entity &entity, AttributeManager::AttributeInfo *attribute,
                                     double value, unsigned layer,
                                     unsigned id, bool fullcheck)
 {
-    bool ret = mAttributes.at(attr).remove(value, layer, id, fullcheck);
-    updateDerivedAttributes(entity, attr);
+    bool ret = mAttributes.at(attribute).remove(value, layer, id, fullcheck);
+    updateDerivedAttributes(entity, attribute);
     return ret;
 }
 
@@ -340,94 +339,90 @@ void BeingComponent::setGender(BeingGender gender)
     mGender = gender;
 }
 
-void BeingComponent::setAttribute(Entity &entity, unsigned id, double value)
+void BeingComponent::setAttribute(Entity &entity,
+                                  AttributeManager::AttributeInfo *attribute,
+                                  double value)
 {
-    AttributeMap::iterator ret = mAttributes.find(id);
-    if (ret == mAttributes.end())
+    auto attributeIt = mAttributes.find(attribute);
+    if (attributeIt == mAttributes.end())
     {
         /*
          * The attribute does not yet exist, so we must attempt to create it.
          */
         LOG_ERROR("Being: Attempt to access non-existing attribute '"
-                  << id << "'!");
+                  << attribute->id << "'!");
         LOG_WARN("Being: Creation of new attributes dynamically is not "
                  "implemented yet!");
     }
     else
     {
-        ret->second.setBase(value);
-        updateDerivedAttributes(entity, id);
+        attributeIt->second.setBase(value);
+        updateDerivedAttributes(entity, attribute);
     }
 }
 
-void BeingComponent::createAttribute(unsigned id, const AttributeManager::AttributeInfo
-                            &attributeInfo)
+void BeingComponent::createAttribute(AttributeManager::AttributeInfo *attributeInfo)
 {
-    mAttributes.insert(std::pair<unsigned, Attribute>
-                                            (id,Attribute(attributeInfo)));
+    mAttributes.insert(std::pair<AttributeManager::AttributeInfo *, Attribute>
+            (attributeInfo, Attribute(attributeInfo)));
 }
 
-const Attribute *BeingComponent::getAttribute(unsigned id) const
+const Attribute *BeingComponent::getAttribute(AttributeManager::AttributeInfo *attribute) const
 {
-    AttributeMap::const_iterator ret = mAttributes.find(id);
+    AttributeMap::const_iterator ret = mAttributes.find(attribute);
     if (ret == mAttributes.end())
     {
         LOG_DEBUG("BeingComponent::getAttribute: Attribute "
-                  << id << " not found! Returning 0.");
+                  << attribute->id << " not found! Returning 0.");
         return 0;
     }
     return &ret->second;
 }
 
-double BeingComponent::getAttributeBase(unsigned id) const
+double BeingComponent::getAttributeBase(AttributeManager::AttributeInfo *attribute) const
 {
-    AttributeMap::const_iterator ret = mAttributes.find(id);
+    AttributeMap::const_iterator ret = mAttributes.find(attribute);
     if (ret == mAttributes.end())
     {
         LOG_DEBUG("BeingComponent::getAttributeBase: Attribute "
-                  << id << " not found! Returning 0.");
+                  << attribute->id << " not found! Returning 0.");
         return 0;
     }
     return ret->second.getBase();
 }
 
 
-double BeingComponent::getModifiedAttribute(unsigned id) const
+double BeingComponent::getModifiedAttribute(AttributeManager::AttributeInfo *attribute) const
 {
-    AttributeMap::const_iterator ret = mAttributes.find(id);
+    AttributeMap::const_iterator ret = mAttributes.find(attribute);
     if (ret == mAttributes.end())
     {
         LOG_DEBUG("BeingComponent::getModifiedAttribute: Attribute "
-                  << id << " not found! Returning 0.");
+                  << attribute->id << " not found! Returning 0.");
         return 0;
     }
     return ret->second.getModifiedAttribute();
 }
 
-void BeingComponent::setModAttribute(unsigned, double)
-{
-    // No-op to satisfy shared structure.
-    // The game-server calculates this manually.
-    return;
-}
-
-void BeingComponent::recalculateBaseAttribute(Entity &entity, unsigned attr)
+void BeingComponent::recalculateBaseAttribute(Entity &entity,
+                                              AttributeManager::AttributeInfo *attribute)
 {
     LOG_DEBUG("Being: Received update attribute recalculation request for "
-              << attr << ".");
-    if (!mAttributes.count(attr))
+              << attribute << ".");
+    if (!mAttributes.count(attribute))
     {
-        LOG_DEBUG("BeingComponent::recalculateBaseAttribute: " << attr << " not found!");
+        LOG_DEBUG("BeingComponent::recalculateBaseAttribute: " << attribute->id << " not found!");
         return;
     }
 
     // Handle speed conversion inside the engine
-    if (attr == ATTR_MOVE_SPEED_RAW)
+    if (attribute == attributeManager->getAttributeInfo(ATTR_MOVE_SPEED_RAW))
     {
+        auto *speedTpsAttribute = attributeManager->getAttributeInfo(ATTR_MOVE_SPEED_TPS);
         double newBase = utils::tpsToRawSpeed(
-                                    getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
-        if (newBase != getAttributeBase(attr))
-            setAttribute(entity, attr, newBase);
+                                    getModifiedAttribute(speedTpsAttribute));
+        if (newBase != getAttributeBase(attribute))
+            setAttribute(entity, attribute, newBase);
         return;
     }
 
@@ -437,18 +432,19 @@ void BeingComponent::recalculateBaseAttribute(Entity &entity, unsigned attr)
     Script *script = ScriptManager::currentState();
     script->prepare(mRecalculateBaseAttributeCallback);
     script->push(&entity);
-    script->push(attr);
+    script->push(attribute);
     script->execute(entity.getMap());
 }
 
-void BeingComponent::updateDerivedAttributes(Entity &entity, unsigned attr)
+void BeingComponent::updateDerivedAttributes(Entity &entity,
+                                             AttributeManager::AttributeInfo *attribute)
 {
-    signal_attribute_changed.emit(&entity, attr);
+    signal_attribute_changed.emit(&entity, attribute);
 
-    LOG_DEBUG("Being: Updating derived attribute(s) of: " << attr);
+    LOG_DEBUG("Being: Updating derived attribute(s) of: " << attribute);
 
     // Handle default actions before handing over to the script engine
-    switch (attr)
+    switch (attribute->id)
     {
     case ATTR_MAX_HP:
     case ATTR_HP:
@@ -458,7 +454,8 @@ void BeingComponent::updateDerivedAttributes(Entity &entity, unsigned attr)
     case ATTR_MOVE_SPEED_TPS:
         // Does not make a lot of sense to have in the scripts.
         // So handle it here:
-        recalculateBaseAttribute(entity, ATTR_MOVE_SPEED_RAW);
+        recalculateBaseAttribute(entity,
+                                 attributeManager->getAttributeInfo(ATTR_MOVE_SPEED_RAW));
         break;
     }
 
@@ -468,7 +465,7 @@ void BeingComponent::updateDerivedAttributes(Entity &entity, unsigned attr)
     Script *script = ScriptManager::currentState();
     script->prepare(mRecalculateDerivedAttributesCallback);
     script->push(&entity);
-    script->push(attr);
+    script->push(attribute);
     script->execute(entity.getMap());
 }
 
@@ -520,15 +517,17 @@ void BeingComponent::setStatusEffectTime(int id, int time)
 
 void BeingComponent::update(Entity &entity)
 {
-    int oldHP = getModifiedAttribute(ATTR_HP);
+    auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_HP);
+
+    int oldHP = getModifiedAttribute(hpAttribute);
     int newHP = oldHP;
-    int maxHP = getModifiedAttribute(ATTR_MAX_HP);
+    int maxHP = getModifiedAttribute(attributeManager->getAttributeInfo(ATTR_MAX_HP));
 
     // Regenerate HP
     if (mAction != DEAD && mHealthRegenerationTimeout.expired())
     {
         mHealthRegenerationTimeout.set(TICKS_PER_HP_REGENERATION);
-        newHP += getModifiedAttribute(ATTR_HP_REGEN);
+        newHP += getModifiedAttribute(attributeManager->getAttributeInfo(ATTR_HP_REGEN));
     }
     // Cap HP at maximum
     if (newHP > maxHP)
@@ -538,7 +537,7 @@ void BeingComponent::update(Entity &entity)
     // Only update HP when it actually changed to avoid network noise
     if (newHP != oldHP)
     {
-        setAttribute(entity, ATTR_HP, newHP);
+        setAttribute(entity, hpAttribute, newHP);
         entity.getComponent<ActorComponent>()->raiseUpdateFlags(
                 UPDATEFLAG_HEALTHCHANGE);
     }
@@ -573,7 +572,7 @@ void BeingComponent::update(Entity &entity)
     }
 
     // Check if being died
-    if (getModifiedAttribute(ATTR_HP) <= 0 && mAction != DEAD)
+    if (getModifiedAttribute(hpAttribute) <= 0 && mAction != DEAD)
         died(entity);
 }
 

@@ -24,6 +24,8 @@
 #include "common/inventorydata.h"
 #include "common/manaserv_protocol.h"
 
+#include "game-server/attributemanager.h"
+
 #include <list>
 #include <string>
 #include <vector>
@@ -192,6 +194,8 @@ class Script : public sigc::trackable
          * Pushes a list of items with amounts to the script engine.
          */
         virtual void push(const std::list<InventoryItem> &itemList) = 0;
+
+        virtual void push(AttributeManager::AttributeInfo *) = 0;
 
         /**
          * Executes the function being prepared.

@@ -22,10 +22,8 @@
 #include "game-server/item.h"
 
 #include "common/configuration.h"
-#include "game-server/attack.h"
 #include "game-server/attributemanager.h"
 #include "game-server/being.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/state.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
@@ -37,9 +35,11 @@ bool ItemEffectAttrMod::apply(Entity *itemUser)
 {
     LOG_DEBUG("Applying modifier.");
     itemUser->getComponent<BeingComponent>()->applyModifier(*itemUser,
-                                                            mAttributeId, mMod,
+                                                            mAttribute,
+                                                            mMod,
                                                             mAttributeLayer,
-                                                            mDuration, mId);
+                                                            mDuration,
+                                                            mModId);
     return false;
 }
 
@@ -47,21 +47,11 @@ void ItemEffectAttrMod::dispell(Entity *itemUser)
 {
     LOG_DEBUG("Dispelling modifier.");
     itemUser->getComponent<BeingComponent>()->removeModifier(*itemUser,
-                                                             mAttributeId,
+                                                             mAttribute,
                                                              mMod,
                                                              mAttributeLayer,
-                                                             mId, !mDuration);
-}
-
-bool ItemEffectAttack::apply(Entity *itemUser)
-{
-    itemUser->getComponent<CombatComponent>()->addAttack(mAttackInfo);
-    return false;
-}
-
-void ItemEffectAttack::dispell(Entity *itemUser)
-{
-    itemUser->getComponent<CombatComponent>()->removeAttack(mAttackInfo);
+                                                             mModId,
+                                                             !mDuration);
 }
 
 ItemEffectScript::~ItemEffectScript()
@@ -110,13 +100,6 @@ ItemClass::~ItemClass()
         delete mEffects.begin()->second;
         mEffects.erase(mEffects.begin());
     }
-
-    for (std::vector<AttackInfo *>::iterator it = mAttackInfos.begin(),
-         it_end = mAttackInfos.end();
-         it != it_end; ++it)
-    {
-        delete *it;
-    }
 }
 
 void ItemClass::addEffect(ItemEffectInfo *effect,
@@ -146,14 +129,6 @@ bool ItemClass::useTrigger(Entity *itemUser, ItemTriggerType trigger)
             it->second->dispell(itemUser);
 
     return ret;
-}
-
-void ItemClass::addAttack(AttackInfo *attackInfo,
-                             ItemTriggerType applyTrigger,
-                             ItemTriggerType dispellTrigger)
-{
-    mAttackInfos.push_back(attackInfo);
-    addEffect(new ItemEffectAttack(attackInfo), applyTrigger, dispellTrigger);
 }
 
 ItemComponent::ItemComponent(ItemClass *type, int amount) :

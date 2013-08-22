@@ -314,12 +314,12 @@ bool AttributeModifiersEffect::tick()
     return ret;
 }
 
-Attribute::Attribute(const AttributeManager::AttributeInfo &info):
+Attribute::Attribute(const AttributeManager::AttributeInfo *info):
     mBase(0),
-    mMinValue(info.minimum),
-    mMaxValue(info.maximum)
+    mMinValue(info->minimum),
+    mMaxValue(info->maximum)
 {
-    const std::vector<AttributeModifier> &modifiers = info.modifiers;
+    const std::vector<AttributeModifier> &modifiers = info->modifiers;
     LOG_DEBUG("Construction of new attribute with '" << modifiers.size()
         << "' layers.");
     for (unsigned i = 0; i < modifiers.size(); ++i)

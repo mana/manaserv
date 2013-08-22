@@ -24,7 +24,6 @@
 #include "common/resourcemanager.h"
 #include "game-server/attributemanager.h"
 #include "game-server/item.h"
-#include "game-server/skillmanager.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
 #include "utils/logger.h"
@@ -339,18 +338,14 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
                                                      0);
             ModifierLocation location = attributeManager->getLocation(tag);
             double value = XML::getFloatProperty(subNode, "value", 0.0);
-            item->addEffect(new ItemEffectAttrMod(location.attributeId,
+
+            auto *attribute = attributeManager->getAttributeInfo(location.attributeId);
+            item->addEffect(new ItemEffectAttrMod(attribute,
                                                   location.layer,
                                                   value,
                                                   item->getDatabaseID(),
                                                   duration),
                             triggerType.apply, triggerType.dispell);
-        }
-        else if (xmlStrEqual(subNode->name, BAD_CAST "attack"))
-        {
-            AttackInfo *attackInfo = AttackInfo::readAttackNode(subNode);
-            item->addAttack(attackInfo, triggerType.apply, triggerType.dispell);
-
         }
         // Having a dispell for the next three is nonsensical.
         else if (xmlStrEqual(subNode->name, BAD_CAST "cooldown"))

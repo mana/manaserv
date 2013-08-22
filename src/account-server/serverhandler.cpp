@@ -39,7 +39,6 @@
 #include "net/connectionhandler.h"
 #include "net/messageout.h"
 #include "net/netcomputer.h"
-#include "serialize/characterdata.h"
 #include "utils/logger.h"
 #include "utils/tokendispenser.h"
 
@@ -162,7 +161,7 @@ static void registerGameClient(GameServer *s, const std::string &token,
     msg.writeString(token, MAGIC_TOKEN_LENGTH);
     msg.writeInt32(ptr->getDatabaseID());
     msg.writeString(ptr->getName());
-    serializeCharacterData(*ptr, msg);
+    ptr->serialize(msg);
     s->send(msg);
 }
 
@@ -291,7 +290,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int id = msg.readInt32();
             if (CharacterData *ptr = storage->getCharacter(id, nullptr))
             {
-                deserializeCharacterData(*ptr, msg);
+                ptr->deserialize(msg);
                 if (!storage->updateCharacter(ptr))
                 {
                     LOG_ERROR("Failed to update character "
@@ -412,13 +411,6 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int id = msg.readInt32();
             int duration = msg.readInt32();
             storage->banCharacter(id, duration);
-        } break;
-
-        case GAMSG_CHANGE_PLAYER_LEVEL:
-        {
-            int id = msg.readInt32();
-            int level = msg.readInt16();
-            storage->setPlayerLevel(id, level);
         } break;
 
         case GAMSG_CHANGE_ACCOUNT_LEVEL:
@@ -691,15 +683,6 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
                 double base   = msg.readDouble();
                 double mod    = msg.readDouble();
                 storage->updateAttribute(charId, attrId, base, mod);
-            } break;
-
-            case SYNC_CHARACTER_SKILL:
-            {
-                LOG_DEBUG("received SYNC_CHARACTER_SKILL");
-                int charId = msg.readInt32();
-                int skillId = msg.readInt8();
-                int skillValue = msg.readInt32();
-                storage->updateExperience(charId, skillId, skillValue);
             } break;
 
             case SYNC_ONLINE_STATUS:

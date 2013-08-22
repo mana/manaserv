@@ -21,11 +21,13 @@
 #ifndef ATTRIBUTEMANAGER_H
 #define ATTRIBUTEMANAGER_H
 
-#include <map>
-#include <vector>
-#include <string>
 #include <limits>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
+#include "utils/string.h"
 #include "utils/xml.h"
 
 enum ScopeType
@@ -90,11 +92,16 @@ class AttributeManager
 {
     public:
         struct AttributeInfo {
-            AttributeInfo():
+            AttributeInfo(int id, const std::string &name):
+                id(id),
+                name(name),
                 minimum(std::numeric_limits<double>::min()),
                 maximum(std::numeric_limits<double>::max()),
                 modifiable(false)
             {}
+
+            int id;
+            std::string name;
 
             /** The minimum and maximum permitted attribute values. */
             double minimum;
@@ -102,7 +109,7 @@ class AttributeManager
             /** Tells whether the base attribute is modifiable by the player */
             bool modifiable;
             /** Effect modifier type: stackability and modification type. */
-            std::vector<struct AttributeModifier> modifiers;
+            std::vector<AttributeModifier> modifiers;
         };
 
         AttributeManager()
@@ -117,15 +124,12 @@ class AttributeManager
          * Reloads attribute reference file.
          */
         void reload();
+        void deinitialize();
 
-        const std::vector<AttributeModifier> *getAttributeInfo(int id) const;
+        AttributeInfo *getAttributeInfo(int id) const;
+        AttributeInfo *getAttributeInfo(const std::string &name) const;
 
-        // being type id -> (*{ stackable type, effect type })[]
-        typedef std::map<int, AttributeInfo*> AttributeScope;
-
-        const AttributeScope &getAttributeScope(ScopeType) const;
-
-        bool isAttributeDirectlyModifiable(int id) const;
+        const std::set<AttributeInfo *> &getAttributeScope(ScopeType) const;
 
         ModifierLocation getLocation(const std::string &tag) const;
 
@@ -136,17 +140,15 @@ class AttributeManager
         void checkStatus();
 
     private:
-        void readModifierNode(xmlNodePtr modifierNode, int attributeId);
+        void readModifierNode(xmlNodePtr modifierNode, int attributeId,
+                              AttributeInfo *info);
 
-        // Attribute id -> { modifiable, min, max, { stackable type, effect type }[] }
-        typedef std::map<int, AttributeInfo> AttributeMap;
+        std::set<AttributeInfo *> mAttributeScopes[MaxScope];
 
-        /** Maps tag names to specific modifiers. */
-        typedef std::map<std::string, ModifierLocation> TagMap;
+        std::map<int, AttributeInfo *> mAttributeMap;
+        utils::NameMap<AttributeInfo *> mAttributeNameMap;
 
-        AttributeScope mAttributeScopes[MaxScope];
-        AttributeMap mAttributeMap;
-        TagMap mTagMap;
+        std::map<std::string, ModifierLocation> mTagMap;
 };
 
 extern AttributeManager *attributeManager;

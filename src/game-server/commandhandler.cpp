@@ -32,7 +32,7 @@
 #include "game-server/mapmanager.h"
 #include "game-server/monster.h"
 #include "game-server/monstermanager.h"
-#include "game-server/specialmanager.h"
+#include "game-server/abilitymanager.h"
 #include "game-server/state.h"
 
 #include "scripting/scriptmanager.h"
@@ -80,12 +80,11 @@ static void handleLogsay(Entity*, std::string&);
 static void handleKillMonsters(Entity*, std::string&);
 static void handleCraft(Entity*, std::string&);
 static void handleGetPos(Entity*, std::string&);
-static void handleSkills(Entity*, std::string&);
 static void handleEffect(Entity*, std::string&);
-static void handleGiveSpecial(Entity*, std::string&);
-static void handleTakeSpecial(Entity*, std::string&);
-static void handleRechargeSpecial(Entity*, std::string&);
-static void handleListSpecials(Entity*, std::string&);
+static void handleGiveAbility(Entity*, std::string&);
+static void handleTakeAbility(Entity*, std::string&);
+static void handleRechargeAbility(Entity*, std::string&);
+static void handleListAbility(Entity*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -147,26 +146,24 @@ static CmdRef const cmdRef[] =
         "Crafts something.", &handleCraft},
     {"getpos", "<character>",
         "Gets the position of a character.", &handleGetPos},
-    {"skills", "<character>",
-        "Lists all skills and their values of a character", &handleSkills},
     {"effect", "<effectid> <x> <y> / <effectid> <being> / <effectid>",
         "Shows an effect at the given position or on the given being. "
         "The player's character is targeted if neither of them is provided.",
         &handleEffect},
-    {"givespecial", "<character> <special>",
-        "Gives the character the special. "
-        "The special can get passed as specialid or in the format "
-        "<setname>_<specialname>", &handleGiveSpecial},
-    {"takespecial", "<character> <special>",
-        "Takes the special aways from the character. "
-        "The special can get passed as specialid or in the format "
-        "<setname>_<specialname>", &handleTakeSpecial},
-    {"rechargespecial", "<character> <special>",
-        "Recharges the special of the character. "
-        "The special can get passed as specialid or in the format "
-        "<setname>_<specialname>", &handleRechargeSpecial},
-    {"listspecials", "<character>",
-        "Lists the specials of the character.", &handleListSpecials},
+    {"giveability", "<character> <ability>",
+        "Gives the character the ability. "
+        "The ability can get passed as abilityid or in the format "
+        "<setname>_<abilityname>", &handleGiveAbility},
+    {"takeability", "<character> <ability>",
+        "Takes the ability aways from the character. "
+        "The ability can get passed as abilityid or in the format "
+        "<setname>_<abilityname>", &handleTakeAbility},
+    {"rechargeability", "<character> <ability>",
+        "Recharges the ability of the character. "
+        "The ability can get passed as abilityid or in the format "
+        "<setname>_<abilityname>", &handleRechargeAbility},
+    {"listabilities", "<character>",
+        "Lists the abilitys of the character.", &handleListAbility},
     {nullptr, nullptr, nullptr, nullptr}
 
 };
@@ -674,9 +671,11 @@ static void handleMoney(Entity *player, std::string &args)
 
     auto *beingComponent = other->getComponent<BeingComponent>();
 
+    auto *moneyAttribute = attributeManager->getAttributeInfo(ATTR_GP);
+
     // change how much money the player has
-    const double previousMoney = beingComponent->getAttributeBase(ATTR_GP);
-    beingComponent->setAttribute(*player, ATTR_GP , previousMoney + value);
+    const double previousMoney = beingComponent->getAttributeBase(moneyAttribute);
+    beingComponent->setAttribute(*player, moneyAttribute , previousMoney + value);
 
     // log transaction
     std::string msg = "User created " + valuestr + " money";
@@ -1068,7 +1067,6 @@ static void handleTakePermission(Entity *player, std::string &args)
 static void handleAttribute(Entity *player, std::string &args)
 {
     Entity *other;
-    int attr, value;
 
     // get arguments
     std::string character = getArgument(args);
@@ -1107,16 +1105,16 @@ static void handleAttribute(Entity *player, std::string &args)
     }
 
     // put the attribute into an integer
-    attr = utils::stringToInt(attrstr);
+    int attributeId = utils::stringToInt(attrstr);
 
-    if (attr < 0)
+    if (attributeId < 0)
     {
         say("Invalid Attribute", player);
         return;
     }
 
     // put the value into an integer
-    value = utils::stringToInt(valuestr);
+    int value = utils::stringToInt(valuestr);
 
     if (value < 0)
     {
@@ -1126,12 +1124,20 @@ static void handleAttribute(Entity *player, std::string &args)
 
     auto *beingComponent = other->getComponent<BeingComponent>();
 
+    auto *attribute = attributeManager->getAttributeInfo(attributeId);
+
+    if (!attribute)
+    {
+        say("Invalid attribute", player);
+        return;
+    }
+
     // change the player's attribute
-    beingComponent->setAttribute(*other, attr, value);
+    beingComponent->setAttribute(*other, attribute, value);
 
     // log transaction
     std::stringstream msg;
-    msg << "User changed attribute " << attr << " of player "
+    msg << "User changed attribute " << attribute->id << " of player "
         << beingComponent->getName()
         << " to " << value;
     int databaseId =
@@ -1267,7 +1273,8 @@ static void handleMute(Entity *player, std::string &args)
 
 static void handleDie(Entity *player, std::string &)
 {
-    player->getComponent<BeingComponent>()->setAttribute(*player, ATTR_HP, 0);
+    auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_HP);
+    player->getComponent<BeingComponent>()->setAttribute(*player, hpAttribute, 0);
     say("You've killed yourself.", player);
 }
 
@@ -1287,7 +1294,8 @@ static void handleKill(Entity *player, std::string &args)
     }
 
     // kill the player
-    other->getComponent<BeingComponent>()->setAttribute(*player, ATTR_HP, 0);
+    auto *hpAttribute = attributeManager->getAttributeInfo(ATTR_HP);
+    other->getComponent<BeingComponent>()->setAttribute(*player, hpAttribute, 0);
 
     // feedback
     std::stringstream targetMsg;
@@ -1516,52 +1524,6 @@ static void handleGetPos(Entity *player, std::string &args)
     say(str.str(), player);
 }
 
-static void handleSkills(Entity *player, std::string &args)
-{
-    std::string character = getArgument(args);
-    if (character.empty())
-    {
-        say("Invalid amount of arguments given.", player);
-        say("Usage: @skills <character>", player);
-        return;
-    }
-    Entity *other;
-    if (character == "#")
-        other = player;
-    else
-        other = gameHandler->getCharacterByNameSlow(character);
-    if (!other)
-    {
-        say("Invalid character, or player is offline.", player);
-        return;
-    }
-
-
-    auto *characterComponent =
-            player->getComponent<CharacterComponent>();
-
-    say("List of skills of player '" +
-        other->getComponent<BeingComponent>()->getName() + "':", player);
-    std::map<int, int>::const_iterator it =
-            characterComponent->getSkillBegin();
-    std::map<int, int>::const_iterator it_end =
-            characterComponent->getSkillEnd();
-
-    if (it == it_end)
-    {
-        say("No skills available.", player);
-        return;
-    }
-
-    while (it != it_end)
-    {
-        std::stringstream str;
-        str << "Id: " << it->first << " value: " << it->second;
-        say(str.str(), player);
-        ++it;
-    }
-}
-
 static void handleEffect(Entity *player, std::string &args)
 {
     std::vector<std::string> arguments;
@@ -1602,14 +1564,14 @@ static void handleEffect(Entity *player, std::string &args)
     }
 }
 
-static void handleGiveSpecial(Entity *player, std::string &args)
+static void handleGiveAbility(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
-    std::string special = getArgument(args);
-    if (character.empty() || special.empty())
+    std::string ability = getArgument(args);
+    if (character.empty() || ability.empty())
     {
         say("Invalid amount of arguments given.", player);
-        say("Usage: @givespecial <character> <special>", player);
+        say("Usage: @giveability <character> <ability>", player);
         return;
     }
 
@@ -1625,28 +1587,28 @@ static void handleGiveSpecial(Entity *player, std::string &args)
         return;
     }
 
-    int specialId;
-    if (utils::isNumeric(special))
-        specialId = utils::stringToInt(special);
+    int abilityId;
+    if (utils::isNumeric(ability))
+        abilityId = utils::stringToInt(ability);
     else
-        specialId = specialManager->getId(special);
+        abilityId = abilityManager->getId(ability);
 
-    if (specialId <= 0 ||
-        !other->getComponent<CharacterComponent>()->giveSpecial(specialId))
+    if (abilityId <= 0 ||
+        !other->getComponent<AbilityComponent>()->giveAbility(abilityId))
     {
-        say("Invalid special.", player);
+        say("Invalid ability.", player);
         return;
     }
 }
 
-static void handleTakeSpecial(Entity *player, std::string &args)
+static void handleTakeAbility(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
-    std::string special = getArgument(args);
-    if (character.empty() || special.empty())
+    std::string ability = getArgument(args);
+    if (character.empty() || ability.empty())
     {
         say("Invalid amount of arguments given.", player);
-        say("Usage: @takespecial <character> <special>", player);
+        say("Usage: @takeability <character> <ability>", player);
         return;
     }
 
@@ -1662,33 +1624,33 @@ static void handleTakeSpecial(Entity *player, std::string &args)
         return;
     }
 
-    int specialId;
-    if (utils::isNumeric(special))
-        specialId = utils::stringToInt(special);
+    int abilityId;
+    if (utils::isNumeric(ability))
+        abilityId = utils::stringToInt(ability);
     else
-        specialId = specialManager->getId(special);
+        abilityId = abilityManager->getId(ability);
 
-    if (specialId <= 0)
+    if (abilityId <= 0)
     {
-        say("Invalid special.", player);
+        say("Invalid ability.", player);
         return;
     }
-    if (!other->getComponent<CharacterComponent>()->takeSpecial(specialId))
+    if (!other->getComponent<AbilityComponent>()->takeAbility(abilityId))
     {
-        say("Character does not have special.", player);
+        say("Character does not have ability.", player);
         return;
     }
 }
 
-static void handleRechargeSpecial(Entity *player, std::string &args)
+static void handleRechargeAbility(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
-    std::string special = getArgument(args);
+    std::string ability = getArgument(args);
     std::string newMana = getArgument(args);
-    if (character.empty() || special.empty())
+    if (character.empty() || ability.empty())
     {
         say("Invalid amount of arguments given.", player);
-        say("Usage: @rechargespecial <character> <special> [<mana>]", player);
+        say("Usage: @rechargeability <character> <ability>", player);
         return;
     }
 
@@ -1704,49 +1666,30 @@ static void handleRechargeSpecial(Entity *player, std::string &args)
         return;
     }
 
-    int specialId;
-    if (utils::isNumeric(special))
-        specialId = utils::stringToInt(special);
+    int abilityId;
+    if (utils::isNumeric(ability))
+        abilityId = utils::stringToInt(ability);
     else
-        specialId = specialManager->getId(special);
+        abilityId = abilityManager->getId(ability);
 
-    SpecialManager::SpecialInfo *info =
-            specialManager->getSpecialInfo(specialId);
+    const AbilityManager::AbilityInfo *info =
+            abilityManager->getAbilityInfo(abilityId);
 
     if (!info)
     {
-        say("Invalid special.", player);
+        say("Invalid ability.", player);
         return;
     }
-    int mana;
-    if (newMana.empty())
-    {
-        mana = info->neededMana;
-    }
-    else
-    {
-        if (!utils::isNumeric(newMana))
-        {
-            say("Invalid mana amount given.", player);
-            return;
-        }
-        mana = utils::stringToInt(newMana);
-    }
-    if (!other->getComponent<CharacterComponent>()
-            ->setSpecialMana(specialId, mana))
-    {
-        say("Character does not have special.", player);
-        return;
-    }
+    other->getComponent<AbilityComponent>()->setAbilityCooldown(abilityId, 0);
 }
 
-static void handleListSpecials(Entity *player, std::string &args)
+static void handleListAbility(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
     if (character.empty())
     {
         say("Invalid amount of arguments given.", player);
-        say("Usage: @listspecials <character>", player);
+        say("Usage: @listabilitys <character>", player);
         return;
     }
 
@@ -1762,18 +1705,15 @@ static void handleListSpecials(Entity *player, std::string &args)
         return;
     }
 
-    auto *characterComponent =
-            other->getComponent<CharacterComponent>();
+    auto *abilityComponent = other->getComponent<AbilityComponent>();
 
-    say("Specials of character " +
+    say("Abilityies of character " +
         other->getComponent<BeingComponent>()->getName() + ":", player);
-    for (SpecialMap::const_iterator it = characterComponent->getSpecialBegin(),
-         it_end = characterComponent->getSpecialEnd(); it != it_end; ++it)
+    for (auto &abilityIt : abilityComponent->getAbilities())
     {
-        const SpecialValue &info = it->second;
+        const AbilityValue &info = abilityIt.second;
         std::stringstream str;
-        str << info.specialInfo->id << ": " << info.specialInfo->setName << "/"
-            << info.specialInfo->name << " charge: " << info.currentMana;
+        str << info.abilityInfo->id << ": " << info.abilityInfo->name;
         say(str.str(), player);
     }
 }

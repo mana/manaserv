@@ -26,7 +26,6 @@
 #include "common/configuration.h"
 #include "common/resourcemanager.h"
 #include "game-server/character.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/map.h"
 #include "game-server/mapmanager.h"
@@ -596,13 +595,6 @@ void MapComposite::remove(Entity *ptr)
     for (std::vector<Entity*>::iterator i = mContent->entities.begin(),
          i_end = mContent->entities.end(); i != i_end; ++i)
     {
-        if ((*i)->canFight())
-        {
-            if ((*i)->getComponent<CombatComponent>()->getTarget() == ptr)
-            {
-                (*i)->getComponent<CombatComponent>()->clearTarget();
-            }
-        }
         if (*i == ptr)
         {
             i = mContent->entities.erase(i);

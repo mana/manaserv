@@ -22,10 +22,8 @@
 
 #include "common/configuration.h"
 #include "game-server/accountconnection.h"
-#include "game-server/attack.h"
 #include "game-server/attributemanager.h"
 #include "game-server/buysell.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
@@ -33,13 +31,11 @@
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
-#include "game-server/skillmanager.h"
 #include "game-server/state.h"
 #include "game-server/trade.h"
 #include "scripting/scriptmanager.h"
 #include "net/messagein.h"
 #include "net/messageout.h"
-#include "serialize/characterdata.h"
 
 #include "utils/logger.h"
 
@@ -47,12 +43,6 @@
 #include <cassert>
 #include <cmath>
 #include <limits.h>
-
-// Experience curve related values
-const float CharacterComponent::EXPCURVE_EXPONENT = 3.0f;
-const float CharacterComponent::EXPCURVE_FACTOR = 10.0f;
-const float CharacterComponent::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
-const float CharacterComponent::EXP_LEVEL_FLEXIBILITY = 1.0f;
 
 Script::Ref CharacterComponent::mDeathCallback;
 Script::Ref CharacterComponent::mDeathAcceptedCallback;
@@ -75,30 +65,26 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mClient(nullptr),
     mConnected(true),
     mTransactionHandler(nullptr),
-    mSpecialUpdateNeeded(false),
     mDatabaseID(-1),
     mHairStyle(0),
     mHairColor(0),
-    mLevel(1),
-    mLevelProgress(0),
-    mUpdateLevelProgress(false),
-    mRecalculateLevel(true),
+    mSendAttributePointsStatus(false),
+    mAttributePoints(0),
+    mCorrectionPoints(0),
+    mSendAbilityCooldown(false),
     mParty(0),
     mTransaction(TRANS_NONE),
     mTalkNpcId(0),
     mNpcThread(0),
-    mKnuckleAttackInfo(0),
     mBaseEntity(&entity)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    const AttributeManager::AttributeScope &attributes =
-                           attributeManager->getAttributeScope(CharacterScope);
+    auto &attributeScope = attributeManager->getAttributeScope(CharacterScope);
     LOG_DEBUG("Character creation: initialisation of "
-              << attributes.size() << " attributes.");
-    for (auto attributeScope : attributes)
-        beingComponent->createAttribute(attributeScope.first,
-                                        *attributeScope.second);
+              << attributeScope.size() << " attributes.");
+    for (auto &attribute : attributeScope)
+        beingComponent->createAttribute(attribute);
 
     auto *actorComponent = entity.getComponent<ActorComponent>();
     actorComponent->setWalkMask(Map::BLOCKMASK_WALL);
@@ -106,86 +92,211 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     actorComponent->setSize(16);
 
 
-    CombatComponent *combatcomponent = new CombatComponent(entity);
-    entity.addComponent(combatcomponent);
-    combatcomponent->getAttacks().attack_added.connect(
-            sigc::mem_fun(this, &CharacterComponent::attackAdded));
-    combatcomponent->getAttacks().attack_removed.connect(
-            sigc::mem_fun(this, &CharacterComponent::attackRemoved));
-
-    // Default knuckle attack
-    int damageBase = beingComponent->getModifiedAttribute(ATTR_STR);
-    int damageDelta = damageBase / 2;
-    Damage knuckleDamage;
-    knuckleDamage.skill = skillManager->getDefaultSkillId();
-    knuckleDamage.base = damageBase;
-    knuckleDamage.delta = damageDelta;
-    knuckleDamage.cth = 2;
-    knuckleDamage.element = ELEMENT_NEUTRAL;
-    knuckleDamage.type = DAMAGE_PHYSICAL;
-    knuckleDamage.range = DEFAULT_TILE_LENGTH;
-
-    mKnuckleAttackInfo = new AttackInfo(0, knuckleDamage, 7, 3, 0);
-    combatcomponent->addAttack(mKnuckleAttackInfo);
+    auto *abilityComponent = new AbilityComponent();
+    entity.addComponent(abilityComponent);
+    abilityComponent->signal_ability_changed.connect(
+            sigc::mem_fun(this, &CharacterComponent::abilityStatusChanged));
+    abilityComponent->signal_global_cooldown_activated.connect(
+            sigc::mem_fun(this,
+                          &CharacterComponent::abilityCooldownActivated));
 
     // Get character data.
     mDatabaseID = msg.readInt32();
     beingComponent->setName(msg.readString());
 
-    CharacterData characterData(&entity, this);
-    deserializeCharacterData(characterData, msg);
+    deserialize(entity, msg);
 
     Inventory(&entity, mPossessions).initialize();
     modifiedAllAttributes(entity);;
 
     beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
             this, &CharacterComponent::attributeChanged));
+
+    for (auto &abilityIt : abilityComponent->getAbilities())
+        mModifiedAbilities.insert(abilityIt.first);
 }
 
 CharacterComponent::~CharacterComponent()
 {
     delete mNpcThread;
-    delete mKnuckleAttackInfo;
+}
+
+void CharacterComponent::deserialize(Entity &entity, MessageIn &msg)
+{
+    auto *beingComponent = entity.getComponent<BeingComponent>();
+
+    // general character properties
+    setAccountLevel(msg.readInt8());
+    beingComponent->setGender(ManaServ::getGender(msg.readInt8()));
+    setHairStyle(msg.readInt8());
+    setHairColor(msg.readInt8());
+    setAttributePoints(msg.readInt16());
+    setCorrectionPoints(msg.readInt16());
+
+    // character attributes
+    unsigned attrSize = msg.readInt16();
+    for (unsigned i = 0; i < attrSize; ++i)
+    {
+        unsigned id = msg.readInt16();
+        double base = msg.readDouble();
+        auto *attributeInfo = attributeManager->getAttributeInfo(id);
+        if (attributeInfo)
+            beingComponent->setAttribute(entity, attributeInfo, base);
+    }
+
+    // status effects currently affecting the character
+    int statusSize = msg.readInt16();
+
+    for (int i = 0; i < statusSize; i++)
+    {
+        int status = msg.readInt16();
+        int time = msg.readInt16();
+        beingComponent->applyStatusEffect(status, time);
+    }
+
+    // location
+    auto *map = MapManager::getMap(msg.readInt16());
+    entity.setMap(map);
+
+    Point temporaryPoint;
+    temporaryPoint.x = msg.readInt16();
+    temporaryPoint.y = msg.readInt16();
+    entity.getComponent<ActorComponent>()->setPosition(entity, temporaryPoint);
+
+    // kill count
+    int killSize = msg.readInt16();
+    for (int i = 0; i < killSize; i++)
+    {
+        int monsterId = msg.readInt16();
+        int kills = msg.readInt32();
+        setKillCount(monsterId, kills);
+    }
+
+    // character abilities
+    int abilitiesSize = msg.readInt16();
+    for (int i = 0; i < abilitiesSize; i++)
+    {
+        const int id = msg.readInt32();
+        entity.getComponent<AbilityComponent>()->giveAbility(id);
+    }
+
+
+    Possessions &poss = getPossessions();
+    EquipData equipData;
+    int equipSlotsSize = msg.readInt16();
+    unsigned eqSlot;
+    EquipmentItem equipItem;
+    for (int j = 0; j < equipSlotsSize; ++j)
+    {
+        eqSlot  = msg.readInt16();
+        equipItem.itemId = msg.readInt16();
+        equipItem.itemInstance = msg.readInt16();
+        equipData.insert(equipData.end(),
+                               std::make_pair(eqSlot, equipItem));
+    }
+    poss.setEquipment(equipData);
+
+    // Loads inventory - must be last because size isn't transmitted
+    InventoryData inventoryData;
+    while (msg.getUnreadLength())
+    {
+        InventoryItem i;
+        int slotId = msg.readInt16();
+        i.itemId   = msg.readInt16();
+        i.amount   = msg.readInt16();
+        inventoryData.insert(inventoryData.end(), std::make_pair(slotId, i));
+    }
+    poss.setInventory(inventoryData);
+}
+
+void CharacterComponent::serialize(Entity &entity, MessageOut &msg)
+{
+    auto *beingComponent = entity.getComponent<BeingComponent>();
+
+    // general character properties
+    msg.writeInt8(getAccountLevel());
+    msg.writeInt8(beingComponent->getGender());
+    msg.writeInt8(getHairStyle());
+    msg.writeInt8(getHairColor());
+    msg.writeInt16(getAttributePoints());
+    msg.writeInt16(getCorrectionPoints());
+
+
+    const AttributeMap &attributes = beingComponent->getAttributes();
+    msg.writeInt16(attributes.size());
+    for (auto attributeIt : attributes)
+    {
+        msg.writeInt16(attributeIt.first->id);
+        msg.writeDouble(attributeIt.second.getBase());
+        msg.writeDouble(attributeIt.second.getModifiedAttribute());
+    }
+
+    // status effects currently affecting the character
+    auto &statusEffects = beingComponent->getStatusEffects();
+    msg.writeInt16(statusEffects.size());
+    for (auto &statusIt : statusEffects)
+    {
+        msg.writeInt16(statusIt.first);
+        msg.writeInt16(statusIt.second.time);
+    }
+
+    // location
+    msg.writeInt16(entity.getMap()->getID());
+    const Point &pos = entity.getComponent<ActorComponent>()->getPosition();
+    msg.writeInt16(pos.x);
+    msg.writeInt16(pos.y);
+
+    // kill count
+    msg.writeInt16(getKillCountSize());
+    for (auto &killCountIt : mKillCount)
+    {
+        msg.writeInt16(killCountIt.first);
+        msg.writeInt32(killCountIt.second);
+    }
+
+    // character abilities
+    auto &abilities = entity.getComponent<AbilityComponent>()->getAbilities();
+    msg.writeInt16(abilities.size());
+    for (auto &abilityIt : abilities) {
+        msg.writeInt32(abilityIt.first);
+    }
+
+    // inventory - must be last because size isn't transmitted
+    const Possessions &poss = getPossessions();
+    const EquipData &equipData = poss.getEquipment();
+    msg.writeInt16(equipData.size()); // number of equipment
+    for (EquipData::const_iterator k = equipData.begin(),
+             k_end = equipData.end(); k != k_end; ++k)
+    {
+        msg.writeInt16(k->first);                 // Equip slot id
+        msg.writeInt16(k->second.itemId);         // ItemId
+        msg.writeInt16(k->second.itemInstance);   // Item Instance id
+    }
+
+    const InventoryData &inventoryData = poss.getInventory();
+    for (InventoryData::const_iterator j = inventoryData.begin(),
+         j_end = inventoryData.end(); j != j_end; ++j)
+    {
+        msg.writeInt16(j->first);           // slot id
+        msg.writeInt16(j->second.itemId);   // item id
+        msg.writeInt16(j->second.amount);   // amount
+    }
 }
 
 void CharacterComponent::update(Entity &entity)
 {
-    // Update character level if needed.
-    if (mRecalculateLevel)
-    {
-        mRecalculateLevel = false;
-        recalculateLevel(entity);
-    }
-
     // Dead character: don't regenerate anything else
     if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
-    // Update special recharge
-    for (SpecialMap::iterator it = mSpecials.begin(), it_end = mSpecials.end();
-         it != it_end; it++)
-    {
-        SpecialValue &s = it->second;
-        if (s.specialInfo->rechargeable && s.currentMana < s.specialInfo->neededMana)
-        {
-            s.currentMana += s.rechargeSpeed;
-            if (s.currentMana >= s.specialInfo->neededMana &&
-                    s.specialInfo->rechargedCallback.isValid())
-            {
-                Script *script = ScriptManager::currentState();
-                script->prepare(s.specialInfo->rechargedCallback);
-                script->push(&entity);
-                script->push(s.specialInfo->id);
-                script->execute(entity.getMap());
-            }
-        }
-    }
+    if (!mModifiedAbilities.empty())
+        sendAbilityUpdate(entity);
 
-    if (mSpecialUpdateNeeded)
-    {
-        sendSpecialUpdate();
-        mSpecialUpdateNeeded = false;
-    }
+    if (mSendAbilityCooldown)
+        sendAbilityCooldownUpdate(entity);
+
+    if (mSendAttributePointsStatus)
+        sendAttributePointsStatus(entity);
 }
 
 void CharacterComponent::characterDied(Entity *being)
@@ -206,16 +317,17 @@ void CharacterComponent::respawn(Entity &entity)
 
     // Make it alive again
     beingComponent->setAction(entity, STAND);
-    // Reset target
-    entity.getComponent<CombatComponent>()->clearTarget();
 
     // Execute respawn callback when set
     if (executeCallback(mDeathAcceptedCallback, entity))
         return;
 
     // No script respawn callback set - fall back to hardcoded logic
-    const double maxHp = beingComponent->getModifiedAttribute(ATTR_MAX_HP);
-    beingComponent->setAttribute(entity, ATTR_HP, maxHp);
+    const double maxHp = beingComponent->getModifiedAttribute(
+            attributeManager->getAttributeInfo(ATTR_MAX_HP));
+    beingComponent->setAttribute(entity,
+                                 attributeManager->getAttributeInfo(ATTR_HP),
+                                 maxHp);
     // Warp back to spawn point.
     int spawnMap = Configuration::getValue("char_respawnMap", 1);
     int spawnX = Configuration::getValue("char_respawnX", 1024);
@@ -225,133 +337,51 @@ void CharacterComponent::respawn(Entity &entity)
                            Point(spawnX, spawnY));
 }
 
-bool CharacterComponent::specialUseCheck(SpecialMap::iterator it)
+void CharacterComponent::abilityStatusChanged(int id)
 {
-    if (it == mSpecials.end())
-    {
-        LOG_INFO("Character uses special " << it->first
-                 << " without authorization.");
-        return false;
-    }
-
-    //check if the special is currently recharged
-    SpecialValue &special = it->second;
-    if (special.specialInfo->rechargeable &&
-            special.currentMana < special.specialInfo->neededMana)
-    {
-        LOG_INFO("Character uses special " << it->first << " which is not recharged. ("
-                 << special.currentMana << "/"
-                 << special.specialInfo->neededMana << ")");
-        return false;
-    }
-
-    if (!special.specialInfo->useCallback.isValid())
-    {
-        LOG_WARN("No callback for use of special "
-                 << special.specialInfo->setName << "/"
-                 << special.specialInfo->name << ". Ignoring special.");
-        return false;
-    }
-    return true;
+    mModifiedAbilities.insert(id);
 }
 
-void CharacterComponent::useSpecialOnBeing(Entity &user, int id, Entity *b)
+void CharacterComponent::abilityCooldownActivated()
 {
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (!specialUseCheck(it))
-            return;
-    SpecialValue &special = it->second;
-
-    if (special.specialInfo->target != SpecialManager::TARGET_BEING)
-        return;
-
-    //tell script engine to cast the spell
-    Script *script = ScriptManager::currentState();
-    script->prepare(special.specialInfo->useCallback);
-    script->push(&user);
-    script->push(b);
-    script->push(special.specialInfo->id);
-    script->execute(user.getMap());
+    mSendAbilityCooldown = true;
 }
 
-void CharacterComponent::useSpecialOnPoint(Entity &user, int id, int x, int y)
+void CharacterComponent::sendAbilityUpdate(Entity &entity)
 {
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (!specialUseCheck(it))
-            return;
-    SpecialValue &special = it->second;
+    auto &abilities = entity.getComponent<AbilityComponent>()->getAbilities();
 
-    if (special.specialInfo->target != SpecialManager::TARGET_POINT)
-        return;
-
-    //tell script engine to cast the spell
-    Script *script = ScriptManager::currentState();
-    script->prepare(special.specialInfo->useCallback);
-    script->push(&user);
-    script->push(x);
-    script->push(y);
-    script->push(special.specialInfo->id);
-    script->execute(user.getMap());
-}
-
-bool CharacterComponent::giveSpecial(int id, int currentMana)
-{
-    if (mSpecials.find(id) == mSpecials.end())
+    MessageOut msg(GPMSG_ABILITY_STATUS);
+    for (unsigned id : mModifiedAbilities)
     {
-        const SpecialManager::SpecialInfo *specialInfo =
-                specialManager->getSpecialInfo(id);
-        if (!specialInfo)
-        {
-            LOG_ERROR("Tried to give not existing special id " << id << ".");
-            return false;
-        }
-        mSpecials.insert(std::pair<int, SpecialValue>(
-                             id, SpecialValue(currentMana, specialInfo)));
-        mSpecialUpdateNeeded = true;
-        return true;
-    }
-    return false;
-}
+        auto it = abilities.find(id);
+        if (it == abilities.end())
+            continue; // got deleted
 
-bool CharacterComponent::setSpecialMana(int id, int mana)
-{
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (it != mSpecials.end())
-    {
-        it->second.currentMana = mana;
-        mSpecialUpdateNeeded = true;
-        return true;
+        msg.writeInt8(id);
+        msg.writeInt32(it->second.rechargeTimeout.remaining());
     }
-    return false;
-}
 
-bool CharacterComponent::setSpecialRechargeSpeed(int id, int speed)
-{
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (it != mSpecials.end())
-    {
-        it->second.rechargeSpeed = speed;
-        mSpecialUpdateNeeded = true;
-        return true;
-    }
-    return false;
-}
-
-void CharacterComponent::sendSpecialUpdate()
-{
-    //GPMSG_SPECIAL_STATUS = 0x0293,
-    // { B specialID, L current, L max, L recharge }
-
-    MessageOut msg(GPMSG_SPECIAL_STATUS);
-    for (SpecialMap::iterator it = mSpecials.begin(), it_end = mSpecials.end();
-         it != it_end; ++it)
-    {
-        msg.writeInt8(it->first);
-        msg.writeInt32(it->second.currentMana);
-        msg.writeInt32(it->second.specialInfo->neededMana);
-        msg.writeInt32(it->second.rechargeSpeed);
-    }
+    mModifiedAbilities.clear();
     gameHandler->sendTo(mClient, msg);
+}
+
+void CharacterComponent::sendAbilityCooldownUpdate(Entity &entity)
+{
+    MessageOut msg(GPMSG_ABILITY_COOLDOWN);
+    auto *abilityComponent = entity.getComponent<AbilityComponent>();
+    msg.writeInt16(abilityComponent->globalCooldown());
+    gameHandler->sendTo(mClient, msg);
+    mSendAbilityCooldown = false;
+}
+
+void CharacterComponent::sendAttributePointsStatus(Entity &entity)
+{
+    MessageOut msg(GPMSG_ATTRIBUTE_POINTS_STATUS);
+    msg.writeInt16(mAttributePoints);
+    msg.writeInt16(mCorrectionPoints);
+    gameHandler->sendTo(mClient, msg);
+    mSendAttributePointsStatus = false;
 }
 
 void CharacterComponent::cancelTransaction()
@@ -417,37 +447,14 @@ void CharacterComponent::sendStatus(Entity &entity)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
     MessageOut attribMsg(GPMSG_PLAYER_ATTRIBUTE_CHANGE);
-    for (std::set<size_t>::const_iterator i = mModifiedAttributes.begin(),
-         i_end = mModifiedAttributes.end(); i != i_end; ++i)
+    for (AttributeManager::AttributeInfo *attribute : mModifiedAttributes)
     {
-        int attr = *i;
-        attribMsg.writeInt16(attr);
-        attribMsg.writeInt32(beingComponent->getAttributeBase(attr) * 256);
-        attribMsg.writeInt32(beingComponent->getModifiedAttribute(attr) * 256);
+        attribMsg.writeInt16(attribute->id);
+        attribMsg.writeInt32(beingComponent->getAttributeBase(attribute) * 256);
+        attribMsg.writeInt32(beingComponent->getModifiedAttribute(attribute) * 256);
     }
     if (attribMsg.getLength() > 2) gameHandler->sendTo(mClient, attribMsg);
     mModifiedAttributes.clear();
-
-    MessageOut expMsg(GPMSG_PLAYER_EXP_CHANGE);
-    for (std::set<size_t>::const_iterator i = mModifiedExperience.begin(),
-         i_end = mModifiedExperience.end(); i != i_end; ++i)
-    {
-        int skill = *i;
-        expMsg.writeInt16(skill);
-        expMsg.writeInt32(getExpGot(skill));
-        expMsg.writeInt32(getExpNeeded(skill));
-        expMsg.writeInt16(levelForExp(getExperience(skill)));
-    }
-    if (expMsg.getLength() > 2) gameHandler->sendTo(mClient, expMsg);
-    mModifiedExperience.clear();
-
-    if (mUpdateLevelProgress)
-    {
-        mUpdateLevelProgress = false;
-        MessageOut progressMessage(GPMSG_LEVEL_PROGRESS);
-        progressMessage.writeInt8(mLevelProgress);
-        gameHandler->sendTo(mClient, progressMessage);
-    }
 }
 
 void CharacterComponent::modifiedAllAttributes(Entity &entity)
@@ -462,73 +469,16 @@ void CharacterComponent::modifiedAllAttributes(Entity &entity)
     }
 }
 
-void CharacterComponent::attributeChanged(Entity *entity, unsigned attr)
+void CharacterComponent::attributeChanged(Entity *entity,
+                                          AttributeManager::AttributeInfo *attribute)
 {
     auto *beingComponent = entity->getComponent<BeingComponent>();
 
     // Inform the client of this attribute modification.
-    accountHandler->updateAttributes(getDatabaseID(), attr,
-                                   beingComponent->getAttributeBase(attr),
-                                   beingComponent->getModifiedAttribute(attr));
-    mModifiedAttributes.insert(attr);
-
-    // Update the knuckle Attack if required
-    if (attr == ATTR_STR && mKnuckleAttackInfo)
-    {
-        // TODO: dehardcode this
-        Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
-        knuckleDamage.base = beingComponent->getModifiedAttribute(ATTR_STR);
-        knuckleDamage.delta = knuckleDamage.base / 2;
-    }
-}
-
-int CharacterComponent::expForLevel(int level)
-{
-    return int(pow(level, EXPCURVE_EXPONENT) * EXPCURVE_FACTOR);
-}
-
-int CharacterComponent::levelForExp(int exp)
-{
-    return int(pow(float(exp) / EXPCURVE_FACTOR, 1.0f / EXPCURVE_EXPONENT));
-}
-
-void CharacterComponent::receiveExperience(int skill, int experience, int optimalLevel)
-{
-    // reduce experience when skill is over optimal level
-    int levelOverOptimum = levelForExp(getExperience(skill)) - optimalLevel;
-    if (optimalLevel && levelOverOptimum > 0)
-    {
-        experience *= EXP_LEVEL_FLEXIBILITY
-                      / (levelOverOptimum + EXP_LEVEL_FLEXIBILITY);
-    }
-
-    // Add exp
-    int oldExp = mExperience[skill];
-    long int newExp = mExperience[skill] + experience;
-    if (newExp < 0)
-        newExp = 0; // Avoid integer underflow/negative exp.
-
-    // Check the skill cap
-    long int maxSkillCap = Configuration::getValue("game_maxSkillCap", INT_MAX);
-    assert(maxSkillCap <= INT_MAX);  // Avoid integer overflow.
-    if (newExp > maxSkillCap)
-    {
-        newExp = maxSkillCap;
-        if (oldExp != maxSkillCap)
-        {
-            LOG_INFO("Player hit the skill cap");
-            // TODO: Send a message to player letting them know they hit the cap
-            // or not?
-        }
-    }
-    mExperience[skill] = newExp;
-    mModifiedExperience.insert(skill);
-
-    // Inform account server
-    if (newExp != oldExp)
-        accountHandler->updateExperience(getDatabaseID(), skill, newExp);
-
-    mRecalculateLevel = true;
+    accountHandler->updateAttributes(getDatabaseID(), attribute->id,
+                                     beingComponent->getAttributeBase(attribute),
+                                     beingComponent->getModifiedAttribute(attribute));
+    mModifiedAttributes.insert(attribute);
 }
 
 void CharacterComponent::incrementKillCount(int monsterType)
@@ -554,91 +504,17 @@ int CharacterComponent::getKillCount(int monsterType) const
     return 0;
 }
 
-
-void CharacterComponent::recalculateLevel(Entity &entity)
-{
-    std::list<float> levels;
-    std::map<int, int>::const_iterator a;
-    for (a = getSkillBegin(); a != getSkillEnd(); a++)
-    {
-        // Only use the first 1000 skill levels in calculation
-        if (a->first < 1000)
-        {
-            float expGot = getExpGot(a->first);
-            float expNeed = getExpNeeded(a->first);
-            levels.push_back(levelForExp(a->first) + expGot / expNeed);
-        }
-    }
-    levels.sort();
-
-    std::list<float>::iterator i = levels.end();
-    float level = 0.0f;
-    float factor = 1.0f;
-    float factorSum = 0.0f;
-    while (i != levels.begin())
-    {
-        i--;
-        level += *i * factor;
-        factorSum += factor;
-        factor *= LEVEL_SKILL_PRECEDENCE_FACTOR;
-    }
-    level /= factorSum;
-    level += 1.0f; // + 1.0f because the lowest level is 1 and not 0
-
-    while (mLevel < level)
-    {
-        levelup(entity);
-    }
-
-    int levelProgress = int((level - floor(level)) * 100);
-    if (levelProgress != mLevelProgress)
-    {
-        mLevelProgress = levelProgress;
-        mUpdateLevelProgress = true;
-    }
-}
-
-int CharacterComponent::getExpNeeded(size_t skill) const
-{
-    int level = levelForExp(getExperience(skill));
-    return CharacterComponent::expForLevel(level + 1) - expForLevel(level);
-}
-
-int CharacterComponent::getExpGot(size_t skill) const
-{
-    int level = levelForExp(getExperience(skill));
-    return mExperience.at(skill) - CharacterComponent::expForLevel(level);
-}
-
-void CharacterComponent::levelup(Entity &entity)
-{
-    mLevel++;
-
-    mCharacterPoints += CHARPOINTS_PER_LEVELUP;
-    mCorrectionPoints += CORRECTIONPOINTS_PER_LEVELUP;
-    if (mCorrectionPoints > CORRECTIONPOINTS_MAX)
-        mCorrectionPoints = CORRECTIONPOINTS_MAX;
-
-    MessageOut levelupMsg(GPMSG_LEVELUP);
-    levelupMsg.writeInt16(mLevel);
-    levelupMsg.writeInt16(mCharacterPoints);
-    levelupMsg.writeInt16(mCorrectionPoints);
-    gameHandler->sendTo(mClient, levelupMsg);
-    LOG_INFO(entity.getComponent<BeingComponent>()->getName()
-             << " reached level " << mLevel);
-}
-
 AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
-                                                            size_t attribute)
+                                                            AttributeManager::AttributeInfo *attribute)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    if (!attributeManager->isAttributeDirectlyModifiable(attribute))
+    if (!attribute->modifiable)
         return ATTRIBMOD_INVALID_ATTRIBUTE;
-    if (!mCharacterPoints)
+    if (!mAttributePoints)
         return ATTRIBMOD_NO_POINTS_LEFT;
 
-    --mCharacterPoints;
+    setAttributePoints(mAttributePoints - 1);
 
     const double base = beingComponent->getAttributeBase(attribute);
     beingComponent->setAttribute(entity, attribute, base + 1);
@@ -647,19 +523,19 @@ AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
 }
 
 AttribmodResponseCode CharacterComponent::useCorrectionPoint(Entity &entity,
-                                                             size_t attribute)
+                                                             AttributeManager::AttributeInfo *attribute)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    if (!attributeManager->isAttributeDirectlyModifiable(attribute))
+    if (!attribute->modifiable)
         return ATTRIBMOD_INVALID_ATTRIBUTE;
     if (!mCorrectionPoints)
         return ATTRIBMOD_NO_POINTS_LEFT;
     if (beingComponent->getAttributeBase(attribute) <= 1)
         return ATTRIBMOD_DENIED;
 
-    --mCorrectionPoints;
-    ++mCharacterPoints;
+    setCorrectionPoints(mCorrectionPoints - 1);
+    setAttributePoints(mAttributePoints + 1);
 
     const double base = beingComponent->getAttributeBase(attribute);
     beingComponent->setAttribute(entity, attribute, base - 1);
@@ -694,23 +570,6 @@ void CharacterComponent::resumeNpcThread()
     }
 }
 
-void CharacterComponent::attackAdded(CombatComponent *combatComponent,
-                                     Attack &attack)
-{
-    // Remove knuckle attack
-    if (attack.getAttackInfo() != mKnuckleAttackInfo)
-        combatComponent->removeAttack(mKnuckleAttackInfo);
-}
-
-void CharacterComponent::attackRemoved(CombatComponent *combatComponent,
-                                       Attack &attack)
-{
-    // Add knuckle attack
-    // 1 since the attack is not really removed yet.
-    if (combatComponent->getAttacks().getNumber() == 1)
-        combatComponent->addAttack(mKnuckleAttackInfo);
-}
-
 void CharacterComponent::disconnected(Entity &entity)
 {
     mConnected = false;
@@ -723,24 +582,6 @@ void CharacterComponent::disconnected(Entity &entity)
 
     signal_disconnected.emit(entity);
 }
-
-bool CharacterComponent::takeSpecial(int id)
-{
-    SpecialMap::iterator i = mSpecials.find(id);
-    if (i != mSpecials.end())
-    {
-        mSpecials.erase(i);
-        mSpecialUpdateNeeded = true;
-        return true;
-    }
-    return false;
-}
-
-void CharacterComponent::clearSpecials()
-{
-    mSpecials.clear();
-}
-
 void CharacterComponent::triggerLoginCallback(Entity &entity)
 {
     executeCallback(mLoginCallback, entity);

@@ -29,14 +29,16 @@
 
 #include "game-server/actor.h"
 #include "game-server/attribute.h"
-#include "game-server/attack.h"
+#include "game-server/attributemanager.h"
 #include "game-server/timeout.h"
+
+#include "scripting/script.h"
 
 class BeingComponent;
 class MapComposite;
 class StatusEffect;
 
-typedef std::map< unsigned, Attribute > AttributeMap;
+typedef std::map<AttributeManager::AttributeInfo *, Attribute> AttributeMap;
 
 struct Status
 {
@@ -45,6 +47,11 @@ struct Status
 };
 
 typedef std::map< int, Status > StatusEffects;
+
+/**
+ * Type definition for a list of hits
+ */
+typedef std::vector<unsigned> Hits;
 
 /**
  * Generic being (living actor). Keeps direction, destination and a few other
@@ -137,7 +144,7 @@ class BeingComponent : public Component
         /**
          * Sets an attribute.
          */
-        void setAttribute(Entity &entity, unsigned id, double value);
+        void setAttribute(Entity &entity, AttributeManager::AttributeInfo *, double value);
 
         /**
          * Creates an Attribute that did not exist before
@@ -145,13 +152,12 @@ class BeingComponent : public Component
          * @param id The id of the attribute
          * @param attributeInfo The info that describes the attribute
          */
-        void createAttribute(unsigned id, const AttributeManager::AttributeInfo
-                             &attributeInfo);
+        void createAttribute(AttributeManager::AttributeInfo *);
 
         /**
          * Gets an attribute or 0 if not existing.
          */
-        const Attribute *getAttribute(unsigned id) const;
+        const Attribute *getAttribute(AttributeManager::AttributeInfo *) const;
 
         const AttributeMap &getAttributes() const
         { return mAttributes; }
@@ -159,27 +165,20 @@ class BeingComponent : public Component
         /**
          * Gets an attribute base.
          */
-        double getAttributeBase(unsigned id) const;
+        double getAttributeBase(AttributeManager::AttributeInfo *) const;
 
         /**
          * Gets an attribute after applying modifiers.
          */
-        double getModifiedAttribute(unsigned id) const;
-
-        /**
-         * No-op to satisfy shared structure.
-         * @note The game server calculates this manually, so nothing happens
-         *       here.
-         */
-        void setModAttribute(unsigned, double);
+        double getModifiedAttribute(AttributeManager::AttributeInfo *) const;
 
         /**
          * Checks whether or not an attribute exists in this being.
          * @returns True if the attribute is present in the being, false otherwise.
          */
 
-        bool checkAttributeExists(unsigned id) const
-        { return mAttributes.count(id); }
+        bool checkAttributeExists(AttributeManager::AttributeInfo *attribute) const
+        { return mAttributes.count(attribute); }
 
         /**
          * Adds a modifier to one attribute.
@@ -188,13 +187,13 @@ class BeingComponent : public Component
          * @param lvl If non-zero, indicates that a temporary modifier can be
          *        dispelled prematuraly by a spell of given level.
          */
-        void applyModifier(Entity &entity, unsigned attr, double value,
-                           unsigned layer, unsigned duration = 0,
-                           unsigned id = 0);
+        void applyModifier(Entity &entity, AttributeManager::AttributeInfo *,
+                           double value, unsigned layer,
+                           unsigned duration = 0, unsigned id = 0);
 
-        bool removeModifier(Entity &entity, unsigned attr, double value,
-                            unsigned layer, unsigned id = 0,
-                            bool fullcheck = false);
+        bool removeModifier(Entity &entity, AttributeManager::AttributeInfo *,
+                            double value, unsigned layer,
+                            unsigned id = 0, bool fullcheck = false);
 
         /**
          * Called when an attribute modifier is changed.
@@ -202,14 +201,16 @@ class BeingComponent : public Component
          *     attributes if it has changed.
          * @returns Whether it was changed.
          */
-        void recalculateBaseAttribute(Entity &, unsigned);
+        void recalculateBaseAttribute(Entity &,
+                                      AttributeManager::AttributeInfo *);
 
         /**
          * Attribute has changed, recalculate base value of dependant
          *     attributes (and handle other actions for the modified
          *     attribute)
          */
-        void updateDerivedAttributes(Entity &entity, unsigned);
+        void updateDerivedAttributes(Entity &entity,
+                                     AttributeManager::AttributeInfo *);
 
         /**
          * Sets a statuseffect on this being
@@ -259,7 +260,7 @@ class BeingComponent : public Component
         { script->assignCallback(mRecalculateBaseAttributeCallback); }
 
         sigc::signal<void, Entity *> signal_died;
-        sigc::signal<void, Entity *, unsigned> signal_attribute_changed;
+        sigc::signal<void, Entity *, AttributeManager::AttributeInfo *> signal_attribute_changed;
 
         /**
          * Activate an emote flag on the being.
@@ -279,6 +280,10 @@ class BeingComponent : public Component
         void updateDirection(Entity &entity,
                              const Point &currentPos,
                              const Point &destPos);
+
+        void addHitTaken(unsigned damage);
+        const Hits &getHitsTaken() const;
+        void clearHitsTaken();
 
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
@@ -312,11 +317,35 @@ class BeingComponent : public Component
         /** The last being emote Id. Used when triggering a being emoticon. */
         int mEmoteId;
 
+        Hits mHitsTaken;            //List of punches taken since last update.
+
         /** Called when derived attributes need to get calculated */
         static Script::Ref mRecalculateDerivedAttributesCallback;
 
         /** Called when a base attribute needs to get calculated */
         static Script::Ref mRecalculateBaseAttributeCallback;
 };
+
+
+inline void BeingComponent::addHitTaken(unsigned damage)
+{
+    mHitsTaken.push_back(damage);
+}
+
+/**
+ * Gets the damage list.
+ */
+inline const Hits &BeingComponent::getHitsTaken() const
+{
+    return mHitsTaken;
+}
+
+/**
+ * Clears the damage list.
+ */
+inline void BeingComponent::clearHitsTaken()
+{
+    mHitsTaken.clear();
+}
 
 #endif // BEING_H

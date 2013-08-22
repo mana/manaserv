@@ -26,36 +26,48 @@
 
 void AttributeManager::initialize()
 {
-    reload();
 }
 
 void AttributeManager::reload()
 {
+    deinitialize();
+    initialize();
+}
+
+void AttributeManager::deinitialize()
+{
     mTagMap.clear();
+
+    mAttributeNameMap.clear();
+    for (auto &it : mAttributeMap)
+        delete it.second;
     mAttributeMap.clear();
+
     for (unsigned i = 0; i < MaxScope; ++i)
         mAttributeScopes[i].clear();
 }
 
-const std::vector<AttributeModifier> *AttributeManager::getAttributeInfo(int id) const
+AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
+        int id) const
 {
-    AttributeMap::const_iterator ret = mAttributeMap.find(id);
+    auto ret = mAttributeMap.find(id);
     if (ret == mAttributeMap.end())
         return 0;
-    return &ret->second.modifiers;
+    return ret->second;
 }
 
-const AttributeManager::AttributeScope &AttributeManager::getAttributeScope(ScopeType type) const
+AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
+        const std::string &name) const
+{
+    if (mAttributeNameMap.contains(name))
+        return mAttributeNameMap.value(name);
+    return 0;
+}
+
+const std::set<AttributeManager::AttributeInfo *>
+&AttributeManager::getAttributeScope(ScopeType type) const
 {
     return mAttributeScopes[type];
-}
-
-bool AttributeManager::isAttributeDirectlyModifiable(int id) const
-{
-    AttributeMap::const_iterator ret = mAttributeMap.find(id);
-    if (ret == mAttributeMap.end())
-        return false;
-    return ret->second.modifiable;
 }
 
 ModifierLocation AttributeManager::getLocation(const std::string &tag) const
@@ -68,10 +80,11 @@ ModifierLocation AttributeManager::getLocation(const std::string &tag) const
 
 const std::string *AttributeManager::getTag(const ModifierLocation &location) const
 {
-    for (TagMap::const_iterator it = mTagMap.begin(),
-         it_end = mTagMap.end(); it != it_end; ++it)
-        if (it->second == location)
-            return &it->first;
+    for (auto &it : mTagMap)
+    {
+        if (it.second == location)
+            return &it.first;
+    }
     return 0;
 }
 
@@ -90,56 +103,69 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
         return;
     }
 
-    AttributeInfo &attribute = mAttributeMap[id];
+    std::string name = XML::getProperty(attributeNode, "name", std::string());
+    if (name.empty())
+    {
+        LOG_WARN("Attribute manager: attribute '" << id
+                 << "' does not have a name! Skipping...");
+        return;
+    }
 
-    attribute.modifiers = std::vector<AttributeModifier>();
-    attribute.minimum = XML::getFloatProperty(attributeNode, "minimum",
+    AttributeInfo *attribute = new AttributeInfo(id, name);
+
+    attribute->modifiers = std::vector<AttributeModifier>();
+    attribute->minimum = XML::getFloatProperty(attributeNode, "minimum",
                                            std::numeric_limits<double>::min());
-    attribute.maximum = XML::getFloatProperty(attributeNode, "maximum",
+    attribute->maximum = XML::getFloatProperty(attributeNode, "maximum",
                                            std::numeric_limits<double>::max());
-    attribute.modifiable = XML::getBoolProperty(attributeNode, "modifiable",
-                                                false);
+    attribute->modifiable = XML::getBoolProperty(attributeNode, "modifiable",
+                                                 false);
+
+    const std::string scope = utils::toUpper(
+                XML::getProperty(attributeNode, "scope", std::string()));
+
+    bool hasScope = false;
+
+    if (scope.find("CHARACTER") != std::string::npos)
+    {
+        mAttributeScopes[CharacterScope].insert(attribute);
+        LOG_DEBUG("Attribute manager: attribute '" << id
+                  << "' added to default character scope.");
+        hasScope = true;
+    }
+    if (scope.find("MONSTER") != std::string::npos)
+    {
+        mAttributeScopes[MonsterScope].insert(attribute);
+        LOG_DEBUG("Attribute manager: attribute '" << id
+                  << "' added to default monster scope.");
+        hasScope = true;
+    }
+    if (scope == "BEING")
+    {
+        mAttributeScopes[BeingScope].insert(attribute);
+        LOG_DEBUG("Attribute manager: attribute '" << id
+                  << "' added to default being scope.");
+        hasScope = true;
+    }
+
+    if (!hasScope)
+    {
+        LOG_WARN("Attribute manager: attribute '" << id
+                  << "' has no (valid) scope. Skipping...");
+        delete attribute;
+        return;
+    }
 
     for_each_xml_child_node(subNode, attributeNode)
     {
         if (xmlStrEqual(subNode->name, BAD_CAST "modifier"))
         {
-            readModifierNode(subNode, id);
+            readModifierNode(subNode, id, attribute);
         }
     }
 
-    const std::string scope = utils::toUpper(
-                XML::getProperty(attributeNode, "scope", std::string()));
-
-    if (scope.empty())
-    {
-        // Give a warning unless scope has been explicitly set to "NONE"
-        LOG_WARN("Attribute manager: attribute '" << id
-                 << "' has no default scope.");
-    }
-    else if (scope == "CHARACTER")
-    {
-        mAttributeScopes[CharacterScope][id] = &attribute;
-        LOG_DEBUG("Attribute manager: attribute '" << id
-                  << "' added to default character scope.");
-    }
-    else if (scope == "MONSTER")
-    {
-        mAttributeScopes[MonsterScope][id] = &attribute;
-        LOG_DEBUG("Attribute manager: attribute '" << id
-                  << "' added to default monster scope.");
-    }
-    else if (scope == "BEING")
-    {
-        mAttributeScopes[BeingScope][id] = &attribute;
-        LOG_DEBUG("Attribute manager: attribute '" << id
-                  << "' added to default being scope.");
-    }
-    else if (scope == "NONE")
-    {
-        LOG_DEBUG("Attribute manager: attribute '" << id
-                  << "' set to have no default scope.");
-    }
+    mAttributeMap[id] = attribute;
+    mAttributeNameMap[name] = attribute;
 }
 
 /**
@@ -153,19 +179,17 @@ void AttributeManager::checkStatus()
     LOG_DEBUG("Additive is " << Additive << ", Multiplicative is " << Multiplicative << ".");
     const std::string *tag;
     unsigned count = 0;
-    for (AttributeMap::const_iterator i = mAttributeMap.begin();
-         i != mAttributeMap.end(); ++i)
+    for (auto &attributeIt : mAttributeMap)
     {
         unsigned lCount = 0;
-        LOG_DEBUG("  "<<i->first<<" : ");
-        for (std::vector<AttributeModifier>::const_iterator j =
-            i->second.modifiers.begin();
-            j != i->second.modifiers.end(); ++j)
+        LOG_DEBUG("  "<< attributeIt.first<<" : ");
+        for (auto &modifierIt : attributeIt.second->modifiers)
         {
-            tag = getTag(ModifierLocation(i->first, lCount));
+            tag = getTag(ModifierLocation(attributeIt.first, lCount));
             std::string end = tag ? "tag of '" + (*tag) + "'." : "no tag.";
-            LOG_DEBUG("    stackableType: " << j->stackableType
-                      << ", effectType: " << j->effectType << ", and " << end);
+            LOG_DEBUG("    stackableType: " << modifierIt.stackableType
+                      << ", effectType: " << modifierIt.effectType << ", and "
+                      << end);
             ++lCount;
             ++count;
         }
@@ -173,18 +197,17 @@ void AttributeManager::checkStatus()
     LOG_INFO("Loaded '" << mAttributeMap.size() << "' attributes with '"
              << count << "' modifier layers.");
 
-    for (TagMap::const_iterator i = mTagMap.begin(), i_end = mTagMap.end();
-         i != i_end; ++i)
+    for (auto &tagIt : mTagMap)
     {
-        LOG_DEBUG("Tag '" << i->first << "': '" << i->second.attributeId
-                  << "', '" << i->second.layer << "'.");
+        LOG_DEBUG("Tag '" << tagIt.first << "': '" << tagIt.second.attributeId
+                  << "', '" << tagIt.second.layer << "'.");
     }
 
     LOG_INFO("Loaded '" << mTagMap.size() << "' modifier tags.");
 }
 
 void AttributeManager::readModifierNode(xmlNodePtr modifierNode,
-                                        int attributeId)
+                                        int attributeId, AttributeInfo *info)
 {
     const std::string stackableTypeString = utils::toUpper(
                 XML::getProperty(modifierNode, "stacktype", std::string()));
@@ -245,13 +268,12 @@ void AttributeManager::readModifierNode(xmlNodePtr modifierNode,
         return;
     }
 
-    mAttributeMap[attributeId].modifiers.push_back(
+    info->modifiers.push_back(
                 AttributeModifier(stackableType, effectType));
 
     if (!tag.empty())
     {
-        const int layer =
-            mAttributeMap[attributeId].modifiers.size() - 1;
+        const int layer = info->modifiers.size() - 1;
         mTagMap.insert(std::make_pair(tag, ModifierLocation(attributeId,
                                                             layer)));
     }

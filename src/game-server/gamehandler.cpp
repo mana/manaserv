@@ -27,7 +27,6 @@
 #include "common/transaction.h"
 #include "game-server/accountconnection.h"
 #include "game-server/buysell.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/commandhandler.h"
 #include "game-server/emotemanager.h"
 #include "game-server/inventory.h"
@@ -254,16 +253,12 @@ void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
             handleMoveItem(client, message);
             break;
 
-        case PGMSG_ATTACK:
-            handleAttack(client, message);
+        case PGMSG_USE_ABILITY_ON_BEING:
+            handleUseAbilityOnBeing(client, message);
             break;
 
-        case PGMSG_USE_SPECIAL_ON_BEING:
-            handleUseSpecialOnBeing(client, message);
-            break;
-
-        case PGMSG_USE_SPECIAL_ON_POINT:
-            handleUseSpecialOnPoint(client, message);
+        case PGMSG_USE_ABILITY_ON_POINT:
+            handleUseAbilityOnPoint(client, message);
             break;
 
         case PGMSG_ACTION_CHANGE:
@@ -671,28 +666,12 @@ void GameHandler::handleMoveItem(GameClient &client, MessageIn &message)
                                     TRANS_ITEM_MOVE, str.str());
 }
 
-void GameHandler::handleAttack(GameClient &client, MessageIn &message)
-{
-    int id = message.readInt16();
-    const int publicId =
-            client.character->getComponent<ActorComponent>()->getPublicID();
-    LOG_DEBUG("Character " << publicId << " attacked being " << id);
-
-    Entity *being = findBeingNear(client.character, id);
-    if (being && being->getType() != OBJECT_NPC)
-    {
-        client.character->getComponent<CombatComponent>()->setTarget(being);
-        client.character->getComponent<BeingComponent>()->setAction(
-                *client.character, ATTACK);
-    }
-}
-
-void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message)
+void GameHandler::handleUseAbilityOnBeing(GameClient &client, MessageIn &message)
 {
     if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
-    const int specialID = message.readInt8();
+    const int abilityID = message.readInt8();
     const int targetID = message.readInt16(); // 0 when no target is selected
     Entity *being = 0;
     if (targetID != 0)
@@ -701,28 +680,28 @@ void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message
     const int publicId =
             client.character->getComponent<ActorComponent>()->getPublicID();
     LOG_DEBUG("Character " << publicId
-              << " tries to use his special attack " << specialID);
-    auto *characterComponent = client.character
-            ->getComponent<CharacterComponent>();
-    characterComponent->useSpecialOnBeing(*client.character, specialID, being);
+              << " tries to use his ability " << abilityID);
+    auto *abilityComponent = client.character
+            ->getComponent<AbilityComponent>();
+    abilityComponent->useAbilityOnBeing(*client.character, abilityID, being);
 }
 
-void GameHandler::handleUseSpecialOnPoint(GameClient &client, MessageIn &message)
+void GameHandler::handleUseAbilityOnPoint(GameClient &client, MessageIn &message)
 {
     if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
-    const int specialID = message.readInt8();
+    const int abilityID = message.readInt8();
     const int x = message.readInt16();
     const int y = message.readInt16();
 
     const int publicId =
             client.character->getComponent<ActorComponent>()->getPublicID();
     LOG_DEBUG("Character " << publicId
-              << " tries to use his special attack " << specialID);
-    auto *characterComponent = client.character
-            ->getComponent<CharacterComponent>();
-    characterComponent->useSpecialOnPoint(*client.character, specialID, x, y);
+              << " tries to use his ability " << abilityID);
+    auto *abilityComponent = client.character
+            ->getComponent<AbilityComponent>();
+    abilityComponent->useAbilityOnPoint(*client.character, abilityID, x, y);
 }
 
 void GameHandler::handleActionChange(GameClient &client, MessageIn &message)
@@ -897,21 +876,26 @@ void GameHandler::handleRaiseAttribute(GameClient &client, MessageIn &message)
     auto *characterComponent =
             client.character->getComponent<CharacterComponent>();
 
-    const int attribute = message.readInt16();
+    const int attributeId = message.readInt16();
+    auto *attribute = attributeManager->getAttributeInfo(attributeId);
     AttribmodResponseCode retCode;
-    retCode = characterComponent->useCharacterPoint(*client.character,
-                                                    attribute);
+    if (attribute) {
+        retCode = characterComponent->useCharacterPoint(*client.character,
+                                                        attribute);
+    } else {
+        retCode = ATTRIBMOD_INVALID_ATTRIBUTE;
+    }
 
     MessageOut result(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
     result.writeInt8(retCode);
-    result.writeInt16(attribute);
+    result.writeInt16(attributeId);
     client.send(result);
 
     if (retCode == ATTRIBMOD_OK)
     {
         accountHandler->updateCharacterPoints(
                 characterComponent->getDatabaseID(),
-                characterComponent->getCharacterPoints(),
+                characterComponent->getAttributePoints(),
                 characterComponent->getCorrectionPoints());
 
         // log transaction
@@ -927,21 +911,27 @@ void GameHandler::handleLowerAttribute(GameClient &client, MessageIn &message)
     auto *characterComponent =
             client.character->getComponent<CharacterComponent>();
 
-    const int attribute = message.readInt32();
+    const int attributeId = message.readInt32();
+    auto *attribute = attributeManager->getAttributeInfo(attributeId);
     AttribmodResponseCode retCode;
-    retCode = characterComponent->useCorrectionPoint(*client.character,
-                                                     attribute);
+
+    if (attribute) {
+        retCode = characterComponent->useCorrectionPoint(*client.character,
+                                                         attribute);
+    } else {
+        retCode = ATTRIBMOD_INVALID_ATTRIBUTE;
+    }
 
     MessageOut result(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
     result.writeInt8(retCode);
-    result.writeInt16(attribute);
+    result.writeInt16(attributeId);
     client.send(result);
 
     if (retCode == ATTRIBMOD_OK)
     {
         accountHandler->updateCharacterPoints(
                 characterComponent->getDatabaseID(),
-                characterComponent->getCharacterPoints(),
+                characterComponent->getAttributePoints(),
                 characterComponent->getCorrectionPoints());
 
         // log transaction

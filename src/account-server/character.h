@@ -23,7 +23,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <set>
 
 #include "common/defines.h"
 #include "common/inventorydata.h"
@@ -55,19 +55,6 @@ struct AttributeValue
     { return modified; }
 };
 
-struct SpecialValue
-{
-    SpecialValue()
-        : currentMana(0)
-    {}
-
-    SpecialValue(unsigned currentMana)
-        : currentMana(currentMana)
-    {}
-
-    unsigned currentMana;
-};
-
 struct Status
 {
     Status()
@@ -82,16 +69,13 @@ struct Status
  */
 typedef std::map<unsigned, AttributeValue> AttributeMap;
 
-/**
- * Stores specials by their id.
- */
-typedef std::map<unsigned, SpecialValue> SpecialMap;
-
 class CharacterData
 {
     public:
-
         CharacterData(const std::string &name, int id = -1);
+
+        void serialize(MessageOut &msg);
+        void deserialize(MessageIn &msg);
 
         /**
          * Gets the database id of the character.
@@ -156,12 +140,6 @@ class CharacterData
         void setAccountLevel(int l, bool force = false)
         { if (force) mAccountLevel = l; }
 
-        /**
-         * Gets the level of the character.
-         */
-        int getLevel() const { return mLevel; }
-        void setLevel(int level) { mLevel = level; }
-
         /** Sets the value of a base attribute of the character. */
         void setAttribute(unsigned id, double value)
         { mAttributes[id].base = value; }
@@ -171,24 +149,6 @@ class CharacterData
 
         const AttributeMap &getAttributes() const
         { return mAttributes; }
-
-        int getSkillSize() const
-        { return mExperience.size(); }
-
-        const std::map<int, int>::const_iterator getSkillBegin() const
-        { return mExperience.begin(); }
-
-        const std::map<int, int>::const_iterator getSkillEnd() const
-        { return mExperience.end(); }
-
-        int getExperience(int skill) const
-        { return mExperience.find(skill)->second; }
-
-        void setExperience(int skill, int value)
-        { mExperience[skill] = value; }
-
-        void receiveExperience(int skill, int value)
-        { mExperience[skill] += value; }
 
         /**
          * Get / Set a status effects
@@ -220,23 +180,13 @@ class CharacterData
         void setKillCount(int monsterId, int kills)
         { mKillCount[monsterId] = kills; }
 
-        /**
-         * Get / Set specials
-         */
-        int getSpecialSize() const
-        { return mSpecials.size(); }
+        const std::set<int> &getAbilities() const
+        { return mAbilities; }
 
-        SpecialMap::const_iterator getSpecialBegin() const
-        { return mSpecials.begin(); }
+        void clearAbilities()
+        { mAbilities.clear(); }
 
-        SpecialMap::const_iterator getSpecialEnd() const
-        { return mSpecials.end(); }
-
-
-        void clearSpecials()
-        { mSpecials.clear(); }
-
-        void giveSpecial(int id, int currentMana);
+        void giveAbility(int id);
 
         /**
          * Gets the Id of the map that the character is on.
@@ -269,11 +219,11 @@ class CharacterData
         Possessions &getPossessions()
         { return mPossessions; }
 
-        void setCharacterPoints(int points)
-        { mCharacterPoints = points; }
+        void setAttributePoints(int points)
+        { mAttributePoints = points; }
 
-        int getCharacterPoints() const
-        { return mCharacterPoints; }
+        int getAttributePoints() const
+        { return mAttributePoints; }
 
         void setCorrectionPoints(int points)
         { mCorrectionPoints = points; }
@@ -300,16 +250,14 @@ class CharacterData
         Account *mAccount;        //!< Account owning the character.
         Point mPos;               //!< Position the being is at.
         AttributeMap mAttributes; //!< Attributes.
-        std::map<int, int> mExperience; //!< Skill Experience.
         std::map<int, Status> mStatusEffects; //!< Status Effects
         std::map<int, int> mKillCount; //!< Kill Count
-        SpecialMap  mSpecials;
+        std::set<int> mAbilities;
         unsigned short mMapId;    //!< Map the being is on.
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.
         unsigned char mHairColor; //!< Hair color of the being.
-        short mLevel;             //!< Level of the being.
-        short mCharacterPoints;   //!< Unused character points.
+        short mAttributePoints;   //!< Unused character points.
         short mCorrectionPoints;  //!< Unused correction points.
         unsigned char mAccountLevel; //!< Level of the associated account.
 

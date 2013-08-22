@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS `mana_characters` (
     `gender`       tinyint(3)   unsigned NOT NULL,
     `hair_style`   tinyint(3)   unsigned NOT NULL,
     `hair_color`   tinyint(3)   unsigned NOT NULL,
-    `level`        tinyint(3)   unsigned NOT NULL,
     `char_pts`     smallint(5)  unsigned NOT NULL,
     `correct_pts`  smallint(5)  unsigned NOT NULL,
     -- location on the map
@@ -70,21 +69,6 @@ CREATE TABLE IF NOT EXISTS `mana_char_attr` (
 DEFAULT CHARSET=utf8;
 
 --
--- table: `mana_char_skills`
---
-CREATE TABLE IF NOT EXISTS `mana_char_skills` (
-    `char_id`      int(10)      unsigned NOT NULL,
-    `skill_id`     smallint(5)  unsigned NOT NULL,
-    `skill_exp`    smallint(5)  unsigned NOT NULL,
-    --
-    PRIMARY KEY (`char_id`, `skill_id`),
-    FOREIGN KEY (`char_id`)
-        REFERENCES `mana_characters` (`id`)
-        ON DELETE CASCADE
-) ENGINE=InnoDB
-DEFAULT CHARSET=utf8;
-
---
 -- table: `mana_char_status_effects`
 --
 CREATE TABLE IF NOT EXISTS `mana_char_status_effects` (
@@ -113,14 +97,13 @@ CREATE TABLE IF NOT EXISTS `mana_char_kill_stats`
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
--- Create table 'mana_char_specials'
+-- Create table 'mana_char_abilities'
 
-CREATE TABLE mana_char_specials
+CREATE TABLE mana_char_abilities
 (
-    `char_id`   	       int(10) unsigned NOT NULL,
-    `special_id` 	       int(10) unsigned NOT NULL,
-    `special_current_mana` int(10) unsigned NOT NULL,
-	PRIMARY KEY (`char_id`, `special_id`),
+    `char_id`                int(10) unsigned NOT NULL,
+    `ability_id`             int(10) unsigned NOT NULL,
+	PRIMARY KEY (`char_id`, `ability_id`),
     FOREIGN KEY (`char_id`)
         REFERENCES `mana_characters` (`id`)
         ON DELETE CASCADE
@@ -417,7 +400,6 @@ AS
           c.user_id    as user_id,
           c.name       as name,
           c.gender     as gender,
-          c.level      as level,
           c.map_id     as map_id
      FROM mana_online_list l
      JOIN mana_characters c
@@ -438,7 +420,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', NOW());
-INSERT INTO mana_world_states VALUES('database_version',     -1,'21', NOW());
+INSERT INTO mana_world_states VALUES('database_version',     -1,'24', NOW());
 
 -- all known transaction codes
 
@@ -475,7 +457,6 @@ INSERT INTO mana_transaction_codes VALUES ( 30, 'Trade items',              'Act
 INSERT INTO mana_transaction_codes VALUES ( 31, 'Attribute increased',      'Character' );
 INSERT INTO mana_transaction_codes VALUES ( 32, 'Attribute decreased',      'Character' );
 INSERT INTO mana_transaction_codes VALUES ( 33, 'Command MUTE',             'Commands' );
-INSERT INTO mana_transaction_codes VALUES ( 34, 'Command EXP',              'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 35, 'Command INVISIBLE',        'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 36, 'Command COMBAT',           'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 37, 'Command ANNOUNCE',         'Commands' );
