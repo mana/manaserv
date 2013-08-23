@@ -21,6 +21,7 @@
 #include "game-server/attributemanager.h"
 
 #include "common/defines.h"
+#include "game-server/attributeinfo.h"
 #include "utils/string.h"
 #include "utils/logger.h"
 
@@ -47,7 +48,7 @@ void AttributeManager::deinitialize()
         mAttributeScopes[i].clear();
 }
 
-AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
+AttributeInfo *AttributeManager::getAttributeInfo(
         int id) const
 {
     auto ret = mAttributeMap.find(id);
@@ -56,7 +57,7 @@ AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
     return ret->second;
 }
 
-AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
+AttributeInfo *AttributeManager::getAttributeInfo(
         const std::string &name) const
 {
     if (mAttributeNameMap.contains(name))
@@ -64,7 +65,7 @@ AttributeManager::AttributeInfo *AttributeManager::getAttributeInfo(
     return 0;
 }
 
-const std::set<AttributeManager::AttributeInfo *>
+const std::set<AttributeInfo *>
 &AttributeManager::getAttributeScope(ScopeType type) const
 {
     return mAttributeScopes[type];

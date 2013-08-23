@@ -38,7 +38,7 @@ class BeingComponent;
 class MapComposite;
 class StatusEffect;
 
-typedef std::map<AttributeManager::AttributeInfo *, Attribute> AttributeMap;
+typedef std::map<AttributeInfo *, Attribute> AttributeMap;
 
 struct Status
 {
@@ -144,7 +144,7 @@ class BeingComponent : public Component
         /**
          * Sets an attribute.
          */
-        void setAttribute(Entity &entity, AttributeManager::AttributeInfo *, double value);
+        void setAttribute(Entity &entity, AttributeInfo *, double value);
 
         /**
          * Creates an Attribute that did not exist before
@@ -152,12 +152,12 @@ class BeingComponent : public Component
          * @param id The id of the attribute
          * @param attributeInfo The info that describes the attribute
          */
-        void createAttribute(AttributeManager::AttributeInfo *);
+        void createAttribute(AttributeInfo *);
 
         /**
          * Gets an attribute or 0 if not existing.
          */
-        const Attribute *getAttribute(AttributeManager::AttributeInfo *) const;
+        const Attribute *getAttribute(AttributeInfo *) const;
 
         const AttributeMap &getAttributes() const
         { return mAttributes; }
@@ -165,19 +165,19 @@ class BeingComponent : public Component
         /**
          * Gets an attribute base.
          */
-        double getAttributeBase(AttributeManager::AttributeInfo *) const;
+        double getAttributeBase(AttributeInfo *) const;
 
         /**
          * Gets an attribute after applying modifiers.
          */
-        double getModifiedAttribute(AttributeManager::AttributeInfo *) const;
+        double getModifiedAttribute(AttributeInfo *) const;
 
         /**
          * Checks whether or not an attribute exists in this being.
          * @returns True if the attribute is present in the being, false otherwise.
          */
 
-        bool checkAttributeExists(AttributeManager::AttributeInfo *attribute) const
+        bool checkAttributeExists(AttributeInfo *attribute) const
         { return mAttributes.count(attribute); }
 
         /**
@@ -187,11 +187,11 @@ class BeingComponent : public Component
          * @param lvl If non-zero, indicates that a temporary modifier can be
          *        dispelled prematuraly by a spell of given level.
          */
-        void applyModifier(Entity &entity, AttributeManager::AttributeInfo *,
+        void applyModifier(Entity &entity, AttributeInfo *,
                            double value, unsigned layer,
                            unsigned duration = 0, unsigned id = 0);
 
-        bool removeModifier(Entity &entity, AttributeManager::AttributeInfo *,
+        bool removeModifier(Entity &entity, AttributeInfo *,
                             double value, unsigned layer,
                             unsigned id = 0, bool fullcheck = false);
 
@@ -202,7 +202,7 @@ class BeingComponent : public Component
          * @returns Whether it was changed.
          */
         void recalculateBaseAttribute(Entity &,
-                                      AttributeManager::AttributeInfo *);
+                                      AttributeInfo *);
 
         /**
          * Attribute has changed, recalculate base value of dependant
@@ -210,7 +210,7 @@ class BeingComponent : public Component
          *     attribute)
          */
         void updateDerivedAttributes(Entity &entity,
-                                     AttributeManager::AttributeInfo *);
+                                     AttributeInfo *);
 
         /**
          * Sets a statuseffect on this being
@@ -260,7 +260,7 @@ class BeingComponent : public Component
         { script->assignCallback(mRecalculateBaseAttributeCallback); }
 
         sigc::signal<void, Entity *> signal_died;
-        sigc::signal<void, Entity *, AttributeManager::AttributeInfo *> signal_attribute_changed;
+        sigc::signal<void, Entity *, AttributeInfo *> signal_attribute_changed;
 
         /**
          * Activate an emote flag on the being.

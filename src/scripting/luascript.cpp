@@ -113,7 +113,7 @@ void LuaScript::push(const std::list<InventoryItem> &itemList)
     ++nbArgs;
 }
 
-void LuaScript::push(AttributeManager::AttributeInfo *attributeInfo)
+void LuaScript::push(AttributeInfo *attributeInfo)
 {
     assert(nbArgs >= 0);
     ::push(mCurrentState, attributeInfo);

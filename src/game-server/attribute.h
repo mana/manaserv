@@ -22,7 +22,7 @@
 #define ATTRIBUTE_H
 
 #include "common/defines.h"
-#include "attributemanager.h"
+#include "attributeinfo.h"
 #include <vector>
 #include <list>
 
@@ -138,7 +138,7 @@ class Attribute
             , mMaxValue(0)
         {throw;} // DEBUG; Find improper constructions
 
-        Attribute(const AttributeManager::AttributeInfo *info);
+        Attribute(const AttributeInfo *info);
 
         ~Attribute();
 

@@ -57,7 +57,7 @@ class LuaScript : public Script
         void push(const std::string &);
         void push(Entity *);
         void push(const std::list<InventoryItem> &itemList);
-        void push(AttributeManager::AttributeInfo *);
+        void push(AttributeInfo *);
 
         int execute(const Context &context = Context());
 

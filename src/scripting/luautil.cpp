@@ -226,9 +226,9 @@ AbilityManager::AbilityInfo *checkAbility(lua_State *s, int p)
     return abilityInfo;
 }
 
-AttributeManager::AttributeInfo *checkAttribute(lua_State *s, int p)
+AttributeInfo *checkAttribute(lua_State *s, int p)
 {
-    AttributeManager::AttributeInfo *attributeInfo;
+    AttributeInfo *attributeInfo;
 
     switch (lua_type(s, p))
     {

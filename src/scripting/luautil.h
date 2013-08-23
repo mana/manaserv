@@ -165,7 +165,7 @@ typedef LuaUserData<MapObject> LuaMapObject;
 typedef LuaUserData<MonsterClass> LuaMonsterClass;
 typedef LuaUserData<StatusEffect> LuaStatusEffect;
 typedef LuaUserData<AbilityManager::AbilityInfo> LuaAbilityInfo;
-typedef LuaUserData<AttributeManager::AttributeInfo> LuaAttributeInfo;
+typedef LuaUserData<AttributeInfo> LuaAttributeInfo;
 
 Script *                               getScript(lua_State *s);
 
@@ -180,7 +180,7 @@ Entity *                               checkMonster(lua_State *s, int p);
 MonsterClass *                         checkMonsterClass(lua_State *s, int p);
 Entity *                               checkNpc(lua_State *s, int p);
 AbilityManager::AbilityInfo *          checkAbility(lua_State *s, int p);
-AttributeManager::AttributeInfo *      checkAttribute(lua_State *s, int p);
+AttributeInfo *      checkAttribute(lua_State *s, int p);
 unsigned char                          checkWalkMask(lua_State *s, int p);
 
 MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
@@ -220,7 +220,7 @@ inline void push(lua_State *s, MonsterClass *val)
     LuaMonsterClass::push(s, val);
 }
 
-inline void push(lua_State *s, AttributeManager::AttributeInfo *val)
+inline void push(lua_State *s, AttributeInfo *val)
 {
     LuaAttributeInfo::push(s, val);
 }

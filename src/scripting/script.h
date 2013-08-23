@@ -195,7 +195,7 @@ class Script : public sigc::trackable
          */
         virtual void push(const std::list<InventoryItem> &itemList) = 0;
 
-        virtual void push(AttributeManager::AttributeInfo *) = 0;
+        virtual void push(AttributeInfo *) = 0;
 
         /**
          * Executes the function being prepared.

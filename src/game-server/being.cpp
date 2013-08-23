@@ -317,7 +317,7 @@ void BeingComponent::setAction(Entity &entity, BeingAction action)
     }
 }
 
-void BeingComponent::applyModifier(Entity &entity, AttributeManager::AttributeInfo *attribute,
+void BeingComponent::applyModifier(Entity &entity, AttributeInfo *attribute,
                                    double value, unsigned layer,
                                    unsigned duration, unsigned id)
 {
@@ -325,7 +325,7 @@ void BeingComponent::applyModifier(Entity &entity, AttributeManager::AttributeIn
     updateDerivedAttributes(entity, attribute);
 }
 
-bool BeingComponent::removeModifier(Entity &entity, AttributeManager::AttributeInfo *attribute,
+bool BeingComponent::removeModifier(Entity &entity, AttributeInfo *attribute,
                                     double value, unsigned layer,
                                     unsigned id, bool fullcheck)
 {
@@ -340,7 +340,7 @@ void BeingComponent::setGender(BeingGender gender)
 }
 
 void BeingComponent::setAttribute(Entity &entity,
-                                  AttributeManager::AttributeInfo *attribute,
+                                  AttributeInfo *attribute,
                                   double value)
 {
     auto attributeIt = mAttributes.find(attribute);
@@ -361,13 +361,13 @@ void BeingComponent::setAttribute(Entity &entity,
     }
 }
 
-void BeingComponent::createAttribute(AttributeManager::AttributeInfo *attributeInfo)
+void BeingComponent::createAttribute(AttributeInfo *attributeInfo)
 {
-    mAttributes.insert(std::pair<AttributeManager::AttributeInfo *, Attribute>
+    mAttributes.insert(std::pair<AttributeInfo *, Attribute>
             (attributeInfo, Attribute(attributeInfo)));
 }
 
-const Attribute *BeingComponent::getAttribute(AttributeManager::AttributeInfo *attribute) const
+const Attribute *BeingComponent::getAttribute(AttributeInfo *attribute) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(attribute);
     if (ret == mAttributes.end())
@@ -379,7 +379,7 @@ const Attribute *BeingComponent::getAttribute(AttributeManager::AttributeInfo *a
     return &ret->second;
 }
 
-double BeingComponent::getAttributeBase(AttributeManager::AttributeInfo *attribute) const
+double BeingComponent::getAttributeBase(AttributeInfo *attribute) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(attribute);
     if (ret == mAttributes.end())
@@ -392,7 +392,7 @@ double BeingComponent::getAttributeBase(AttributeManager::AttributeInfo *attribu
 }
 
 
-double BeingComponent::getModifiedAttribute(AttributeManager::AttributeInfo *attribute) const
+double BeingComponent::getModifiedAttribute(AttributeInfo *attribute) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(attribute);
     if (ret == mAttributes.end())
@@ -405,7 +405,7 @@ double BeingComponent::getModifiedAttribute(AttributeManager::AttributeInfo *att
 }
 
 void BeingComponent::recalculateBaseAttribute(Entity &entity,
-                                              AttributeManager::AttributeInfo *attribute)
+                                              AttributeInfo *attribute)
 {
     LOG_DEBUG("Being: Received update attribute recalculation request for "
               << attribute << ".");
@@ -437,7 +437,7 @@ void BeingComponent::recalculateBaseAttribute(Entity &entity,
 }
 
 void BeingComponent::updateDerivedAttributes(Entity &entity,
-                                             AttributeManager::AttributeInfo *attribute)
+                                             AttributeInfo *attribute)
 {
     signal_attribute_changed.emit(&entity, attribute);
 

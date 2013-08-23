@@ -314,7 +314,7 @@ bool AttributeModifiersEffect::tick()
     return ret;
 }
 
-Attribute::Attribute(const AttributeManager::AttributeInfo *info):
+Attribute::Attribute(const AttributeInfo *info):
     mBase(0),
     mMinValue(info->minimum),
     mMaxValue(info->maximum)

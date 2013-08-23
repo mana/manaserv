@@ -447,7 +447,7 @@ void CharacterComponent::sendStatus(Entity &entity)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
     MessageOut attribMsg(GPMSG_PLAYER_ATTRIBUTE_CHANGE);
-    for (AttributeManager::AttributeInfo *attribute : mModifiedAttributes)
+    for (AttributeInfo *attribute : mModifiedAttributes)
     {
         attribMsg.writeInt16(attribute->id);
         attribMsg.writeInt32(beingComponent->getAttributeBase(attribute) * 256);
@@ -470,7 +470,7 @@ void CharacterComponent::modifiedAllAttributes(Entity &entity)
 }
 
 void CharacterComponent::attributeChanged(Entity *entity,
-                                          AttributeManager::AttributeInfo *attribute)
+                                          AttributeInfo *attribute)
 {
     auto *beingComponent = entity->getComponent<BeingComponent>();
 
@@ -505,7 +505,7 @@ int CharacterComponent::getKillCount(int monsterType) const
 }
 
 AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
-                                                            AttributeManager::AttributeInfo *attribute)
+                                                            AttributeInfo *attribute)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
@@ -523,7 +523,7 @@ AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
 }
 
 AttribmodResponseCode CharacterComponent::useCorrectionPoint(Entity &entity,
-                                                             AttributeManager::AttributeInfo *attribute)
+                                                             AttributeInfo *attribute)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 

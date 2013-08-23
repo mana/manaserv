@@ -105,9 +105,9 @@ class MonsterClass
         /**
          * Sets a being base attribute.
          */
-        void setAttribute(AttributeManager::AttributeInfo *attribute, double value);
+        void setAttribute(AttributeInfo *attribute, double value);
 
-        const std::map<AttributeManager::AttributeInfo *, double>
+        const std::map<AttributeInfo *, double>
         &getAttributes() const;
 
         /** Sets collision circle radius. */
@@ -137,7 +137,7 @@ class MonsterClass
         BeingGender mGender;
 
         MonsterDrops mDrops;
-        std::map<AttributeManager::AttributeInfo *, double> mAttributes;
+        std::map<AttributeInfo *, double> mAttributes;
         std::set<AbilityManager::AbilityInfo *> mAbilities;
         float mSpeed; /**< The monster class speed in tiles per second */
         int mSize;
@@ -189,12 +189,12 @@ class MonsterComponent : public Component
         Timeout mDecayTimeout;
 };
 
-inline void MonsterClass::setAttribute(AttributeManager::AttributeInfo *attribute, double value)
+inline void MonsterClass::setAttribute(AttributeInfo *attribute, double value)
 {
     mAttributes[attribute] = value;
 }
 
-inline const std::map<AttributeManager::AttributeInfo *, double>
+inline const std::map<AttributeInfo *, double>
 &MonsterClass::getAttributes() const
 {
     return mAttributes;

@@ -110,7 +110,7 @@ class ItemEffectInfo
 class ItemEffectAttrMod : public ItemEffectInfo
 {
     public:
-        ItemEffectAttrMod(AttributeManager::AttributeInfo *attribute,
+        ItemEffectAttrMod(AttributeInfo *attribute,
                           unsigned layer, double value, unsigned modId,
                           unsigned duration = 0)
                 : mAttribute(attribute)
@@ -124,7 +124,7 @@ class ItemEffectAttrMod : public ItemEffectInfo
         void dispell(Entity *itemUser);
 
     private:
-        AttributeManager::AttributeInfo *mAttribute;
+        AttributeInfo *mAttribute;
         unsigned mAttributeLayer;
         double mMod;
         unsigned mDuration;

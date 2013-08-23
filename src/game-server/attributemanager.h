@@ -21,7 +21,6 @@
 #ifndef ATTRIBUTEMANAGER_H
 #define ATTRIBUTEMANAGER_H
 
-#include <limits>
 #include <map>
 #include <set>
 #include <string>
@@ -30,6 +29,8 @@
 #include "utils/string.h"
 #include "utils/xml.h"
 
+class AttributeInfo;
+
 enum ScopeType
 {
     BeingScope = 0,
@@ -37,37 +38,6 @@ enum ScopeType
     MonsterScope,
     // Add new types here as needed
     MaxScope
-};
-
-/**
- * Stackable types.
- * @todo non-stackable malus layers
- */
-enum StackableType
-{
-    Stackable,
-    NonStackable,
-    NonStackableBonus
-};
-
-/**
- * Attribute augmentation methods.
- */
-enum ModifierEffectType
-{
-    Multiplicative,
-    Additive
-};
-
-struct AttributeModifier
-{
-    AttributeModifier(StackableType s, ModifierEffectType effect) :
-        stackableType(s),
-        effectType(effect)
-    {}
-
-    StackableType stackableType;
-    ModifierEffectType effectType;
 };
 
 /**
@@ -91,27 +61,6 @@ struct ModifierLocation
 class AttributeManager
 {
     public:
-        struct AttributeInfo {
-            AttributeInfo(int id, const std::string &name):
-                id(id),
-                name(name),
-                minimum(std::numeric_limits<double>::min()),
-                maximum(std::numeric_limits<double>::max()),
-                modifiable(false)
-            {}
-
-            int id;
-            std::string name;
-
-            /** The minimum and maximum permitted attribute values. */
-            double minimum;
-            double maximum;
-            /** Tells whether the base attribute is modifiable by the player */
-            bool modifiable;
-            /** Effect modifier type: stackability and modification type. */
-            std::vector<AttributeModifier> modifiers;
-        };
-
         AttributeManager()
         {}
 

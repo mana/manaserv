@@ -104,7 +104,7 @@ class Trade
         TradedItems mItems1, mItems2; /**< Traded items. */
         int mMoney1, mMoney2;         /**< Traded money. */
         TradeState mState;            /**< State of transaction. */
-        AttributeManager::AttributeInfo *mCurrencyAttribute;
+        AttributeInfo *mCurrencyAttribute;
 };
 
 #endif
