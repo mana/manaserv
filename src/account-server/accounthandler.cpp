@@ -242,7 +242,7 @@ void AccountClientHandler::deinitialize()
 {
     accountHandler->stopListen();
     delete accountHandler;
-    accountHandler = 0;
+    accountHandler = nullptr;
 }
 
 void AccountClientHandler::process()
@@ -381,7 +381,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     }
 
     // Check if the account exists
-    Account *acc = 0;
+    Account *acc = nullptr;
     for (Account *account : mPendingAccounts)
         if (account->getName() == username)
             acc = account;

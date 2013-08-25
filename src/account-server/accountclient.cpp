@@ -22,24 +22,6 @@
 
 AccountClient::AccountClient(ENetPeer *peer):
     NetComputer(peer),
-    status(CLIENT_LOGIN),
-    mAccount(nullptr)
+    status(CLIENT_LOGIN)
 {
-}
-
-AccountClient::~AccountClient()
-{
-    unsetAccount();
-}
-
-void AccountClient::setAccount(Account *acc)
-{
-    unsetAccount();
-    mAccount = acc;
-}
-
-void AccountClient::unsetAccount()
-{
-    delete mAccount;
-    mAccount = nullptr;
 }

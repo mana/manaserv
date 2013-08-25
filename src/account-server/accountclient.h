@@ -26,6 +26,8 @@
 #include "account-server/account.h"
 #include "net/netcomputer.h"
 
+#include <memory>
+
 class AccountHandler;
 
 enum AccountClientStatus
@@ -42,29 +44,39 @@ class AccountClient : public NetComputer
 {
     public:
         AccountClient(ENetPeer *peer);
-        ~AccountClient();
 
-        /**
-         * Set the account associated with the connection
-         */
         void setAccount(Account *acc);
-
-        /**
-         * Unset the account associated with the connection
-         */
         void unsetAccount();
-
-        /**
-         * Get account associated with the connection.
-         */
-        Account *getAccount() const
-        { return mAccount; }
+        Account *getAccount() const;
 
         AccountClientStatus status;
 
     private:
-        /** Account associated with connection */
-        Account *mAccount;
+        std::unique_ptr<Account> mAccount;
 };
 
-#endif
+/**
+ * Set the account associated with the connection.
+ */
+inline void AccountClient::setAccount(Account *acc)
+{
+    mAccount.reset(acc);
+}
+
+/**
+ * Unset the account associated with the connection.
+ */
+inline void AccountClient::unsetAccount()
+{
+    mAccount.reset();
+}
+
+/**
+ * Get account associated with the connection.
+ */
+inline Account *AccountClient::getAccount() const
+{
+    return mAccount.get();
+}
+
+#endif // ACCOUNTCLIENT_H
