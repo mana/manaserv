@@ -133,7 +133,6 @@ static void informPlayer(MapComposite *map, Entity *p)
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
     const Point &pold = p->getComponent<BeingComponent>()->getOldPosition();
     const Point &ppos = p->getComponent<ActorComponent>()->getPosition();
-    int pid = p->getComponent<ActorComponent>()->getPublicID();
     int pflags = p->getComponent<ActorComponent>()->getUpdateFlags();
     int visualRange = Configuration::getValue("game_visualRange", 448);
 
