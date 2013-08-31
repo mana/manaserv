@@ -759,7 +759,6 @@ bool Storage::updateCharacter(CharacterData *character)
                     << character->getDatabaseID() << "';";
         mDb->execSql(deleteSql.str());
         // In with the new
-        std::set<int>::const_iterator ability_it, ability_it_end;
         for (int abilityId : character->getAbilities())
         {
             insertSql.str("");
