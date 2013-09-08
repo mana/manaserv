@@ -29,7 +29,7 @@
 namespace ManaServ {
 
 enum {
-    PROTOCOL_VERSION = 6,
+    PROTOCOL_VERSION = 7,
     SUPPORTED_DB_VERSION = 25
 };
 
@@ -145,23 +145,24 @@ enum {
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     GPMSG_BEING_ABILITY_POINT      = 0x0282, // W being id, B abilityId, W*2 point
     GPMSG_BEING_ABILITY_BEING      = 0x0283, // W being id, B abilityId, W target being id
-    PGMSG_USE_ABILITY_ON_BEING     = 0x0292, // B abilityID, W being id
-    GPMSG_ABILITY_STATUS           = 0x0293, // { B abilityID, D remainingTicks }
-    PGMSG_USE_ABILITY_ON_POINT     = 0x0294, // B abilityID, W*2 position
-    GPMSG_ABILITY_REMOVED          = 0x0295, // B abilityID
-    GPMSG_ABILITY_COOLDOWN         = 0x0296, // W ticks to wait
-    PGMSG_SAY                      = 0x02A0, // S text
-    GPMSG_SAY                      = 0x02A1, // W being id, S text
-    GPMSG_NPC_CHOICE               = 0x02B0, // W being id, { S text }*
-    GPMSG_NPC_MESSAGE              = 0x02B1, // W being id, B* text
-    PGMSG_NPC_TALK                 = 0x02B2, // W being id
-    PGMSG_NPC_TALK_NEXT            = 0x02B3, // W being id
-    PGMSG_NPC_SELECT               = 0x02B4, // W being id, B choice
-    GPMSG_NPC_BUY                  = 0x02B5, // W being id, { W item id, W amount, W cost }*
-    GPMSG_NPC_SELL                 = 0x02B6, // W being id, { W item id, W amount, W cost }*
-    PGMSG_NPC_BUYSELL              = 0x02B7, // W item id, W amount
-    GPMSG_NPC_ERROR                = 0x02B8, // B error
-    GPMSG_NPC_CLOSE                = 0x02B9, // W being id
+    PGMSG_USE_ABILITY_ON_BEING     = 0x0290, // B abilityID, W being id
+    PGMSG_USE_ABILITY_ON_POINT     = 0x0291, // B abilityID, W*2 position
+    PGMSG_USE_ABILITY_ON_DIRECTION = 0x0292, // B abilityID, B direction
+    GPMSG_ABILITY_STATUS           = 0x02A0, // { B abilityID, D remainingTicks }
+    GPMSG_ABILITY_REMOVED          = 0x02A1, // B abilityID
+    GPMSG_ABILITY_COOLDOWN         = 0x02A2, // W ticks to wait
+    PGMSG_SAY                      = 0x02B0, // S text
+    GPMSG_SAY                      = 0x02B1, // W being id, S text
+    GPMSG_NPC_CHOICE               = 0x02C0, // W being id, { S text }*
+    GPMSG_NPC_MESSAGE              = 0x02C1, // W being id, B* text
+    PGMSG_NPC_TALK                 = 0x02C2, // W being id
+    PGMSG_NPC_TALK_NEXT            = 0x02C3, // W being id
+    PGMSG_NPC_SELECT               = 0x02C4, // W being id, B choice
+    GPMSG_NPC_BUY                  = 0x02C5, // W being id, { W item id, W amount, W cost }*
+    GPMSG_NPC_SELL                 = 0x02C6, // W being id, { W item id, W amount, W cost }*
+    PGMSG_NPC_BUYSELL              = 0x02C7, // W item id, W amount
+    GPMSG_NPC_ERROR                = 0x02C8, // B error
+    GPMSG_NPC_CLOSE                = 0x02C9, // W being id
     GPMSG_NPC_POST                 = 0x02D0, // W being id
     PGMSG_NPC_POST_SEND            = 0x02D1, // W being id, { S name, S text, W item id }
     GPMSG_NPC_POST_GET             = 0x02D2, // W being id, { S name, S text, W item id }
@@ -169,21 +170,21 @@ enum {
     PGMSG_NPC_STRING               = 0x02D4, // W being id, S string
     GPMSG_NPC_NUMBER               = 0x02D5, // W being id, D max, D min, D default
     GPMSG_NPC_STRING               = 0x02D6, // W being id
-    PGMSG_TRADE_REQUEST            = 0x02C0, // W being id
-    GPMSG_TRADE_REQUEST            = 0x02C1, // W being id
-    GPMSG_TRADE_START              = 0x02C2, // -
-    GPMSG_TRADE_COMPLETE           = 0x02C3, // -
-    PGMSG_TRADE_CANCEL             = 0x02C4, // -
-    GPMSG_TRADE_CANCEL             = 0x02C5, // -
-    PGMSG_TRADE_AGREED             = 0x02C6, // -
-    GPMSG_TRADE_AGREED             = 0x02C7, // -
-    PGMSG_TRADE_CONFIRM            = 0x02C8, // -
-    GPMSG_TRADE_CONFIRM            = 0x02C9, // -
-    PGMSG_TRADE_ADD_ITEM           = 0x02CA, // B slot, B amount
-    GPMSG_TRADE_ADD_ITEM           = 0x02CB, // W item id, B amount
-    PGMSG_TRADE_SET_MONEY          = 0x02CC, // D amount
-    GPMSG_TRADE_SET_MONEY          = 0x02CD, // D amount
-    GPMSG_TRADE_BOTH_CONFIRM       = 0x02CE, // -
+    PGMSG_TRADE_REQUEST            = 0x02E0, // W being id
+    GPMSG_TRADE_REQUEST            = 0x02E1, // W being id
+    GPMSG_TRADE_START              = 0x02E2, // -
+    GPMSG_TRADE_COMPLETE           = 0x02E3, // -
+    PGMSG_TRADE_CANCEL             = 0x02E4, // -
+    GPMSG_TRADE_CANCEL             = 0x02E5, // -
+    PGMSG_TRADE_AGREED             = 0x02E6, // -
+    GPMSG_TRADE_AGREED             = 0x02E7, // -
+    PGMSG_TRADE_CONFIRM            = 0x02E8, // -
+    GPMSG_TRADE_CONFIRM            = 0x02E9, // -
+    PGMSG_TRADE_ADD_ITEM           = 0x02EA, // B slot, B amount
+    GPMSG_TRADE_ADD_ITEM           = 0x02EB, // W item id, B amount
+    PGMSG_TRADE_SET_MONEY          = 0x02EC, // D amount
+    GPMSG_TRADE_SET_MONEY          = 0x02ED, // D amount
+    GPMSG_TRADE_BOTH_CONFIRM       = 0x02EE, // -
     PGMSG_USE_ITEM                 = 0x0300, // B slot
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*

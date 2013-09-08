@@ -257,6 +257,10 @@ void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
             handleUseAbilityOnPoint(client, message);
             break;
 
+        case PGMSG_USE_ABILITY_ON_DIRECTION:
+            handleUseAbilityOnDirection(client, message);
+            break;
+
         case PGMSG_ACTION_CHANGE:
             handleActionChange(client, message);
             break;
@@ -681,6 +685,24 @@ void GameHandler::handleUseAbilityOnPoint(GameClient &client, MessageIn &message
     auto *abilityComponent = client.character
             ->getComponent<AbilityComponent>();
     abilityComponent->useAbilityOnPoint(*client.character, abilityID, x, y);
+}
+
+void GameHandler::handleUseAbilityOnDirection(GameClient &client, MessageIn &message)
+{
+    if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
+        return;
+
+    const int abilityID = message.readInt8();
+    const BeingDirection direction = (BeingDirection)message.readInt8();
+
+    const int publicId =
+            client.character->getComponent<ActorComponent>()->getPublicID();
+    LOG_DEBUG("Character " << publicId
+              << " tries to use his ability " << abilityID);
+    auto *abilityComponent = client.character
+            ->getComponent<AbilityComponent>();
+    abilityComponent->useAbilityOnDirection(*client.character, abilityID,
+                                            direction);
 }
 
 void GameHandler::handleActionChange(GameClient &client, MessageIn &message)

@@ -109,6 +109,7 @@ bool AbilityComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
     AbilityMap::iterator it = mAbilities.find(id);
     if (!abilityUseCheck(it))
             return false;
+
     AbilityValue &ability = it->second;
 
     if (ability.abilityInfo->target != AbilityManager::TARGET_BEING)
@@ -141,6 +142,7 @@ bool AbilityComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
     AbilityMap::iterator it = mAbilities.find(id);
     if (!abilityUseCheck(it))
             return false;
+
     AbilityValue &ability = it->second;
 
     if (ability.abilityInfo->target != AbilityManager::TARGET_POINT)
@@ -159,6 +161,33 @@ bool AbilityComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
     mLastTargetPoint = Point(x, y);
     user.getComponent<ActorComponent>()->raiseUpdateFlags(
             UPDATEFLAG_ABILITY_ON_POINT);
+    return true;
+}
+
+bool AbilityComponent::useAbilityOnDirection(Entity &user, int id,
+                                             ManaServ::BeingDirection direction)
+{
+    AbilityMap::iterator it = mAbilities.find(id);
+    if (!abilityUseCheck(it))
+            return false;
+
+    AbilityValue &ability = it->second;
+
+    if (ability.abilityInfo->target != AbilityManager::TARGET_DIRECTION)
+        return false;
+
+    //tell script engine to cast the spell
+    Script *script = ScriptManager::currentState();
+    script->prepare(ability.abilityInfo->useCallback);
+    script->push(&user);
+    script->push(direction);
+    script->push(ability.abilityInfo->id);
+    script->execute(user.getMap());
+
+    mLastUsedAbilityId = id;
+    mLastTargetDirection = direction;
+    user.getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_ABILITY_ON_DIRECTION);
     return true;
 }
 

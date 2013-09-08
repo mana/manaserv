@@ -58,6 +58,8 @@ public:
 
     bool useAbilityOnBeing(Entity &user, int id, Entity *b);
     bool useAbilityOnPoint(Entity &user, int id, int x, int y);
+    bool useAbilityOnDirection(Entity &user, int id,
+                               ManaServ::BeingDirection direction);
 
     bool giveAbility(int id, int currentMana = 0);
     bool giveAbility(const AbilityManager::AbilityInfo *info,
@@ -80,8 +82,10 @@ public:
 
     // For informing clients
     int getLastUsedAbilityId() const;
-    const Point &getLastTargetPoint() const;
+
     int getLastTargetBeingId() const;
+    const Point &getLastTargetPoint() const;
+    ManaServ::BeingDirection getLastUsedTargetDirection() const;
 
 private:
     bool abilityUseCheck(AbilityMap::iterator it);
@@ -93,6 +97,7 @@ private:
     // Variables required for informing clients
     int mLastUsedAbilityId;
     Point mLastTargetPoint;
+    ManaServ::BeingDirection mLastTargetDirection;
     int mLastTargetBeingId;
 };
 

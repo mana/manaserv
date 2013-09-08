@@ -31,6 +31,8 @@ static AbilityManager::TargetMode getTargetByString(const std::string &str)
         return AbilityManager::TARGET_BEING;
     else if (strLower == "point")
         return AbilityManager::TARGET_POINT;
+    else if (strLower == "direction")
+        return AbilityManager::TARGET_DIRECTION;
 
     LOG_WARN("Unknown targetmode " << str << " assuming being.");
     return AbilityManager::TARGET_BEING;

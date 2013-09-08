@@ -135,6 +135,8 @@ class GameHandler: public ConnectionHandler
 
         void handleUseAbilityOnBeing(GameClient &client, MessageIn &message);
         void handleUseAbilityOnPoint(GameClient &client, MessageIn &message);
+        void handleUseAbilityOnDirection(GameClient &client, MessageIn &message);
+
         void handleActionChange(GameClient &client, MessageIn &message);
         void handleDirectionChange(GameClient &client, MessageIn &message);
 

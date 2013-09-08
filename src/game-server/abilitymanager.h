@@ -35,7 +35,8 @@ public:
     enum TargetMode
     {
         TARGET_BEING,
-        TARGET_POINT
+        TARGET_POINT,
+        TARGET_DIRECTION,
     };
 
     struct AbilityInfo
