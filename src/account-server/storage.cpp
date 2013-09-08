@@ -788,7 +788,6 @@ bool Storage::updateCharacter(CharacterData *character)
 
         const Possessions &poss = character->getPossessions();
         const InventoryData &inventoryData = poss.getInventory();
-        const EquipData &equipData = poss.getEquipment();
         for (InventoryData::const_iterator itemIt = inventoryData.begin(),
              j_end = inventoryData.end(); itemIt != j_end; ++itemIt)
         {
