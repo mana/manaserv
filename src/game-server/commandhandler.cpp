@@ -1070,11 +1070,11 @@ static void handleAttribute(Entity *player, std::string &args)
 
     // get arguments
     std::string character = getArgument(args);
-    std::string attrstr = getArgument(args);
+    std::string attribute = getArgument(args);
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (character.empty() || valuestr.empty() || attrstr.empty())
+    if (character.empty() || valuestr.empty() || attribute.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @attribute <character> <attribute> <value>", player);
@@ -1098,16 +1098,24 @@ static void handleAttribute(Entity *player, std::string &args)
     }
 
     // check they are really integers
-    if (!utils::isNumeric(valuestr) || !utils::isNumeric(attrstr))
+    if (!utils::isNumeric(valuestr))
     {
         say("Invalid argument", player);
         return;
     }
 
-    // put the attribute into an integer
-    int attributeId = utils::stringToInt(attrstr);
+    AttributeInfo *attributeInfo;
+    if (utils::isNumeric(attribute))
+    {
+        const int id = utils::stringToInt(attribute);
+        attributeInfo = attributeManager->getAttributeInfo(id);
+    }
+    else
+    {
+        attributeInfo = attributeManager->getAttributeInfo(attribute);
+    }
 
-    if (attributeId < 0)
+    if (!attributeInfo)
     {
         say("Invalid Attribute", player);
         return;
@@ -1124,20 +1132,18 @@ static void handleAttribute(Entity *player, std::string &args)
 
     auto *beingComponent = other->getComponent<BeingComponent>();
 
-    auto *attribute = attributeManager->getAttributeInfo(attributeId);
-
-    if (!attribute)
+    if (!attributeInfo)
     {
         say("Invalid attribute", player);
         return;
     }
 
     // change the player's attribute
-    beingComponent->setAttribute(*other, attribute, value);
+    beingComponent->setAttribute(*other, attributeInfo, value);
 
     // log transaction
     std::stringstream msg;
-    msg << "User changed attribute " << attribute->id << " of player "
+    msg << "User changed attribute " << attributeInfo->id << " of player "
         << beingComponent->getName()
         << " to " << value;
     int databaseId =
