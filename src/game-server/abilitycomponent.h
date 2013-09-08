@@ -85,7 +85,7 @@ public:
 
     int getLastTargetBeingId() const;
     const Point &getLastTargetPoint() const;
-    ManaServ::BeingDirection getLastUsedTargetDirection() const;
+    ManaServ::BeingDirection getLastTargetDirection() const;
 
 private:
     bool abilityUseCheck(AbilityMap::iterator it);
@@ -149,6 +149,11 @@ inline const Point &AbilityComponent::getLastTargetPoint() const
 inline int AbilityComponent::getLastTargetBeingId() const
 {
     return mLastTargetBeingId;
+}
+
+inline ManaServ::BeingDirection AbilityComponent::getLastTargetDirection() const
+{
+    return mLastTargetDirection;
 }
 
 #endif /* ABILITYCOMPONENT_H_ */

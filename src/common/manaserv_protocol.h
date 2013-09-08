@@ -145,6 +145,7 @@ enum {
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     GPMSG_BEING_ABILITY_POINT      = 0x0282, // W being id, B abilityId, W*2 point
     GPMSG_BEING_ABILITY_BEING      = 0x0283, // W being id, B abilityId, W target being id
+    GPMSG_BEING_ABILITY_DIRECTION  = 0x0284, // W being id, B abilityId, B direction
     PGMSG_USE_ABILITY_ON_BEING     = 0x0290, // B abilityID, W being id
     PGMSG_USE_ABILITY_ON_POINT     = 0x0291, // B abilityID, W*2 position
     PGMSG_USE_ABILITY_ON_DIRECTION = 0x0292, // B abilityID, B direction
