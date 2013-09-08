@@ -23,7 +23,7 @@
 
 #include <string.h>
 
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/itemmanager.h"
 #include "game-server/monster.h"
 #include "game-server/monstermanager.h"

@@ -21,7 +21,7 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "net/messageout.h"
 
 class ItemClass;

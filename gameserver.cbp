@@ -129,8 +129,8 @@
 		<Unit filename="src/game-server/being.h" />
 		<Unit filename="src/game-server/buysell.cpp" />
 		<Unit filename="src/game-server/buysell.h" />
-		<Unit filename="src/game-server/character.cpp" />
-		<Unit filename="src/game-server/character.h" />
+		<Unit filename="src/game-server/charactercomponent.cpp" />
+		<Unit filename="src/game-server/charactercomponent.h" />
 		<Unit filename="src/game-server/collisiondetection.cpp" />
 		<Unit filename="src/game-server/collisiondetection.h" />
 		<Unit filename="src/game-server/commandhandler.cpp" />

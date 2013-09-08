@@ -24,7 +24,7 @@
 #include <map>
 #include <string>
 
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/entity.h"
 
 class Script;

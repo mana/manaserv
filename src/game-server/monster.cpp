@@ -23,7 +23,7 @@
 #include "common/configuration.h"
 #include "common/resourcemanager.h"
 #include "game-server/attributemanager.h"
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/collisiondetection.h"
 #include "game-server/item.h"
 #include "game-server/map.h"

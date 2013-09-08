@@ -21,7 +21,7 @@
 #ifndef SCRIPTMANAGER_H
 #define SCRIPTMANAGER_H
 
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 
 #include <string>
 

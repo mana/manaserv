@@ -218,8 +218,8 @@ SET(SRCS_MANASERVGAME
     game-server/being.cpp
     game-server/buysell.h
     game-server/buysell.cpp
-    game-server/character.h
-    game-server/character.cpp
+    game-server/charactercomponent.h
+    game-server/charactercomponent.cpp
     game-server/collisiondetection.h
     game-server/collisiondetection.cpp
     game-server/commandhandler.cpp

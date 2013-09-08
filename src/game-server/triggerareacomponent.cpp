@@ -21,7 +21,7 @@
 
 #include "game-server/triggerareacomponent.h"
 
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/actor.h"
 #include "game-server/state.h"

@@ -21,7 +21,7 @@
 #include "game-server/accountconnection.h"
 
 #include "common/configuration.h"
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/gamehandler.h"
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"

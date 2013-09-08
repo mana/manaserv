@@ -25,7 +25,7 @@
 #include "accountconnection.h"
 #include "common/configuration.h"
 #include "common/resourcemanager.h"
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/map.h"
 #include "game-server/mapmanager.h"

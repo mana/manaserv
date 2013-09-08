@@ -23,7 +23,7 @@
 
 #include "game-server/trade.h"
 
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/gamehandler.h"
 #include "game-server/inventory.h"
 #include "net/messageout.h"

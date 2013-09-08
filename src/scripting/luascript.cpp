@@ -24,7 +24,7 @@
 #include "scripting/luautil.h"
 #include "scripting/scriptmanager.h"
 
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "utils/logger.h"
 
 #include <cassert>

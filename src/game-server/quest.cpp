@@ -21,7 +21,7 @@
 #include "game-server/quest.h"
 
 #include "game-server/accountconnection.h"
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "utils/logger.h"
 
 #include <cassert>

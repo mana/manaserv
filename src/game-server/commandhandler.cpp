@@ -22,7 +22,7 @@
 
 #include "game-server/commandhandler.h"
 #include "game-server/accountconnection.h"
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/effect.h"
 #include "game-server/gamehandler.h"
 #include "game-server/inventory.h"

@@ -18,7 +18,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 
 #include "common/configuration.h"
 #include "game-server/accountconnection.h"

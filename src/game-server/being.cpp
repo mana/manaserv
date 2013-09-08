@@ -25,7 +25,7 @@
 #include "common/configuration.h"
 #include "common/defines.h"
 #include "game-server/attributemanager.h"
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/collisiondetection.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/effect.h"

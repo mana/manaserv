@@ -20,7 +20,7 @@
 
 #include "common/permissionmanager.h"
 
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "utils/logger.h"
 #include "utils/xml.h"
 

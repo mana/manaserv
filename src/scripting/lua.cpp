@@ -31,7 +31,7 @@ extern "C" {
 #include "common/resourcemanager.h"
 #include "game-server/accountconnection.h"
 #include "game-server/buysell.h"
-#include "game-server/character.h"
+#include "game-server/charactercomponent.h"
 #include "game-server/collisiondetection.h"
 #include "game-server/effect.h"
 #include "game-server/gamehandler.h"
