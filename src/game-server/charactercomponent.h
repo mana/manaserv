@@ -288,11 +288,6 @@ class CharacterComponent : public Component
     private:
         void deserialize(Entity &entity, MessageIn &msg);
 
-        double getAttrBase(AttributeMap::const_iterator it) const
-        { return it->second.getBase(); }
-        double getAttrMod(AttributeMap::const_iterator it) const
-        { return it->second.getModifiedAttribute(); }
-
         CharacterComponent(const CharacterComponent &);
         CharacterComponent &operator=(const CharacterComponent &);
 
