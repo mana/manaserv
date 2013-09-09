@@ -291,7 +291,7 @@ void AccountHandler::sendCharacterData(AccountClient &client,
     for (int itemSlot : equipData)
     {
         const auto &it = inventoryData.find(itemSlot);
-        charInfo.writeInt16(itemSlot);
+        charInfo.writeInt16(it->second.equipmentSlot);
         charInfo.writeInt16(it->second.itemId);
     }
 
