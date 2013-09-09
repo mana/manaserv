@@ -27,7 +27,7 @@
 
 void EffectComponent::update(Entity &entity)
 {
-    if (mHasBeenShown)
+    if (mCreationTick != GameState::getCurrentTick())
         GameState::enqueueRemove(&entity);
 }
 

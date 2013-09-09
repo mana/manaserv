@@ -23,6 +23,7 @@
 #define EFFECT_H
 
 #include "game-server/component.h"
+#include "game-server/state.h"
 
 class Entity;
 class MapComposite;
@@ -35,7 +36,7 @@ class EffectComponent : public Component
 
         EffectComponent(int id)
           : mEffectId(id)
-          , mHasBeenShown(false)
+          , mCreationTick(GameState::getCurrentTick())
           , mBeing(0)
         {}
 
@@ -50,18 +51,12 @@ class EffectComponent : public Component
          */
         void update(Entity &entity);
 
-        /**
-         * Called when the object has been shown to a player in the state loop.
-         */
-        void setShown()
-        { mHasBeenShown = true; }
-
         void setBeing(Entity *b)
         { mBeing = b; }
 
     private:
         int mEffectId;
-        bool mHasBeenShown;
+        int mCreationTick;
         Entity *mBeing;
 };
 

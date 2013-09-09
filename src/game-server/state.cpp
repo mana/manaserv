@@ -435,7 +435,6 @@ static void informPlayer(MapComposite *map, Entity *p)
                 case OBJECT_EFFECT:
                 {
                     EffectComponent *e = o->getComponent<EffectComponent>();
-                    e->setShown();
                     // Don't show old effects
                     if (!(oflags & UPDATEFLAG_NEW_ON_MAP))
                         break;
