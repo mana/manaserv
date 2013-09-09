@@ -283,15 +283,24 @@ void AccountHandler::sendCharacterData(AccountClient &client,
     charInfo.writeInt16(ch.getAttributePoints());
     charInfo.writeInt16(ch.getCorrectionPoints());
 
-    for (AttributeMap::const_iterator it = ch.mAttributes.begin(),
-                                      it_end = ch.mAttributes.end();
-        it != it_end;
-        ++it)
+    auto &possessions = ch.getPossessions();
+    auto &equipData = possessions.getEquipment();
+    auto &inventoryData = possessions.getInventory();
+    charInfo.writeInt8(equipData.size());
+
+    for (int itemSlot : equipData)
+    {
+        const auto &it = inventoryData.find(itemSlot);
+        charInfo.writeInt16(itemSlot);
+        charInfo.writeInt16(it->second.itemId);
+    }
+
+    for (auto &it : ch.getAttributes())
     {
         // {id, base value in 256ths, modified value in 256ths }*
-        charInfo.writeInt32(it->first);
-        charInfo.writeInt32((int) (it->second.base * 256));
-        charInfo.writeInt32((int) (it->second.modified * 256));
+        charInfo.writeInt32(it.first);
+        charInfo.writeInt32((int) (it.second.base * 256));
+        charInfo.writeInt32((int) (it.second.modified * 256));
     }
 
     client.send(charInfo);

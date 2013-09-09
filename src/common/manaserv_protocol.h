@@ -29,7 +29,7 @@
 namespace ManaServ {
 
 enum {
-    PROTOCOL_VERSION = 7,
+    PROTOCOL_VERSION = 8,
     SUPPORTED_DB_VERSION = 25
 };
 
@@ -83,7 +83,8 @@ enum {
     PAMSG_CHAR_DELETE              = 0x0022, // B slot
     APMSG_CHAR_DELETE_RESPONSE     = 0x0023, // B error
     // B slot, S name, B gender, B hair style, B hair color,
-    // W character points, W correction points,
+    // W character points, W correction points, B amount of items equipped,
+    // { W slot, W itemId }*
     // {D attr id, D base value (in 1/256ths) D mod value (in 256ths) }*
     APMSG_CHAR_INFO                = 0x0024, // ^
     PAMSG_CHAR_SELECT              = 0x0026, // B slot
