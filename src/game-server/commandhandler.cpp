@@ -1713,7 +1713,7 @@ static void handleListAbility(Entity *player, std::string &args)
 
     auto *abilityComponent = other->getComponent<AbilityComponent>();
 
-    say("Abilityies of character " +
+    say("Abilities of character " +
         other->getComponent<BeingComponent>()->getName() + ":", player);
     for (auto &abilityIt : abilityComponent->getAbilities())
     {
