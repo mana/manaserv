@@ -172,6 +172,8 @@ Script *                               getScript(lua_State *s);
 ItemClass *                            getItemClass(lua_State *s, int p);
 MonsterClass *                         getMonsterClass(lua_State *s, int p);
 
+bool checkOptionalBool(lua_State *s, int p, bool defaultValue);
+
 Entity *                               checkActor(lua_State *s, int p);
 Entity *                               checkBeing(lua_State *s, int p);
 Entity *                               checkCharacter(lua_State *s, int p);

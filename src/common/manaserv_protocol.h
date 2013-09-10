@@ -254,6 +254,9 @@ enum {
     PCMSG_USER_MODE                   = 0x0465, // W channel id, S name, B mode
     PCMSG_KICK_USER                   = 0x0466, // W channel id, S name
 
+    // -- Questlog
+    GPMSG_QUESTLOG_STATUS       = 0x0470, // W quest id, B flags, [B status], [S questname], [S questdescription]
+
     // Inter-server
     GAMSG_REGISTER              = 0x0500, // S address, W port, S password, D items db revision
     AGMSG_REGISTER_RESPONSE     = 0x0501, // W item version, W password response, { S globalvar_key, S globalvar_value }
@@ -415,6 +418,13 @@ enum {
     GUILD_EVENT_OFFLINE_PLAYER
 };
 
+enum {
+    QUESTLOG_UPDATE_STATE = 1,
+    QUESTLOG_UPDATE_TITLE = 2,
+    QUESTLOG_UPDATE_DESCRIPTION = 4,
+    QUESTLOG_SHOW_NOTIFICATION = 8,
+};
+
 /**
   * Moves enum for beings and actors for others players vision.
   * WARNING: Has to be in sync with the same enum in the Being class
@@ -481,6 +491,55 @@ inline ManaServ::BeingGender getGender(std::string gender)
         return ManaServ::GENDER_FEMALE;
     else
         return ManaServ::GENDER_UNSPECIFIED;
+}
+
+/**
+ * Quest states
+ */
+enum QuestStatus
+{
+    STATUS_OPEN = 0,
+    STATUS_STARTED,
+    STATUS_FINISHED,
+    STATUS_INVALID
+};
+
+/**
+ * Helper function for getting quest status by id
+ * @param status id of the status
+ * @return the status as enum value
+ */
+inline ManaServ::QuestStatus getQuestStatus(int status)
+{
+    switch (status)
+    {
+        case 0:
+            return ManaServ::STATUS_OPEN;
+        case 1:
+            return ManaServ::STATUS_STARTED;
+        case 2:
+            return ManaServ::STATUS_FINISHED;
+        default:
+            return ManaServ::STATUS_INVALID;
+    }
+}
+
+/**
+ * Helper function for getting quest status by string
+ * @param status name of quest status (open, started or finished)
+ * @return the status as enum value
+ */
+inline ManaServ::QuestStatus getQuestStatus(std::string status)
+{
+    std::string lowercase = utils::toLower(status);
+    if (lowercase == "open")
+        return ManaServ::STATUS_OPEN;
+    else if (lowercase == "started")
+        return ManaServ::STATUS_STARTED;
+    else if (lowercase == "finished")
+        return ManaServ::STATUS_FINISHED;
+    else
+        return ManaServ::STATUS_INVALID;
 }
 
 } // namespace ManaServ

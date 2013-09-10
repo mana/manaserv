@@ -2336,6 +2336,122 @@ static int entity_use_ability(lua_State *s)
     return 1;
 }
 
+/** LUA set_questlog_status (being)
+ * entity:set_questlog_status(int id, int state, string name,
+ *                            string description[, bool notify = true])
+ **
+ * Sets the questlog status.
+ *
+ * Valid only for character entities.
+ *
+ * For state you can use one of the following:
+ *  * `QUEST_OPEN`
+ *  * `QUEST_FINISHED`
+ *  * `QUEST_FAILED`
+ */
+static int set_questlog_status(lua_State *s)
+{
+    const Entity *character = checkCharacter(s, 1);
+    const int questId = luaL_checkinteger(s, 2);
+    const int questState = luaL_checkinteger(s, 3);
+    const char *questTitle = luaL_checkstring(s, 4);
+    const char *questDescription = luaL_checkstring(s, 5);
+    const bool questNotification = checkOptionalBool(s, 6, true);
+
+    MessageOut out(GPMSG_QUESTLOG_STATUS);
+    out.writeInt16(questId);
+    int flags = QUESTLOG_UPDATE_STATE |
+            QUESTLOG_UPDATE_TITLE |
+            QUESTLOG_UPDATE_DESCRIPTION;
+    if (questNotification)
+        flags |= QUESTLOG_SHOW_NOTIFICATION;
+    out.writeInt8(flags);
+    out.writeInt8(questState);
+    out.writeString(questTitle);
+    out.writeString(questDescription);
+
+    character->getComponent<CharacterComponent>()->getClient()->send(out);
+    return 0;
+}
+
+/** LUA set_questlog_state (being)
+ * entity:set_questlog_state(int id, int state[, bool notify = true])
+ **
+ * Sets the questlog state.
+ *
+ * Valid only for character entities.
+ *
+ * For state you can use one of the following:
+ *  * `QUEST_OPEN`
+ *  * `QUEST_FINISHED`
+ *  * `QUEST_FAILED`
+ */
+static int set_questlog_state(lua_State *s)
+{
+    const Entity *character = checkCharacter(s, 1);
+    const int questId = luaL_checkinteger(s, 2);
+    const int questState = luaL_checkinteger(s, 3);
+    const bool questNotification = checkOptionalBool(s, 4, true);
+
+    MessageOut out(GPMSG_QUESTLOG_STATUS);
+    out.writeInt16(questId);
+    out.writeInt8(QUESTLOG_UPDATE_STATE |
+                  questNotification ? QUESTLOG_SHOW_NOTIFICATION : 0);
+    out.writeInt8(questState);
+
+    character->getComponent<CharacterComponent>()->getClient()->send(out);
+    return 0;
+}
+
+/** LUA set_questlog_title (being)
+ * entity:set_questlog_title(int id, string title[, bool notify = true])
+ **
+ * Sets the questlog title.
+ *
+ * Valid only for character entities.
+ */
+static int set_questlog_title(lua_State *s)
+{
+    const Entity *character = checkCharacter(s, 1);
+    const int questId = luaL_checkinteger(s, 2);
+    const char *questTitle = luaL_checkstring(s, 3);
+    const bool questNotification = checkOptionalBool(s, 4, true);
+
+    MessageOut out(GPMSG_QUESTLOG_STATUS);
+    out.writeInt16(questId);
+    out.writeInt8(QUESTLOG_UPDATE_TITLE |
+                  questNotification ? QUESTLOG_SHOW_NOTIFICATION : 0);
+    out.writeString(questTitle);
+
+    character->getComponent<CharacterComponent>()->getClient()->send(out);
+    return 0;
+}
+
+/** LUA set_questlog_description (being)
+ * entity:set_questlog_description(int id, string description[, bool notify = true])
+ **
+ * Sets the questlog description.
+ *
+ * Valid only for character entities.
+ */
+static int set_questlog_description(lua_State *s)
+{
+    const Entity *character = checkCharacter(s, 1);
+    const int questId = luaL_checkinteger(s, 2);
+    luaL_argcheck(s, lua_isboolean(s, 3), 3, "boolean expected");
+    const char *questDescription = luaL_checkstring(s, 3);
+    const bool questNotification = checkOptionalBool(s, 4, true);
+
+    MessageOut out(GPMSG_QUESTLOG_STATUS);
+    out.writeInt16(questId);
+    out.writeInt8(QUESTLOG_UPDATE_DESCRIPTION |
+                  questNotification ? QUESTLOG_SHOW_NOTIFICATION : 0);
+    out.writeString(questDescription);
+
+    character->getComponent<CharacterComponent>()->getClient()->send(out);
+    return 0;
+}
+
 
 /** LUA_CATEGORY Monster (monster)
  */
@@ -3158,7 +3274,6 @@ static int map_object_get_type(lua_State *s)
     return 1;
 }
 
-
 /** LUA_CATEGORY Item class (itemclass)
  */
 
@@ -3429,6 +3544,10 @@ LuaScript::LuaScript():
         { "status_time",                    entity_get_status_time            },
         { "set_status_time",                entity_set_status_time            },
         { "add_hit_taken",                  entity_add_hit_taken              },
+        { "set_questlog_status",            set_questlog_status               },
+        { "set_questlog_state",             set_questlog_state                },
+        { "set_questlog_title",             set_questlog_title                },
+        { "set_questlog_description",       set_questlog_description          },
         { nullptr, nullptr }
     };
 

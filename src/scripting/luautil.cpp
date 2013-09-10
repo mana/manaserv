@@ -163,6 +163,16 @@ MonsterClass *getMonsterClass(lua_State *s, int p)
 }
 
 
+bool checkOptionalBool(lua_State *s, int p, bool defaultValue)
+{
+    if (lua_gettop(s) >= p)
+    {
+        luaL_argcheck(s, lua_isboolean(s, p), p, "boolean expected");
+        return lua_toboolean(s, p);
+    }
+    return defaultValue;
+}
+
 Entity *checkActor(lua_State *s, int p)
 {
     Entity *entity = LuaEntity::check(s, p);
