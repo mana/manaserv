@@ -27,8 +27,7 @@
 
 void EffectComponent::update(Entity &entity)
 {
-    if (mCreationTick != GameState::getCurrentTick())
-        GameState::enqueueRemove(&entity);
+    GameState::enqueueRemove(&entity);
 }
 
 namespace Effects
