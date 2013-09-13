@@ -1695,7 +1695,7 @@ static void handleListAbility(Entity *player, std::string &args)
     if (character.empty())
     {
         say("Invalid amount of arguments given.", player);
-        say("Usage: @listabilitys <character>", player);
+        say("Usage: @listabilities <character>", player);
         return;
     }
 
