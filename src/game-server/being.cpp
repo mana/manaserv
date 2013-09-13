@@ -193,8 +193,8 @@ void BeingComponent::move(Entity &entity)
     // zone to another.
     mOld = entity.getComponent<ActorComponent>()->getPosition();
 
-    // Ignore not moving beings
-    if (mAction == STAND && mDst == mOld)
+    // Ignore not moving or dead beings
+    if ((mAction == STAND && mDst == mOld) || mAction == DEAD)
         return;
 
     if (mMoveTime > WORLD_TICK_MS)
