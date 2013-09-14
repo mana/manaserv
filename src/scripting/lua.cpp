@@ -2014,6 +2014,25 @@ static int entity_set_hair_style(lua_State *s)
     return 0;
 }
 
+/** LUA entity:increment_kill_count (being)
+ * entity:increment_kill_count(int monsterId)
+ * entity:increment_kill_count(string monsterName)
+ * entity:increment_kill_count(MonsterClass monsterClass)
+ **
+ * Valid only for character entities.
+ *
+ * Increments the kill count by one.
+ */
+static int entity_increment_kill_count(lua_State *s)
+{
+
+    Entity *c = checkCharacter(s, 1);
+    MonsterClass *monster = checkMonsterClass(s, 2);
+
+    c->getComponent<CharacterComponent>()->incrementKillCount(monster->getId());
+    return 0;
+}
+
 /** LUA entity:kill_count (being)
  * entity:kill_count(int monsterId)
  * entity:kill_count(string monsterName)
@@ -3526,6 +3545,7 @@ LuaScript::LuaScript():
         { "set_hair_color",                 entity_set_hair_color             },
         { "hair_style",                     entity_get_hair_style             },
         { "set_hair_style",                 entity_set_hair_style             },
+        { "increment_kill_count",            entity_increment_kill_count       },
         { "kill_count",                     entity_get_kill_count             },
         { "rights",                         entity_get_rights                 },
         { "kick",                           entity_kick                       },
