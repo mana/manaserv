@@ -36,7 +36,6 @@ class EffectComponent : public Component
 
         EffectComponent(int id)
           : mEffectId(id)
-          , mCreationTick(GameState::getCurrentTick())
           , mBeing(0)
         {}
 
@@ -56,7 +55,6 @@ class EffectComponent : public Component
 
     private:
         int mEffectId;
-        int mCreationTick;
         Entity *mBeing;
 };
 
