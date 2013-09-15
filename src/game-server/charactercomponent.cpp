@@ -111,8 +111,7 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
             this, &CharacterComponent::attributeChanged));
 
-    entity.signal_inserted.connect(sigc::mem_fun(this,
-                                                 &CharacterComponent::inserted));
+    sendFullInfo(entity);
 }
 
 CharacterComponent::~CharacterComponent()
@@ -587,9 +586,8 @@ void CharacterComponent::triggerLoginCallback(Entity &entity)
     executeCallback(mLoginCallback, entity);
 }
 
-void CharacterComponent::inserted(Entity *entity)
+void CharacterComponent::sendFullInfo(Entity &entity)
 {
-    Inventory(entity).sendFull();
-    modifiedAllAbilities(*entity);
-    modifiedAllAttributes(*entity);
+    modifiedAllAbilities(entity);
+    modifiedAllAttributes(entity);
 }

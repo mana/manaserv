@@ -279,6 +279,8 @@ class CharacterComponent : public Component
 
         void triggerLoginCallback(Entity &entity);
 
+        void sendFullInfo(Entity &entity);
+
         sigc::signal<void, Entity &> signal_disconnected;
 
         void serialize(Entity &entity, MessageOut &msg);
@@ -288,8 +290,6 @@ class CharacterComponent : public Component
 
         CharacterComponent(const CharacterComponent &);
         CharacterComponent &operator=(const CharacterComponent &);
-
-        void inserted(Entity *entity);
 
         void abilityStatusChanged(int id);
         void abilityCooldownActivated();

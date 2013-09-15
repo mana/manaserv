@@ -79,7 +79,7 @@ void GameHandler::computerDisconnected(NetComputer *comp)
     delete &computer;
 }
 
-void GameHandler::killConnection(Entity *ch)
+void GameHandler::detachClient(Entity *ch)
 {
     auto *component = ch->getComponent<CharacterComponent>();
     GameClient *client = component->getClient();
@@ -364,7 +364,7 @@ void GameHandler::addPendingCharacter(const std::string &token, Entity *ch)
             delete ch;
 
             GameState::remove(old_ch);
-            killConnection(old_ch);
+            detachClient(old_ch);
             MessageOut msg(GPMSG_CONNECT_RESPONSE);
             msg.writeInt8(ERRMSG_LOGIN_WAS_TAKEN_OVER);
             c->disconnect(msg);
@@ -393,7 +393,7 @@ void GameHandler::tokenMatched(GameClient *computer, Entity *character)
     if (!GameState::insert(character))
     {
         result.writeInt8(ERRMSG_SERVER_FULL);
-        killConnection(character);
+        detachClient(character);
         delete character;
         computer->disconnect(result);
         return;
@@ -403,6 +403,9 @@ void GameHandler::tokenMatched(GameClient *computer, Entity *character)
 
     result.writeInt8(ERRMSG_OK);
     computer->send(result);
+
+    Inventory(character).sendFull();
+    characterComponent->sendFullInfo(*character);
 }
 
 void GameHandler::deletePendingClient(GameClient *computer)
