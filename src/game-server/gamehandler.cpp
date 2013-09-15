@@ -79,14 +79,14 @@ void GameHandler::computerDisconnected(NetComputer *comp)
     delete &computer;
 }
 
-void GameHandler::kill(Entity *ch)
+void GameHandler::killConnection(Entity *ch)
 {
     auto *component = ch->getComponent<CharacterComponent>();
     GameClient *client = component->getClient();
     assert(client);
     client->character = nullptr;
     client->status = CLIENT_LOGIN;
-    component->setClient(0);
+    component->setClient(nullptr);
 }
 
 void GameHandler::prepareServerChange(Entity *ch)
@@ -343,10 +343,9 @@ void GameHandler::addPendingCharacter(const std::string &token, Entity *ch)
 
     int id = ch->getComponent<CharacterComponent>()->getDatabaseID();
 
-    for (NetComputers::const_iterator i = clients.begin(),
-         i_end = clients.end(); i != i_end; ++i)
+    for (NetComputer *i : clients)
     {
-        GameClient *c = static_cast< GameClient * >(*i);
+        GameClient *c = static_cast< GameClient * >(i);
         Entity *old_ch = c->character;
         if (old_ch && id == old_ch->getComponent<CharacterComponent>()->getDatabaseID())
         {
@@ -363,8 +362,13 @@ void GameHandler::addPendingCharacter(const std::string &token, Entity *ch)
                already present character, kill its current connection, and make
                it available for a new connection. */
             delete ch;
+
             GameState::remove(old_ch);
-            kill(old_ch);
+            killConnection(old_ch);
+            MessageOut msg(GPMSG_CONNECT_RESPONSE);
+            msg.writeInt8(ERRMSG_LOGIN_WAS_TAKEN_OVER);
+            c->disconnect(msg);
+
             ch = old_ch;
             break;
         }
@@ -389,7 +393,7 @@ void GameHandler::tokenMatched(GameClient *computer, Entity *character)
     if (!GameState::insert(character))
     {
         result.writeInt8(ERRMSG_SERVER_FULL);
-        kill(character);
+        killConnection(character);
         delete character;
         computer->disconnect(result);
         return;
@@ -399,10 +403,6 @@ void GameHandler::tokenMatched(GameClient *computer, Entity *character)
 
     result.writeInt8(ERRMSG_OK);
     computer->send(result);
-
-    // Force sending the whole character to the client.
-    Inventory(character).sendFull();
-    characterComponent->modifiedAllAttributes(*character);
 }
 
 void GameHandler::deletePendingClient(GameClient *computer)

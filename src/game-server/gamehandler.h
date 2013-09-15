@@ -65,7 +65,7 @@ class GameHandler: public ConnectionHandler
         /**
          * Kills connection with given character.
          */
-        void kill(Entity *);
+        void killConnection(Entity *);
 
         /**
          * Prepares a server change for given character.

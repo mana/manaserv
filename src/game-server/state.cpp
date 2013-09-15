@@ -524,7 +524,7 @@ void GameState::update(int tick)
                 if (o->getType() == OBJECT_CHARACTER)
                 {
                     o->getComponent<CharacterComponent>()->disconnected(*o);
-                    gameHandler->kill(o);
+                    gameHandler->killConnection(o);
                 }
                 delete o;
                 break;
@@ -770,7 +770,7 @@ void GameState::warp(Entity *ptr, MapComposite *map, const Point &point)
         if (!insert(ptr))
         {
             characterComponent->disconnected(*ptr);
-            gameHandler->kill(ptr);
+            gameHandler->killConnection(ptr);
             delete ptr;
         }
     }

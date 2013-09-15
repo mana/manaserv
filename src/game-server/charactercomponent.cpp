@@ -107,13 +107,12 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     deserialize(entity, msg);
 
     Inventory(&entity, mPossessions).initialize();
-    modifiedAllAttributes(entity);;
 
     beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
             this, &CharacterComponent::attributeChanged));
 
-    for (auto &abilityIt : abilityComponent->getAbilities())
-        mModifiedAbilities.insert(abilityIt.first);
+    entity.signal_inserted.connect(sigc::mem_fun(this,
+                                                 &CharacterComponent::inserted));
 }
 
 CharacterComponent::~CharacterComponent()
@@ -452,6 +451,12 @@ void CharacterComponent::sendStatus(Entity &entity)
     mModifiedAttributes.clear();
 }
 
+void CharacterComponent::modifiedAllAbilities(Entity &entity)
+{
+    for (auto &abilityIt : entity.getComponent<AbilityComponent>()->getAbilities())
+        mModifiedAbilities.insert(abilityIt.first);
+}
+
 void CharacterComponent::modifiedAllAttributes(Entity &entity)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
@@ -580,4 +585,11 @@ void CharacterComponent::disconnected(Entity &entity)
 void CharacterComponent::triggerLoginCallback(Entity &entity)
 {
     executeCallback(mLoginCallback, entity);
+}
+
+void CharacterComponent::inserted(Entity *entity)
+{
+    Inventory(entity).sendFull();
+    modifiedAllAbilities(*entity);
+    modifiedAllAttributes(*entity);
 }

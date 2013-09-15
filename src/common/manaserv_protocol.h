@@ -308,7 +308,8 @@ enum {
     ERRMSG_TIME_OUT,                    // data failed to arrive in due time
     ERRMSG_LIMIT_REACHED,               // limit reached
     ERRMSG_ADMINISTRATIVE_LOGOFF,       // kicked by server administrator
-    ERRMSG_ALREADY_MEMBER               // is already member of guild/party
+    ERRMSG_ALREADY_MEMBER,              // is already member of guild/party
+    ERRMSG_LOGIN_WAS_TAKEN_OVER         // a different connection took over
 };
 
 // used in AGMSG_REGISTER_RESPONSE to show state of item db

@@ -167,9 +167,7 @@ class CharacterComponent : public Component
          */
         void sendStatus(Entity &entity);
 
-        /**
-         * Marks all attributes as being modified.
-         */
+        void modifiedAllAbilities(Entity &entity);
         void modifiedAllAttributes(Entity &entity);
 
         /**
@@ -290,6 +288,8 @@ class CharacterComponent : public Component
 
         CharacterComponent(const CharacterComponent &);
         CharacterComponent &operator=(const CharacterComponent &);
+
+        void inserted(Entity *entity);
 
         void abilityStatusChanged(int id);
         void abilityCooldownActivated();
