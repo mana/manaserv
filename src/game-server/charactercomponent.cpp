@@ -110,8 +110,6 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
 
     beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
             this, &CharacterComponent::attributeChanged));
-
-    sendFullInfo(entity);
 }
 
 CharacterComponent::~CharacterComponent()
@@ -276,22 +274,6 @@ void CharacterComponent::serialize(Entity &entity, MessageOut &msg)
     }
 }
 
-void CharacterComponent::update(Entity &entity)
-{
-    // Dead character: don't regenerate anything else
-    if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
-        return;
-
-    if (!mModifiedAbilities.empty())
-        sendAbilityUpdate(entity);
-
-    if (mSendAbilityCooldown)
-        sendAbilityCooldownUpdate(entity);
-
-    if (mSendAttributePointsStatus)
-        sendAttributePointsStatus(entity);
-}
-
 void CharacterComponent::characterDied(Entity *being)
 {
     executeCallback(mDeathCallback, *being);
@@ -448,6 +430,15 @@ void CharacterComponent::sendStatus(Entity &entity)
     }
     if (attribMsg.getLength() > 2) gameHandler->sendTo(mClient, attribMsg);
     mModifiedAttributes.clear();
+
+    if (!mModifiedAbilities.empty())
+        sendAbilityUpdate(entity);
+
+    if (mSendAbilityCooldown)
+        sendAbilityCooldownUpdate(entity);
+
+    if (mSendAttributePointsStatus)
+        sendAttributePointsStatus(entity);
 }
 
 void CharacterComponent::modifiedAllAbilities(Entity &entity)
@@ -586,7 +577,7 @@ void CharacterComponent::triggerLoginCallback(Entity &entity)
     executeCallback(mLoginCallback, entity);
 }
 
-void CharacterComponent::sendFullInfo(Entity &entity)
+void CharacterComponent::markAllInfoAsChanged(Entity &entity)
 {
     modifiedAllAbilities(entity);
     modifiedAllAttributes(entity);

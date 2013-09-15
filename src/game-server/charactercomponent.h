@@ -63,10 +63,7 @@ class CharacterComponent : public Component
 
         ~CharacterComponent();
 
-        /**
-         * calls Being::update and handles special recharges and status effects
-         */
-        void update(Entity &entity);
+        virtual void update(Entity &entity);
 
         /**
          * Executes the global die script
@@ -279,7 +276,7 @@ class CharacterComponent : public Component
 
         void triggerLoginCallback(Entity &entity);
 
-        void sendFullInfo(Entity &entity);
+        void markAllInfoAsChanged(Entity &entity);
 
         sigc::signal<void, Entity &> signal_disconnected;
 
@@ -372,6 +369,10 @@ inline void CharacterComponent::setCorrectionPoints(int points)
 inline int CharacterComponent::getCorrectionPoints() const
 {
     return mCorrectionPoints;
+}
+
+inline void CharacterComponent::update(Entity &entity)
+{
 }
 
 #endif // CHARACTER_H

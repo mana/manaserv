@@ -405,7 +405,7 @@ void GameHandler::tokenMatched(GameClient *computer, Entity *character)
     computer->send(result);
 
     Inventory(character).sendFull();
-    characterComponent->sendFullInfo(*character);
+    characterComponent->markAllInfoAsChanged(*character);
 }
 
 void GameHandler::deletePendingClient(GameClient *computer)
