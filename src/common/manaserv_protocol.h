@@ -119,7 +119,7 @@ enum {
     GPMSG_EQUIP                    = 0x0122, // W equipped inventory slot, W slot equipmentSlot
     GPMSG_EQUIP_RESPONSE           = 0x0123, // B error, W slot
     GPMSG_UNEQUIP                  = 0x0124, // W equipped inventory slot
-    GPMSG_UNEQUIP_RESPONE          = 0x0125, // B error, W slot
+    GPMSG_UNEQUIP_RESPONSE         = 0x0125, // B error, W slot
     GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { W attribute, D base value (in 1/256ths), D modified value (in 1/256ths)}*
     GPMSG_ATTRIBUTE_POINTS_STATUS  = 0x0140, // W character points, W correction points
     PGMSG_RAISE_ATTRIBUTE          = 0x0160, // W attribute
@@ -128,12 +128,12 @@ enum {
     GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error, W attribute
     PGMSG_RESPAWN                  = 0x0180, // -
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position, B direction, B gender
-                                             // character: S name, B hair style, B hair color, B sprite layers changed, { B slot type, W item id }*
+                                             // character: S name, B hair style, B hair color [, B sprite layers changed, { B slot type, W item id }*]
                                              // monster: W type id
                                              // npc: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
-    GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // B hairstyle, B haircolor, B sprite layers changed, { B slot type, W item id }*
+    GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // B hairstyle, B haircolor [, B sprite layers changed, { B slot type, W item id }*]
     GPMSG_BEING_EMOTE              = 0x0211, // W being id, W emote id
     PGMSG_BEING_EMOTE              = 0x0212, // W emoticon id
     PGMSG_WALK                     = 0x0260, // W*2 destination
@@ -420,7 +420,7 @@ enum {
     QUESTLOG_UPDATE_STATE = 1,
     QUESTLOG_UPDATE_TITLE = 2,
     QUESTLOG_UPDATE_DESCRIPTION = 4,
-    QUESTLOG_SHOW_NOTIFICATION = 8,
+    QUESTLOG_SHOW_NOTIFICATION = 8
 };
 
 /**

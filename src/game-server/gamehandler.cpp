@@ -622,7 +622,7 @@ void GameHandler::handleEquip(GameClient &client, MessageIn &message)
 void GameHandler::handleUnequip(GameClient &client, MessageIn &message)
 {
     const int slot = message.readInt16();
-    MessageOut msg(GPMSG_UNEQUIP_RESPONE);
+    MessageOut msg(GPMSG_UNEQUIP_RESPONSE);
     if (Inventory(client.character).unequip(slot))
         msg.writeInt8(ERRMSG_OK);
     else
