@@ -90,7 +90,7 @@ static void serializeLooks(Entity *ch, MessageOut &msg)
 
     // The map storing the info about the look changes to send
     //{ slot type id, item id }
-    std::map <unsigned, unsigned> lookChanges;
+    std::map<unsigned, unsigned> lookChanges;
 
     // Note that we can send several updates on the same slot type as different
     // items may have been equipped.

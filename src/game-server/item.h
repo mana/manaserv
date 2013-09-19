@@ -41,34 +41,6 @@ struct ItemEquipRequirement {
     unsigned equipSlotId, capacityRequired;
 };
 
-/**
- * State effects to beings, and actors.
- * States can be multiple for the same being.
- */
-enum
-{
-    SET_STATE_NORMAL = 0,
-    SET_STATE_POISONED,
-    SET_STATE_STONED,
-    SET_STATE_STUNNED,
-    SET_STATE_SLOWED,
-    SET_STATE_TIRED,
-    SET_STATE_MAD,
-    SET_STATE_BERSERK,
-    SET_STATE_HASTED,
-    SET_STATE_FLOATING,
-
-    SET_STATE_NOT_POISONED,
-    SET_STATE_NOT_STONED,
-    SET_STATE_NOT_STUNNED,
-    SET_STATE_NOT_SLOWED,
-    SET_STATE_NOT_TIRED,
-    SET_STATE_NOT_MAD,
-    SET_STATE_NOT_BERSERK,
-    SET_STATE_NOT_HASTED,
-    SET_STATE_NOT_FLOATING
-};
-
 enum ItemTriggerType
 {
     ITT_NULL = 0,

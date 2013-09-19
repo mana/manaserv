@@ -97,24 +97,6 @@ const int DEFAULT_INTERACTION_TILES_AREA = 20;
 const int DEFAULT_TILE_LENGTH = 32;
 
 /**
- * Possible states of beings.
- * States can be multiple for the same being.
- * To be used as bitmask values.
- */
-enum BeingState
-{
-    STATE_POISONED = 1,
-    STATE_STONED   = 2,
-    STATE_STUNNED  = 4,
-    STATE_SLOWED   = 8,
-    STATE_TIRED    = 16,
-    STATE_MAD      = 32,
-    STATE_BERSERK  = 64,
-    STATE_HASTED   = 128,
-    STATE_FLOATING = 256
-};
-
-/**
  * Element attribute for beings, actors, and items.
  * Subject to change until Pauan and Dabe are finished with the element system.
  * Please keep element modifier of BeingAttribute in sync.

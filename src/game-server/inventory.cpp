@@ -84,7 +84,6 @@ void Inventory::initialize()
     /*
      * Construct a set of itemIds to keep track of duplicate itemIds.
      */
-
     for (InventoryData::iterator it = mPoss->inventory.begin(),
          it_end = mPoss->inventory.end(); it != it_end;)
     {
