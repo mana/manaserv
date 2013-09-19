@@ -3609,7 +3609,7 @@ LuaScript::LuaScript():
         { nullptr, nullptr}
     };
 
-    LuaEntity::registerType(mRootState, "Entity", members_Entity);
+    LuaEntity::registerType(mRootState, members_Entity);
     LuaItemClass::registerType(mRootState, "ItemClass", members_ItemClass);
     LuaMapObject::registerType(mRootState, "MapObject", members_MapObject);
     LuaMonsterClass::registerType(mRootState, "MonsterClass", members_MonsterClass);

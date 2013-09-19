@@ -42,17 +42,15 @@ void raiseWarning(lua_State *, const char *format, ...)
     vsprintf(message, format, args);
     va_end( args );
 
-    LOG_WARN("Lua script error: "<< message);
+    LOG_WARN("Lua script error: " << message);
 }
 
 
-char UserDataCache::mRegistryKey;
-
-bool UserDataCache::retrieve(lua_State *s, void *object)
+bool UserDataCache::retrieve(lua_State *s)
 {
     // Retrieve the cache table
-    lua_pushlightuserdata(s, &mRegistryKey);    // key
-    lua_rawget(s, LUA_REGISTRYINDEX);           // Cache?
+    lua_pushlightuserdata(s, &mRegistryKey);    // object_key, key
+    lua_rawget(s, LUA_REGISTRYINDEX);           // object_key, Cache?
 
     if (lua_isnil(s, -1))
     {
@@ -60,47 +58,110 @@ bool UserDataCache::retrieve(lua_State *s, void *object)
         return false;
     }
 
-    lua_pushlightuserdata(s, object);           // Cache, object
-    lua_rawget(s, -2);                          // Cache, UD?
+    lua_pushvalue(s, -2);                       // object_key, Cache, object_key
+    lua_rawget(s, -2);                          // object_key, Cache, UD?
 
     if (lua_isnil(s, -1))
     {
-        lua_pop(s, 2);                          // ...
+        lua_pop(s, 2);                          // object_key
         return false;
     }
 
-    lua_replace(s, -2);                         // UD
+    lua_replace(s, -3);                         // UD, Cache
+    lua_pop(s, 1);                              // UD
     return true;
 }
 
-void UserDataCache::insert(lua_State *s, void *object)
+void UserDataCache::insert(lua_State *s)
 {
     // Retrieve the cache table
-    lua_pushlightuserdata(s, &mRegistryKey);    // UD, key
-    lua_rawget(s, LUA_REGISTRYINDEX);           // UD, Cache?
+    lua_pushlightuserdata(s, &mRegistryKey);    // object_key, UD, key
+    lua_rawget(s, LUA_REGISTRYINDEX);           // object_key, UD, Cache?
 
     // Create the cache when it doesn't exist yet
     if (lua_isnil(s, -1))
     {
-        lua_pop(s, 1);                          // UD
-        lua_newtable(s);                        // UD, Cache
+        lua_pop(s, 1);                          // object_key, UD
+        lua_newtable(s);                        // object_key, UD, Cache
 
         // The metatable that makes the values in the table above weak
-        lua_newtable(s);                        // UD, Cache, {}
+        lua_createtable(s, 0, 1);               // object_key, UD, Cache, {}
         lua_pushliteral(s, "__mode");
         lua_pushliteral(s, "v");
-        lua_rawset(s, -3);                      // UD, Cache, { __mode = "v" }
-        lua_setmetatable(s, -2);                // UD, Cache
+        lua_rawset(s, -3);                      // object_key, UD, Cache, { __mode = "v" }
+        lua_setmetatable(s, -2);                // object_key, UD, Cache
 
-        lua_pushlightuserdata(s, &mRegistryKey);// UD, Cache, key
-        lua_pushvalue(s, -2);                   // UD, Cache, key, Cache
-        lua_rawset(s, LUA_REGISTRYINDEX);       // UD, Cache
+        lua_pushlightuserdata(s, &mRegistryKey);// object_key, UD, Cache, key
+        lua_pushvalue(s, -2);                   // object_key, UD, Cache, key, Cache
+        lua_rawset(s, LUA_REGISTRYINDEX);       // object_key, UD, Cache
     }
 
-    lua_pushlightuserdata(s, object);           // UD, Cache, object
-    lua_pushvalue(s, -3);                       // UD, Cache, object, UD
-    lua_rawset(s, -3);                          // UD, Cache { object = UD }
-    lua_pop(s, 1);                              // UD
+    lua_pushvalue(s, -3);                       // object_key, UD, Cache, object_key
+    lua_pushvalue(s, -3);                       // object_key, UD, Cache, object_key, UD
+    lua_rawset(s, -3);                          // object_key, UD, Cache { object_key = UD }
+    lua_pop(s, 1);                              // object_key, UD
+    lua_replace(s, -2);                         // UD
+}
+
+
+UserDataCache LuaUserData<Entity>::mUserDataCache;
+
+void LuaUserData<Entity>::registerType(lua_State *s, const luaL_Reg *members)
+{
+    luaL_newmetatable(s, "Entity");         // metatable
+    lua_pushliteral(s, "__index");          // metatable, "__index"
+    lua_createtable(s, 0, 0);               // metatable, "__index", {}
+#if LUA_VERSION_NUM < 502
+    luaL_register(s, nullptr, members);
+#else
+    luaL_setfuncs(s, members, 0);
+#endif
+
+    // Make the functions table available as a global
+    lua_pushvalue(s, -1);                   // metatable, "__index", {}, {}
+    lua_setglobal(s, "Entity");             // metatable, "__index", {}
+
+    lua_rawset(s, -3);                      // metatable
+    lua_pop(s, 1);                          // -empty-
+}
+
+void LuaUserData<Entity>::push(lua_State *s, Entity *entity)
+{
+    if (!entity)
+    {
+        lua_pushnil(s);
+    }
+    else
+    {
+#if LUA_VERSION_NUM < 502
+        lua_pushnumber(s, entity->getId());
+#else
+        lua_pushunsigned(s, entity->getId());
+#endif
+
+        if (!mUserDataCache.retrieve(s))
+        {
+            void *userData = lua_newuserdata(s, sizeof(unsigned));
+            * static_cast<unsigned*>(userData) = entity->getId();
+
+#if LUA_VERSION_NUM < 502
+            luaL_newmetatable(s, "Entity");
+            lua_setmetatable(s, -2);
+#else
+            luaL_setmetatable(s, "Entity");
+#endif
+
+            mUserDataCache.insert(s);
+        }
+    }
+}
+
+Entity *LuaUserData<Entity>::check(lua_State *L, int narg)
+{
+    void *userData = luaL_checkudata(L, narg, "Entity");
+    Entity *entity = findEntity(*(static_cast<unsigned*>(userData)));
+    luaL_argcheck(L, entity, narg, "invalid entity");
+    return entity;
 }
 
 

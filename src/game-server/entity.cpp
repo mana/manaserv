@@ -21,7 +21,10 @@
 
 #include "game-server/entity.h"
 
+IdManager<Entity> Entity::mIdManager;
+
 Entity::Entity(EntityType type, MapComposite *map) :
+    mId(mIdManager.allocate(this)),
     mMap(map),
     mType(type)
 {
@@ -33,6 +36,8 @@ Entity::~Entity()
 {
     for (int i = 0; i < ComponentTypeCount; ++i)
         delete mComponents[i];
+
+    mIdManager.free(mId);
 }
 
 /**

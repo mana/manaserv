@@ -25,6 +25,7 @@
 #include "common/manaserv_protocol.h"
 
 #include "game-server/component.h"
+#include "game-server/idmanager.h"
 
 #include <sigc++/signal.h>
 #include <sigc++/trackable.h>
@@ -48,6 +49,7 @@ class Entity : public sigc::trackable
 
         virtual ~Entity();
 
+        unsigned getId() const;
         EntityType getType() const;
 
         template <class T> void addComponent(T *component);
@@ -71,11 +73,29 @@ class Entity : public sigc::trackable
     private:
         Component *getComponent(ComponentType type) const;
 
+        unsigned mId;
         MapComposite *mMap;     /**< Map the entity is on */
         EntityType mType;       /**< Type of this entity. */
 
         Component *mComponents[ComponentTypeCount];
+
+        static IdManager<Entity> mIdManager;
+
+        friend Entity *findEntity(unsigned id);
 };
+
+/**
+ * Looks up an entity by its ID, returns null if there is no such entity.
+ */
+inline Entity *findEntity(unsigned id)
+{
+    return Entity::mIdManager.find(id);
+}
+
+inline unsigned Entity::getId() const
+{
+    return mId;
+}
 
 /**
  * Gets type of this entity.

@@ -62,21 +62,23 @@ class UserDataCache
 {
 public:
     /**
-     * Attempts to retrieve a userdata associated with the given object from
-     * the cache and pushes it on the stack when available.
+     * Attempts to retrieve a userdata associated with the key at the top of
+     * the stack from the cache and pushes it on the stack when available.
+     * When no userdata is found, the key is left on the stack.
      *
      * Returns whether a userdata was pushed.
      */
-    static bool retrieve(lua_State *s, void *object);
+    bool retrieve(lua_State *s);
 
     /**
      * Inserts the userdata at the top of the stack in the cache using
-     * the given object as the key. Leaves the userdata on the stack.
+     * the key that is just below the top of the stack. Leaves the userdata on
+     * the stack.
      */
-    static void insert(lua_State *s, void *object);
+    void insert(lua_State *s);
 
 private:
-    static char mRegistryKey;
+    char mRegistryKey;
 };
 
 
@@ -127,19 +129,24 @@ public:
         {
             lua_pushnil(s);
         }
-        else if (!UserDataCache::retrieve(s, object))
+        else
         {
-            void *userData = lua_newuserdata(s, sizeof(T*));
-            * static_cast<T**>(userData) = object;
+            lua_pushlightuserdata(s, object);
+
+            if (!mUserDataCache.retrieve(s))
+            {
+                void *userData = lua_newuserdata(s, sizeof(T*));
+                * static_cast<T**>(userData) = object;
 
 #if LUA_VERSION_NUM < 502
-            luaL_newmetatable(s, mTypeName);
-            lua_setmetatable(s, -2);
+                luaL_newmetatable(s, mTypeName);
+                lua_setmetatable(s, -2);
 #else
-            luaL_setmetatable(s, mTypeName);
+                luaL_setmetatable(s, mTypeName);
 #endif
 
-            UserDataCache::insert(s, object);
+                mUserDataCache.insert(s);
+            }
         }
     }
 
@@ -155,9 +162,27 @@ public:
 
 private:
     static const char *mTypeName;
+    static UserDataCache mUserDataCache;
 };
 
 template <typename T> const char * LuaUserData<T>::mTypeName;
+template <typename T> UserDataCache LuaUserData<T>::mUserDataCache;
+
+/**
+ * Template specialization for entities, to allow their userdata to refer to
+ * the entity ID.
+ */
+template <>
+class LuaUserData <Entity>
+{
+public:
+    static void registerType(lua_State *s, const luaL_Reg *members);
+    static void push(lua_State *s, Entity *entity);
+    static Entity *check(lua_State *L, int narg);
+
+private:
+    static UserDataCache mUserDataCache;
+};
 
 typedef LuaUserData<Entity> LuaEntity;
 typedef LuaUserData<ItemClass> LuaItemClass;
