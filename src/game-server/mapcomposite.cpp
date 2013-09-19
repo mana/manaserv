@@ -38,6 +38,104 @@
 #include "utils/logger.h"
 #include "utils/point.h"
 
+/******************************************************************************
+ * ObjectBucket
+ *****************************************************************************/
+
+/**
+ * Pool of public IDs for MovingObjects on a map. By maintaining public ID
+ * availability using bits, it can locate an available public ID fast while
+ * using minimal memory access.
+ */
+struct ObjectBucket
+{
+    static int const int_bitsize = sizeof(unsigned) * 8;
+    unsigned bitmap[256 / int_bitsize]; /**< Bitmap of free locations. */
+    short free;                         /**< Number of empty places. */
+    short next_object;                  /**< Next object to look at. */
+    Entity *objects[256];
+
+    ObjectBucket();
+    int allocate();
+    void deallocate(int);
+    bool isAllocated(int) const;
+};
+
+ObjectBucket::ObjectBucket()
+  : free(256), next_object(0)
+{
+    for (unsigned i = 0; i < 256 / int_bitsize; ++i)
+    {
+        // An occupied ID is represented by zero in the bitmap.
+        bitmap[i] = ~0u;
+    }
+}
+
+int ObjectBucket::allocate()
+{
+    // Any free ID in the bucket?
+    if (!free)
+    {
+        LOG_INFO("No free id in bucket");
+        return -1;
+    }
+
+    int freeBucket = -1;
+    // See if the the next_object bucket is free
+    if (bitmap[next_object] != 0)
+    {
+        freeBucket = next_object;
+    }
+    else
+    {
+        /* next_object was not free. Check the whole bucket until one ID is found,
+           starting from the IDs around next_object. */
+        for (unsigned i = 0; i < 256 / int_bitsize; ++i)
+        {
+            // Check to see if this subbucket is free
+            if (bitmap[i] != 0)
+            {
+                freeBucket = i;
+                break;
+            }
+        }
+    }
+
+    assert(freeBucket >= 0);
+
+    // One of them is free. Find it by looking bit-by-bit.
+    int b = bitmap[freeBucket];
+    int j = 0;
+    while (!(b & 1))
+    {
+        b >>= 1;
+        ++j;
+    }
+    // Flip that bit to on, and return the value
+    bitmap[freeBucket] &= ~(1 << j);
+    j += freeBucket * int_bitsize;
+    next_object = freeBucket;
+    --free;
+    return j;
+}
+
+void ObjectBucket::deallocate(int i)
+{
+    assert(!(bitmap[i / int_bitsize] & (1 << (i % int_bitsize))));
+    bitmap[i / int_bitsize] |= 1 << (i % int_bitsize);
+    ++free;
+}
+
+bool ObjectBucket::isAllocated(int i) const
+{
+    return !(bitmap[i / int_bitsize] & (1 << (i % int_bitsize)));
+}
+
+
+/******************************************************************************
+ * MapZone
+ *****************************************************************************/
+
 /* TODO: Implement overlapping map zones instead of strict partitioning.
    Purpose: to decrease the number of zone changes, as overlapping allows for
    hysteresis effect and prevents an actor from changing zone each server
@@ -51,6 +149,31 @@
    regress to quadratic behavior; the lower the value, the more we waste time
    in dealing with zone changes. */
 static int const zoneDiam = 256;
+
+/**
+ * Part of a map.
+ */
+struct MapZone
+{
+    unsigned short nbCharacters, nbMovingObjects;
+    /**
+     * Objects present in this zone.
+     * Characters are stored first, then the remaining MovingObjects, then the
+     * remaining Objects.
+     */
+    std::vector< Entity * > objects;
+
+    /**
+     * Destinations of the objects that left this zone.
+     * This is necessary in order to have an accurate iterator around moving
+     * objects.
+     */
+    MapRegion destinations;
+
+    MapZone(): nbCharacters(0), nbMovingObjects(0) {}
+    void insert(Entity *);
+    void remove(Entity *);
+};
 
 void MapZone::insert(Entity *obj)
 {
@@ -140,6 +263,139 @@ void MapZone::remove(Entity *obj)
     objects.pop_back();
 }
 
+/******************************************************************************
+ * MapContent
+ *****************************************************************************/
+
+/**
+ * Entities on a map.
+ */
+struct MapContent
+{
+    MapContent(Map *);
+    ~MapContent();
+
+    /**
+     * Allocates a unique ID for an actor on this map.
+     */
+    bool allocate(Entity *);
+
+    /**
+     * Deallocates an ID.
+     */
+    void deallocate(Entity *);
+
+    /**
+     * Fills a region of zones within the range of a point.
+     */
+    void fillRegion(MapRegion &, const Point &, int) const;
+
+    /**
+     * Fills a region of zones inside a rectangle.
+     */
+    void fillRegion(MapRegion &, const Rectangle &) const;
+
+    /**
+     * Gets zone at given position.
+     */
+    MapZone &getZone(const Point &pos) const;
+
+    /**
+     * Entities (items, characters, monsters, etc) located on the map.
+     */
+    std::vector< Entity * > entities;
+
+    /**
+     * Buckets of MovingObjects located on the map, referenced by ID.
+     */
+    ObjectBucket *buckets[256];
+
+    int last_bucket; /**< Last bucket acted upon. */
+
+    /**
+     * Partition of the Objects, depending on their position on the map.
+     */
+    MapZone *zones;
+
+    unsigned short mapWidth;  /**< Width with respect to zones. */
+    unsigned short mapHeight; /**< Height with respect to zones. */
+};
+
+MapContent::MapContent(Map *map)
+  : last_bucket(0), zones(nullptr)
+{
+    buckets[0] = new ObjectBucket;
+    buckets[0]->allocate(); // Skip ID 0
+    for (int i = 1; i < 256; ++i)
+    {
+        buckets[i] = nullptr;
+    }
+    mapWidth = (map->getWidth() * map->getTileWidth() + zoneDiam - 1)
+               / zoneDiam;
+    mapHeight = (map->getHeight() * map->getTileHeight() + zoneDiam - 1)
+                / zoneDiam;
+    zones = new MapZone[mapWidth * mapHeight];
+}
+
+MapContent::~MapContent()
+{
+    for (int i = 0; i < 256; ++i)
+    {
+        delete buckets[i];
+    }
+    delete[] zones;
+}
+
+bool MapContent::allocate(Entity *obj)
+{
+    // First, try allocating from the last used bucket.
+    ObjectBucket *b = buckets[last_bucket];
+
+    auto *actorComponent = obj->getComponent<ActorComponent>();
+
+    int i = b->allocate();
+    if (i >= 0)
+    {
+        b->objects[i] = obj;
+        actorComponent->setPublicID(last_bucket * 256 + i);
+        return true;
+    }
+
+    /* If the last used bucket is already full, scan all the buckets for an
+       empty place. If none is available, create a new bucket. */
+    for (i = 0; i < 256; ++i)
+    {
+        b = buckets[i];
+        if (!b)
+        {
+            /* Buckets are created in order. If there is nothing at position i,
+               there will not be anything in the next positions. So create a
+               new bucket. */
+            b = new ObjectBucket;
+            buckets[i] = b;
+            LOG_DEBUG("New bucket created");
+        }
+        int j = b->allocate();
+        if (j >= 0)
+        {
+            last_bucket = i;
+            b->objects[j] = obj;
+            actorComponent->setPublicID(last_bucket * 256 + j);
+            return true;
+        }
+    }
+
+    // All the IDs are currently used, fail.
+    LOG_ERROR("unable to allocate id");
+    return false;
+}
+
+void MapContent::deallocate(Entity *obj)
+{
+    unsigned short id = obj->getComponent<ActorComponent>()->getPublicID();
+    buckets[id / 256]->deallocate(id % 256);
+}
+
 static void addZone(MapRegion &r, unsigned z)
 {
     MapRegion::iterator i_end = r.end(),
@@ -149,6 +405,46 @@ static void addZone(MapRegion &r, unsigned z)
         r.insert(i, z);
     }
 }
+
+void MapContent::fillRegion(MapRegion &r, const Point &p, int radius) const
+{
+    int ax = p.x > radius ? (p.x - radius) / zoneDiam : 0,
+        ay = p.y > radius ? (p.y - radius) / zoneDiam : 0,
+        bx = std::min((p.x + radius) / zoneDiam, mapWidth - 1),
+        by = std::min((p.y + radius) / zoneDiam, mapHeight - 1);
+    for (int y = ay; y <= by; ++y)
+    {
+        for (int x = ax; x <= bx; ++x)
+        {
+            addZone(r, x + y * mapWidth);
+        }
+    }
+}
+
+void MapContent::fillRegion(MapRegion &r, const Rectangle &p) const
+{
+    int ax = p.x / zoneDiam,
+        ay = p.y / zoneDiam,
+        bx = std::min((p.x + p.w) / zoneDiam, mapWidth - 1),
+        by = std::min((p.y + p.h) / zoneDiam, mapHeight - 1);
+    for (int y = ay; y <= by; ++y)
+    {
+        for (int x = ax; x <= bx; ++x)
+        {
+            addZone(r, x + y * mapWidth);
+        }
+    }
+}
+
+MapZone& MapContent::getZone(const Point &pos) const
+{
+    return zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth];
+}
+
+
+/******************************************************************************
+ * ZoneIterator
+ *****************************************************************************/
 
 ZoneIterator::ZoneIterator(const MapRegion &r, const MapContent *m)
   : region(r), pos(0), map(m)
@@ -269,191 +565,6 @@ void ActorIterator::operator++()
     {
         current = (*iterator)->objects[pos];
     }
-}
-
-
-/******************************************************************************
- * ObjectBucket
- *****************************************************************************/
-
-ObjectBucket::ObjectBucket()
-  : free(256), next_object(0)
-{
-    for (unsigned i = 0; i < 256 / int_bitsize; ++i)
-    {
-        // An occupied ID is represented by zero in the bitmap.
-        bitmap[i] = ~0u;
-    }
-}
-
-int ObjectBucket::allocate()
-{
-    // Any free ID in the bucket?
-    if (!free)
-    {
-        LOG_INFO("No free id in bucket");
-        return -1;
-    }
-
-    int freeBucket = -1;
-    // See if the the next_object bucket is free
-    if (bitmap[next_object] != 0)
-    {
-        freeBucket = next_object;
-    }
-    else
-    {
-        /* next_object was not free. Check the whole bucket until one ID is found,
-           starting from the IDs around next_object. */
-        for (unsigned i = 0; i < 256 / int_bitsize; ++i)
-        {
-            // Check to see if this subbucket is free
-            if (bitmap[i] != 0)
-            {
-                freeBucket = i;
-                break;
-            }
-        }
-    }
-
-    assert(freeBucket >= 0);
-
-    // One of them is free. Find it by looking bit-by-bit.
-    int b = bitmap[freeBucket];
-    int j = 0;
-    while (!(b & 1))
-    {
-        b >>= 1;
-        ++j;
-    }
-    // Flip that bit to on, and return the value
-    bitmap[freeBucket] &= ~(1 << j);
-    j += freeBucket * int_bitsize;
-    next_object = freeBucket;
-    --free;
-    return j;
-}
-
-void ObjectBucket::deallocate(int i)
-{
-    assert(!(bitmap[i / int_bitsize] & (1 << (i % int_bitsize))));
-    bitmap[i / int_bitsize] |= 1 << (i % int_bitsize);
-    ++free;
-}
-
-
-/******************************************************************************
- * MapContent
- *****************************************************************************/
-
-MapContent::MapContent(Map *map)
-  : last_bucket(0), zones(nullptr)
-{
-    buckets[0] = new ObjectBucket;
-    buckets[0]->allocate(); // Skip ID 0
-    for (int i = 1; i < 256; ++i)
-    {
-        buckets[i] = nullptr;
-    }
-    mapWidth = (map->getWidth() * map->getTileWidth() + zoneDiam - 1)
-               / zoneDiam;
-    mapHeight = (map->getHeight() * map->getTileHeight() + zoneDiam - 1)
-                / zoneDiam;
-    zones = new MapZone[mapWidth * mapHeight];
-}
-
-MapContent::~MapContent()
-{
-    for (int i = 0; i < 256; ++i)
-    {
-        delete buckets[i];
-    }
-    delete[] zones;
-}
-
-bool MapContent::allocate(Entity *obj)
-{
-    // First, try allocating from the last used bucket.
-    ObjectBucket *b = buckets[last_bucket];
-
-    auto *actorComponent = obj->getComponent<ActorComponent>();
-
-    int i = b->allocate();
-    if (i >= 0)
-    {
-        b->objects[i] = obj;
-        actorComponent->setPublicID(last_bucket * 256 + i);
-        return true;
-    }
-
-    /* If the last used bucket is already full, scan all the buckets for an
-       empty place. If none is available, create a new bucket. */
-    for (i = 0; i < 256; ++i)
-    {
-        b = buckets[i];
-        if (!b)
-        {
-            /* Buckets are created in order. If there is nothing at position i,
-               there will not be anything in the next positions. So create a
-               new bucket. */
-            b = new ObjectBucket;
-            buckets[i] = b;
-            LOG_DEBUG("New bucket created");
-        }
-        int j = b->allocate();
-        if (j >= 0)
-        {
-            last_bucket = i;
-            b->objects[j] = obj;
-            actorComponent->setPublicID(last_bucket * 256 + j);
-            return true;
-        }
-    }
-
-    // All the IDs are currently used, fail.
-    LOG_ERROR("unable to allocate id");
-    return false;
-}
-
-void MapContent::deallocate(Entity *obj)
-{
-    unsigned short id = obj->getComponent<ActorComponent>()->getPublicID();
-    buckets[id / 256]->deallocate(id % 256);
-}
-
-void MapContent::fillRegion(MapRegion &r, const Point &p, int radius) const
-{
-    int ax = p.x > radius ? (p.x - radius) / zoneDiam : 0,
-        ay = p.y > radius ? (p.y - radius) / zoneDiam : 0,
-        bx = std::min((p.x + radius) / zoneDiam, mapWidth - 1),
-        by = std::min((p.y + radius) / zoneDiam, mapHeight - 1);
-    for (int y = ay; y <= by; ++y)
-    {
-        for (int x = ax; x <= bx; ++x)
-        {
-            addZone(r, x + y * mapWidth);
-        }
-    }
-}
-
-void MapContent::fillRegion(MapRegion &r, const Rectangle &p) const
-{
-    int ax = p.x / zoneDiam,
-        ay = p.y / zoneDiam,
-        bx = std::min((p.x + p.w) / zoneDiam, mapWidth - 1),
-        by = std::min((p.y + p.h) / zoneDiam, mapHeight - 1);
-    for (int y = ay; y <= by; ++y)
-    {
-        for (int x = ax; x <= bx; ++x)
-        {
-            addZone(r, x + y * mapWidth);
-        }
-    }
-}
-
-MapZone& MapContent::getZone(const Point &pos) const
-{
-    return zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth];
 }
 
 

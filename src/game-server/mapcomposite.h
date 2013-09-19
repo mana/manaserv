@@ -19,8 +19,8 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SERVER_MAPCOMPOSITE_H
-#define SERVER_MAPCOMPOSITE_H
+#ifndef MAPCOMPOSITE_H
+#define MAPCOMPOSITE_H
 
 #include <string>
 #include <vector>
@@ -29,10 +29,8 @@
 #include "scripting/script.h"
 #include "game-server/map.h"
 
-class CharacterComponent;
 class Entity;
 class Map;
-class MapComposite;
 class Point;
 class Rectangle;
 
@@ -128,109 +126,14 @@ struct ActorIterator
 };
 
 /**
- * Part of a map.
- */
-struct MapZone
-{
-    unsigned short nbCharacters, nbMovingObjects;
-    /**
-     * Objects present in this zone.
-     * Characters are stored first, then the remaining MovingObjects, then the
-     * remaining Objects.
-     */
-    std::vector< Entity * > objects;
-
-    /**
-     * Destinations of the objects that left this zone.
-     * This is necessary in order to have an accurate iterator around moving
-     * objects.
-     */
-    MapRegion destinations;
-
-    MapZone(): nbCharacters(0), nbMovingObjects(0) {}
-    void insert(Entity *);
-    void remove(Entity *);
-};
-
-/**
- * Pool of public IDs for MovingObjects on a map. By maintaining public ID
- * availability using bits, it can locate an available public ID fast while
- * using minimal memory access.
- */
-struct ObjectBucket
-{
-    static int const int_bitsize = sizeof(unsigned) * 8;
-    unsigned bitmap[256 / int_bitsize]; /**< Bitmap of free locations. */
-    short free;                         /**< Number of empty places. */
-    short next_object;                  /**< Next object to look at. */
-    Entity *objects[256];
-
-    ObjectBucket();
-    int allocate();
-    void deallocate(int);
-};
-
-/**
- * Entities on a map.
- */
-struct MapContent
-{
-    MapContent(Map *);
-    ~MapContent();
-
-    /**
-     * Allocates a unique ID for an actor on this map.
-     */
-    bool allocate(Entity *);
-
-    /**
-     * Deallocates an ID.
-     */
-    void deallocate(Entity *);
-
-    /**
-     * Fills a region of zones within the range of a point.
-     */
-    void fillRegion(MapRegion &, const Point &, int) const;
-
-    /**
-     * Fills a region of zones inside a rectangle.
-     */
-    void fillRegion(MapRegion &, const Rectangle &) const;
-
-    /**
-     * Gets zone at given position.
-     */
-    MapZone &getZone(const Point &pos) const;
-
-    /**
-     * Entities (items, characters, monsters, etc) located on the map.
-     */
-    std::vector< Entity * > entities;
-
-    /**
-     * Buckets of MovingObjects located on the map, referenced by ID.
-     */
-    ObjectBucket *buckets[256];
-
-    int last_bucket; /**< Last bucket acted upon. */
-
-    /**
-     * Partition of the Objects, depending on their position on the map.
-     */
-    MapZone *zones;
-
-    unsigned short mapWidth;  /**< Width with respect to zones. */
-    unsigned short mapHeight; /**< Height with respect to zones. */
-};
-
-/**
  * Combined map/entity structure.
  */
 class MapComposite
 {
     public:
         MapComposite(int id, const std::string &name);
+        MapComposite(const MapComposite &) = delete;
+
         ~MapComposite();
 
         bool readMap();
@@ -335,8 +238,8 @@ class MapComposite
          * Changes a script variable without notifying the database server
          * about the change
          */
-        void setVariableFromDbserver (const std::string &key,
-                                      const std::string &value)
+        void setVariableFromDbserver(const std::string &key,
+                                     const std::string &value)
         { mScriptVariables[key] = value; }
 
         /**
@@ -364,8 +267,6 @@ class MapComposite
                                        const std::string &type) const;
 
     private:
-        MapComposite(const MapComposite &);
-
         void initializeContent();
         void callMapVariableCallback(const std::string &key,
                                      const std::string &value);
@@ -385,4 +286,4 @@ class MapComposite
         static Script::Ref mUpdateCallback;
 };
 
-#endif
+#endif // MAPCOMPOSITE_H
