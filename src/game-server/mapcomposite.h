@@ -182,6 +182,12 @@ class MapComposite
         void remove(Entity *);
 
         /**
+         * Returns the actor entity matching \a publicID, or null when no such
+         * entity exists.
+         */
+        Entity *findEntityById(int publicId) const;
+
+        /**
          * Updates zones of every moving beings.
          */
         void update();

@@ -139,56 +139,35 @@ void GameHandler::updateCharacter(int charid, int partyid)
 static Entity *findActorNear(Entity *p, int id)
 {
     MapComposite *map = p->getMap();
-    const Point &ppos = p->getComponent<ActorComponent>()->getPosition();
-    // See map.h for tiles constants
-    const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
-    for (ActorIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
-    {
-        Entity *a = *i;
-        if (a->getComponent<ActorComponent>()->getPublicID() != id)
-            continue;
-        return ppos.inRangeOf(a->getComponent<ActorComponent>()->getPosition(),
-                              pixelDist) ? a : 0;
+
+    if (Entity *e = map->findEntityById(id)) {
+        const Point &ppos = p->getComponent<ActorComponent>()->getPosition();
+        const Point &epos = e->getComponent<ActorComponent>()->getPosition();
+
+        // See map.h for tiles constants
+        const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
+        if (ppos.inRangeOf(epos, pixelDist))
+            return e;
     }
+
     return 0;
 }
 
 static Entity *findBeingNear(Entity *p, int id)
 {
-    MapComposite *map = p->getMap();
-    const Point &ppos = p->getComponent<ActorComponent>()->getPosition();
-    // See map.h for tiles constants
-    const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
-    for (BeingIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
-    {
-        Entity *b = *i;
-        if (b->getComponent<ActorComponent>()->getPublicID() != id)
-            continue;
-        return ppos.inRangeOf(b->getComponent<ActorComponent>()->getPosition(),
-                              pixelDist) ? b : 0;
-    }
+    if (Entity *e = findActorNear(p, id))
+        if (e->hasComponent<BeingComponent>())
+            return e;
+
     return 0;
 }
 
 static Entity *findCharacterNear(Entity *p, int id)
 {
-    MapComposite *map = p->getMap();
-    const Point &ppos = p->getComponent<ActorComponent>()->getPosition();
-    // See map.h for tiles constants
-    const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
-    for (CharacterIterator i(map->getAroundPointIterator(ppos,
-                                                         pixelDist)); i; ++i)
-    {
-        Entity *c = *i;
-        if (c->getComponent<ActorComponent>()->getPublicID() != id)
-            continue;
+    if (Entity *e = findActorNear(p, id))
+        if (e->getType() == OBJECT_CHARACTER)
+            return e;
 
-        if (ppos.inRangeOf(c->getComponent<ActorComponent>()->getPosition(),
-                           pixelDist))
-            return c;
-
-        return  0;
-    }
     return 0;
 }
 

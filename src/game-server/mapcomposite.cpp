@@ -285,6 +285,8 @@ struct MapContent
      */
     void deallocate(Entity *);
 
+    Entity *findEntityById(int publicId) const;
+
     /**
      * Fills a region of zones within the range of a point.
      */
@@ -394,6 +396,19 @@ void MapContent::deallocate(Entity *obj)
 {
     unsigned short id = obj->getComponent<ActorComponent>()->getPublicID();
     buckets[id / 256]->deallocate(id % 256);
+}
+
+/**
+ * Returns the entity matching \a publicId, or null if no such entity exists.
+ */
+Entity *MapContent::findEntityById(int publicId) const
+{
+    if (ObjectBucket *b = buckets[publicId / 256]) {
+        const int bucketIndex = publicId % 256;
+        if (b->isAllocated(bucketIndex))
+            return b->objects[bucketIndex];
+    }
+    return 0;
 }
 
 static void addZone(MapRegion &r, unsigned z)
@@ -723,6 +738,11 @@ void MapComposite::remove(Entity *ptr)
             mContent->deallocate(ptr);
         }
     }
+}
+
+Entity *MapComposite::findEntityById(int publicId) const
+{
+    return mContent->findEntityById(publicId);
 }
 
 void MapComposite::update()
