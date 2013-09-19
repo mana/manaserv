@@ -33,7 +33,7 @@ template <typename Value>
 class IdManager
 {
 public:
-    IdManager() = default;
+    IdManager() : mLastId(0) {}
     IdManager(const IdManager&) = delete;
 
     unsigned allocate(Value *t);
@@ -42,7 +42,7 @@ public:
 
 private:
     std::unordered_map<unsigned, Value*> mIdMap;
-    unsigned mLastId = 0;
+    unsigned mLastId;
 };
 
 
