@@ -371,21 +371,18 @@ enum AttribmodResponseCode {
 enum EntityType
 {
     // A simple item.
-    OBJECT_ITEM = 0,
-    // An item that toggle map/quest actions (doors, switchs, ...)
-    // and can speak (map panels).
-    OBJECT_ACTOR,
+    OBJECT_ITEM         = 0,
     // Non-Playable-Character is an actor capable of movement and maybe actions.
-    OBJECT_NPC,
+    OBJECT_NPC          = 2,
     // A monster (moving actor with AI. Should be able to toggle map/quest
     // actions, too).
-    OBJECT_MONSTER,
+    OBJECT_MONSTER      = 3,
     // A normal being.
-    OBJECT_CHARACTER,
+    OBJECT_CHARACTER    = 4,
     // A effect to be shown.
-    OBJECT_EFFECT,
+    OBJECT_EFFECT       = 5,
     // Server-only object.
-    OBJECT_OTHER
+    OBJECT_OTHER        = 6
 };
 
 // Moving object flags

@@ -610,7 +610,6 @@ bool GameState::insert(Entity *ptr)
                       << monsterComponent->getSpecy()->getId());
             break;
         }
-        case OBJECT_ACTOR:
         case OBJECT_OTHER:
         default:
             LOG_DEBUG("Entity inserted: " << obj->getType());
@@ -688,7 +687,6 @@ void GameState::remove(Entity *ptr)
                       << monsterComponent->getSpecy()->getId());
             break;
         }
-        case OBJECT_ACTOR:
         case OBJECT_OTHER:
         default:
             LOG_DEBUG("Entity removed: " << ptr->getType());
