@@ -23,7 +23,7 @@
 
 #include "game-server/charactercomponent.h"
 #include "game-server/mapcomposite.h"
-#include "game-server/actor.h"
+#include "game-server/actorcomponent.h"
 #include "game-server/state.h"
 
 #include "utils/logger.h"

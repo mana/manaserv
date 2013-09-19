@@ -208,8 +208,8 @@ SET(SRCS_MANASERVGAME
     game-server/abilitymanager.h
     game-server/accountconnection.h
     game-server/accountconnection.cpp
-    game-server/actor.h
-    game-server/actor.cpp
+    game-server/actorcomponent.h
+    game-server/actorcomponent.cpp
     game-server/attribute.h
     game-server/attribute.cpp
     game-server/attributemanager.h

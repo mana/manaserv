@@ -18,8 +18,8 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ACTOR_H
-#define ACTOR_H
+#ifndef ACTORCOMPONENT_H
+#define ACTORCOMPONENT_H
 
 #include "game-server/map.h"
 #include "game-server/entity.h"
@@ -157,4 +157,4 @@ class ActorComponent : public Component
         BlockType mBlockType;
 };
 
-#endif // ACTOR_H
+#endif // ACTORCOMPONENT_H

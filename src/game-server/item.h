@@ -24,7 +24,7 @@
 
 #include <vector>
 
-#include "game-server/actor.h"
+#include "game-server/actorcomponent.h"
 #include "scripting/script.h"
 
 class Entity;

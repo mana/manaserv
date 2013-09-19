@@ -18,7 +18,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/actor.h"
+#include "game-server/actorcomponent.h"
 
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"

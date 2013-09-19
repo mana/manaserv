@@ -27,7 +27,7 @@
 #include <map>
 #include "limits.h"
 
-#include "game-server/actor.h"
+#include "game-server/actorcomponent.h"
 #include "game-server/attribute.h"
 #include "game-server/attributemanager.h"
 #include "game-server/timeout.h"
