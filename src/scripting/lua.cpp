@@ -2454,7 +2454,6 @@ static int set_questlog_description(lua_State *s)
 {
     const Entity *character = checkCharacter(s, 1);
     const int questId = luaL_checkinteger(s, 2);
-    luaL_argcheck(s, lua_isboolean(s, 3), 3, "boolean expected");
     const char *questDescription = luaL_checkstring(s, 3);
     const bool questNotification = checkOptionalBool(s, 4, true);
 
