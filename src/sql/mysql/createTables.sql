@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS `mana_characters` (
     UNIQUE KEY `name` (`name`),
     KEY `user_id` (`user_id`),
     FOREIGN KEY (`user_id`)
-    	REFERENCES `mana_accounts` (`id`)
-    	ON DELETE CASCADE
+        REFERENCES `mana_accounts` (`id`)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
@@ -103,7 +103,7 @@ CREATE TABLE mana_char_abilities
 (
     `char_id`                int(10) unsigned NOT NULL,
     `ability_id`             int(10) unsigned NOT NULL,
-	PRIMARY KEY (`char_id`, `ability_id`),
+        PRIMARY KEY (`char_id`, `ability_id`),
     FOREIGN KEY (`char_id`)
         REFERENCES `mana_characters` (`id`)
         ON DELETE CASCADE
@@ -193,8 +193,8 @@ CREATE TABLE IF NOT EXISTS `mana_inventories` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `owner_id` (`owner_id`, `slot`),
     FOREIGN KEY (`owner_id`)
-    	REFERENCES `mana_characters` (`id`)
-    	ON DELETE CASCADE
+        REFERENCES `mana_characters` (`id`)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
@@ -215,17 +215,17 @@ AUTO_INCREMENT=1 ;
 -- table: `mana_guild_members`
 --
 CREATE TABLE IF NOT EXISTS `mana_guild_members` (
-	`guild_id`     int(10)      unsigned NOT NULL,
-	`member_id`    int(10)      unsigned NOT NULL,
-	`rights`       int(10)      unsigned NOT NULL,
-	--
-	PRIMARY KEY (`guild_id`, `member_id`),
-	FOREIGN KEY (`guild_id`)
-		REFERENCES `mana_guilds` (`id`)
-		ON DELETE CASCADE,
-	FOREIGN KEY (`member_id`)
-		REFERENCES `mana_characters` (`id`)
-		ON DELETE CASCADE
+        `guild_id`     int(10)      unsigned NOT NULL,
+        `member_id`    int(10)      unsigned NOT NULL,
+        `rights`       int(10)      unsigned NOT NULL,
+        --
+        PRIMARY KEY (`guild_id`, `member_id`),
+        FOREIGN KEY (`guild_id`)
+                REFERENCES `mana_guilds` (`id`)
+                ON DELETE CASCADE,
+        FOREIGN KEY (`member_id`)
+                REFERENCES `mana_characters` (`id`)
+                ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
@@ -234,14 +234,14 @@ DEFAULT CHARSET=utf8;
 --
 
 CREATE TABLE IF NOT EXISTS `mana_quests` (
-	`owner_id`     int(10)      unsigned NOT NULL,
-	`name`         varchar(100)          NOT NULL,
-	`value`        varchar(200)          NOT NULL,
-	--
-	PRIMARY KEY (`owner_id`, `name`),
-	FOREIGN KEY (`owner_id`)
-		REFERENCES `mana_characters` (`id`)
-		ON DELETE CASCADE
+        `owner_id`     int(10)      unsigned NOT NULL,
+        `name`         varchar(100)          NOT NULL,
+        `value`        varchar(200)          NOT NULL,
+        --
+        PRIMARY KEY (`owner_id`, `name`),
+        FOREIGN KEY (`owner_id`)
+                REFERENCES `mana_characters` (`id`)
+                ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
@@ -259,25 +259,25 @@ CREATE TABLE IF NOT EXISTS mana_world_states
 --
 
 CREATE TABLE IF NOT EXISTS `mana_auctions` (
-	`auction_id`    int(10)      unsigned  NOT NULL auto_increment,
-	`auction_state` tinyint(3)   unsigned  NOT NULL,
-	`char_id`       int(10)      unsigned  NOT NULL,
-	`itemclass_id`  int(10)      unsigned  NOT NULL,
-	`amount`        int(10)      unsigned  NOT NULL,
-	`start_time`    int(10)      unsigned  NOT NULL,
-	`end_time`      int(10)      unsigned  NOT NULL,
-	`start_price`   int(10)      unsigned  NOT NULL,
-	`min_price`     int(10)      unsigned      NULL,
-	`buyout_price`  int(10)      unsigned      NULL,
-	`description`   varchar(255)               NULL,
-	--
-	PRIMARY KEY (`auction_id`),
-	KEY (`auction_state`),
-	KEY (`itemclass_id`),
-	KEY (`char_id`),
-	FOREIGN KEY (`char_id`)
-		REFERENCES `mana_characters` (`id`)
-		ON DELETE CASCADE
+        `auction_id`    int(10)      unsigned  NOT NULL auto_increment,
+        `auction_state` tinyint(3)   unsigned  NOT NULL,
+        `char_id`       int(10)      unsigned  NOT NULL,
+        `itemclass_id`  int(10)      unsigned  NOT NULL,
+        `amount`        int(10)      unsigned  NOT NULL,
+        `start_time`    int(10)      unsigned  NOT NULL,
+        `end_time`      int(10)      unsigned  NOT NULL,
+        `start_price`   int(10)      unsigned  NOT NULL,
+        `min_price`     int(10)      unsigned      NULL,
+        `buyout_price`  int(10)      unsigned      NULL,
+        `description`   varchar(255)               NULL,
+        --
+        PRIMARY KEY (`auction_id`),
+        KEY (`auction_state`),
+        KEY (`itemclass_id`),
+        KEY (`char_id`),
+        FOREIGN KEY (`char_id`)
+                REFERENCES `mana_characters` (`id`)
+                ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
@@ -287,18 +287,18 @@ AUTO_INCREMENT=1 ;
 --
 
 CREATE TABLE IF NOT EXISTS `mana_auction_bids` (
-	`bid_id`        int(10)      unsigned  NOT NULL auto_increment,
-	`auction_id`    int(10)      unsigned  NOT NULL,
-	`char_id`       int(10)      unsigned  NOT NULL,
-	`bid_time`      int(10)      unsigned  NOT NULL,
-	`bid_price`     int(10)      unsigned  NOT NULL,
-	--
-	PRIMARY KEY (`bid_id`),
-	KEY (`auction_id`),
-	KEY (`char_id`),
-	FOREIGN KEY (`char_id`)
-		REFERENCES `mana_characters` (`id`)
-		ON DELETE CASCADE
+        `bid_id`        int(10)      unsigned  NOT NULL auto_increment,
+        `auction_id`    int(10)      unsigned  NOT NULL,
+        `char_id`       int(10)      unsigned  NOT NULL,
+        `bid_time`      int(10)      unsigned  NOT NULL,
+        `bid_price`     int(10)      unsigned  NOT NULL,
+        --
+        PRIMARY KEY (`bid_id`),
+        KEY (`auction_id`),
+        KEY (`char_id`),
+        FOREIGN KEY (`char_id`)
+                REFERENCES `mana_characters` (`id`)
+                ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
@@ -308,24 +308,24 @@ AUTO_INCREMENT=1 ;
 --
 
 CREATE TABLE IF NOT EXISTS `mana_post` (
-	`letter_id`        int(10)      unsigned  NOT NULL auto_increment,
-	`sender_id`        int(10)      unsigned  NOT NULL,
-	`receiver_id`      int(10)      unsigned  NOT NULL,
-	`letter_type`      int(5)       unsigned  NOT NULL,
-	`expiration_date`  int(10)      unsigned  NOT NULL,
-	`sending_date`     int(10)      unsigned  NOT NULL,
-	`letter_text`      TEXT                       NULL,
-	--
-	PRIMARY KEY (`letter_id`),
-	INDEX `fk_letter_sender` (`sender_id` ASC) ,
-	INDEX `fk_letter_receiver` (`receiver_id` ASC) ,
-	--
-	FOREIGN KEY (`sender_id` )
-		REFERENCES `mana_characters` (`id`)
-		ON DELETE CASCADE,
+        `letter_id`        int(10)      unsigned  NOT NULL auto_increment,
+        `sender_id`        int(10)      unsigned  NOT NULL,
+        `receiver_id`      int(10)      unsigned  NOT NULL,
+        `letter_type`      int(5)       unsigned  NOT NULL,
+        `expiration_date`  int(10)      unsigned  NOT NULL,
+        `sending_date`     int(10)      unsigned  NOT NULL,
+        `letter_text`      TEXT                       NULL,
+        --
+        PRIMARY KEY (`letter_id`),
+        INDEX `fk_letter_sender` (`sender_id` ASC) ,
+        INDEX `fk_letter_receiver` (`receiver_id` ASC) ,
+        --
+        FOREIGN KEY (`sender_id` )
+                REFERENCES `mana_characters` (`id`)
+                ON DELETE CASCADE,
     FOREIGN KEY (`receiver_id` )
-		REFERENCES `mana_characters` (`id`)
-		ON DELETE CASCADE
+                REFERENCES `mana_characters` (`id`)
+                ON DELETE CASCADE
 ) ENGINE = InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
@@ -335,20 +335,20 @@ AUTO_INCREMENT=1 ;
 --
 
 CREATE TABLE IF NOT EXISTS `mana_post_attachments` (
-	`attachment_id`    int(10)      unsigned  NOT NULL auto_increment,
-	`letter_id`        int(10)      unsigned  NOT NULL,
-	`item_id`          int(10)      unsigned  NOT NULL,
-	--
-	PRIMARY KEY (`attachment_id`) ,
-	INDEX `fk_attachment_letter` (`letter_id` ASC) ,
-	INDEX `fk_attachment_item` (`item_id` ASC),
-	--
-	FOREIGN KEY (`letter_id` )
-		REFERENCES `mana_post` (`letter_id`)
-		ON DELETE CASCADE,
-	FOREIGN KEY (`item_id` )
-		REFERENCES `mana_item_instances` (`item_id`)
-		ON DELETE RESTRICT
+        `attachment_id`    int(10)      unsigned  NOT NULL auto_increment,
+        `letter_id`        int(10)      unsigned  NOT NULL,
+        `item_id`          int(10)      unsigned  NOT NULL,
+        --
+        PRIMARY KEY (`attachment_id`) ,
+        INDEX `fk_attachment_letter` (`letter_id` ASC) ,
+        INDEX `fk_attachment_item` (`item_id` ASC),
+        --
+        FOREIGN KEY (`letter_id` )
+                REFERENCES `mana_post` (`letter_id`)
+                ON DELETE CASCADE,
+        FOREIGN KEY (`item_id` )
+                REFERENCES `mana_item_instances` (`item_id`)
+                ON DELETE RESTRICT
 ) ENGINE = InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
@@ -373,8 +373,8 @@ CREATE TABLE IF NOT EXISTS `mana_online_list` (
     --
     PRIMARY KEY (`char_id`),
     FOREIGN KEY (`char_id`)
-    	REFERENCES `mana_characters` (`id`)
-    	ON DELETE CASCADE
+        REFERENCES `mana_characters` (`id`)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8 ;
 
