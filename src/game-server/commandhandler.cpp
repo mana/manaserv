@@ -85,6 +85,8 @@ static void handleGiveAbility(Entity*, std::string&);
 static void handleTakeAbility(Entity*, std::string&);
 static void handleRechargeAbility(Entity*, std::string&);
 static void handleListAbility(Entity*, std::string&);
+static void handleSetAttributePoints(Entity*, std::string&);
+static void handleSetCorrectionPoints(Entity*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -164,6 +166,10 @@ static CmdRef const cmdRef[] =
         "<setname>_<abilityname>", &handleRechargeAbility},
     {"listabilities", "<character>",
         "Lists the abilitys of the character.", &handleListAbility},
+    {"setattributepoints", "<character> <amount>",
+        "Sets the attribute points of a character.", &handleSetAttributePoints},
+    {"setcorrectionpoints", "<character> <amount>",
+        "Sets the correction points of a character.", &handleSetCorrectionPoints},
     {nullptr, nullptr, nullptr, nullptr}
 
 };
@@ -1722,6 +1728,74 @@ static void handleListAbility(Entity *player, std::string &args)
         str << info.abilityInfo->id << ": " << info.abilityInfo->name;
         say(str.str(), player);
     }
+}
+
+static void handleSetAttributePoints(Entity *player, std::string &args)
+{
+    std::string character = getArgument(args);
+    std::string attributePoints = getArgument(args);
+    if (character.empty())
+    {
+        say("Invalid amount of arguments given.", player);
+        say("Usage: @setattributepoints <character> <point>", player);
+        return;
+    }
+
+    Entity *other;
+    if (character == "#")
+        other = player;
+    else
+        other = gameHandler->getCharacterByNameSlow(character);
+
+    if (!other)
+    {
+        say("Invalid character, or player is offline.", player);
+        return;
+    }
+
+    if (!utils::isNumeric(attributePoints))
+    {
+        say("Invalid character, or player is offline.", player);
+        return;
+    }
+
+    auto *characterComponent = other->getComponent<CharacterComponent>();
+
+    characterComponent->setAttributePoints(utils::stringToInt(attributePoints));
+}
+
+static void handleSetCorrectionPoints(Entity *player, std::string &args)
+{
+    std::string character = getArgument(args);
+    std::string correctionPoints = getArgument(args);
+    if (character.empty())
+    {
+        say("Invalid amount of arguments given.", player);
+        say("Usage: @setcorrectionpoints <character> <point>", player);
+        return;
+    }
+
+    Entity *other;
+    if (character == "#")
+        other = player;
+    else
+        other = gameHandler->getCharacterByNameSlow(character);
+
+    if (!other)
+    {
+        say("Invalid character, or player is offline.", player);
+        return;
+    }
+
+    if (!utils::isNumeric(correctionPoints))
+    {
+        say("Invalid character, or player is offline.", player);
+        return;
+    }
+
+    auto *characterComponent = other->getComponent<CharacterComponent>();
+
+    characterComponent->setCorrectionPoints(utils::stringToInt(correctionPoints));
 }
 
 void CommandHandler::handleCommand(Entity *player,
