@@ -906,9 +906,6 @@ static int trade(lua_State *s)
  **
  * Valid only for character entities.
  *
- * The boolean values `inInventory` and `inEquipment` make possible to
- * select whether equipped or carried items must be counted.
- *
  * **Return values:** A number of integers with the amount of items `id` or
  * `name` carried or equipped by the character.
  */
