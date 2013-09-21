@@ -912,23 +912,16 @@ static int trade(lua_State *s)
 static int entity_inv_count(lua_State *s)
 {
     Entity *q = checkCharacter(s, 1);
-    if (!lua_isboolean(s, 2) || !lua_isboolean(s, 3))
-    {
-        luaL_error(s, "inv_count called with incorrect parameters.");
-        return 0;
-    }
 
-    int nb_items = lua_gettop(s) - 1;
+    const int itemCount = lua_gettop(s) - 1;
     Inventory inv(q);
 
-    int nb = 0;
-    for (int i = 4; i < nb_items + 4; ++i)
+    for (int i = 2; i < itemCount + 2; ++i)
     {
-        ItemClass *it = checkItemClass(s, i);
-        nb = inv.count(it->getDatabaseID());
-        lua_pushinteger(s, nb);
+        const ItemClass *it = checkItemClass(s, i);
+        lua_pushinteger(s, inv.count(it->getDatabaseID()));
     }
-    return nb_items;
+    return itemCount;
 }
 
 /** LUA entity:inv_change (inventory)
