@@ -176,6 +176,16 @@ void CharacterComponent::deserialize(Entity &entity, MessageIn &msg)
         entity.getComponent<AbilityComponent>()->giveAbility(id);
     }
 
+    // questlog
+    int questlogSize = msg.readInt16();
+    for (int i = 0; i < questlogSize; ++i) {
+        unsigned id = msg.readInt16();
+        QuestState state = (QuestState) msg.readInt8();
+        std::string title = msg.readString();
+        std::string description = msg.readString();
+
+        setQuestlog(id, state, title, description);
+    }
 
     Possessions &poss = getPossessions();
 
@@ -254,6 +264,16 @@ void CharacterComponent::serialize(Entity &entity, MessageOut &msg)
     msg.writeInt16(abilities.size());
     for (auto &abilityIt : abilities) {
         msg.writeInt32(abilityIt.first);
+    }
+
+    // questlog
+    msg.writeInt16(mQuestlog.size());
+    for (auto questlogIt : mQuestlog) {
+        QuestInfo &quest = questlogIt.second;
+        msg.writeInt16(quest.id);
+        msg.writeInt8(quest.state);
+        msg.writeString(quest.title);
+        msg.writeString(quest.description);
     }
 
     // inventory - must be last because size isn't transmitted
@@ -359,6 +379,44 @@ void CharacterComponent::sendAttributePointsStatus(Entity &entity)
     mSendAttributePointsStatus = false;
 }
 
+void CharacterComponent::sendQuestUpdate()
+{
+    MessageOut msg(GPMSG_QUESTLOG_STATUS);
+    for (auto &questIt : mModifiedQuests) {
+        const QuestInfo *quest = questIt.first;
+        bool notify = questIt.second;
+        msg.writeInt16(quest->id);
+        int flags = QUESTLOG_UPDATE_STATE |
+                QUESTLOG_UPDATE_TITLE |
+                QUESTLOG_UPDATE_DESCRIPTION;
+        if (notify)
+            flags |= QUESTLOG_SHOW_NOTIFICATION;
+        msg.writeInt8(flags);
+        msg.writeInt8(quest->state);
+        msg.writeString(quest->title);
+        msg.writeString(quest->description);
+    }
+    mModifiedQuests.clear();
+    gameHandler->sendTo(mClient, msg);
+}
+
+void CharacterComponent::markQuestAsModified(const QuestInfo *quest,
+                                             bool sendNotification)
+{
+    const auto &it = mModifiedQuests.find(quest);
+    if (it == mModifiedQuests.end()) {
+        mModifiedQuests.insert(std::make_pair(quest, sendNotification));
+        return;
+    }
+    it->second = sendNotification;
+}
+void CharacterComponent::markAllQuestsAsModified()
+{
+    for (auto &questIt : mQuestlog) {
+        mModifiedQuests[&questIt.second] = false;
+    }
+}
+
 void CharacterComponent::cancelTransaction()
 {
     TransactionType t = mTransaction;
@@ -428,7 +486,8 @@ void CharacterComponent::sendStatus(Entity &entity)
         attribMsg.writeInt32(beingComponent->getAttributeBase(attribute) * 256);
         attribMsg.writeInt32(beingComponent->getModifiedAttribute(attribute) * 256);
     }
-    if (attribMsg.getLength() > 2) gameHandler->sendTo(mClient, attribMsg);
+    if (attribMsg.getLength() > 2)
+        gameHandler->sendTo(mClient, attribMsg);
     mModifiedAttributes.clear();
 
     if (!mModifiedAbilities.empty())
@@ -439,6 +498,9 @@ void CharacterComponent::sendStatus(Entity &entity)
 
     if (mSendAttributePointsStatus)
         sendAttributePointsStatus(entity);
+
+    if (!mModifiedQuests.empty())
+        sendQuestUpdate();
 }
 
 void CharacterComponent::modifiedAllAbilities(Entity &entity)
@@ -581,4 +643,52 @@ void CharacterComponent::markAllInfoAsChanged(Entity &entity)
 {
     modifiedAllAbilities(entity);
     modifiedAllAttributes(entity);
+    markAllQuestsAsModified();
+}
+
+void CharacterComponent::setQuestlog(unsigned id, QuestState state,
+                                     const std::string &title,
+                                     const std::string &description,
+                                     bool sendNotification)
+{
+    auto &quest = mQuestlog[id];
+    quest.id = id;
+    quest.state = state;
+    quest.title = title;
+    quest.description = description;
+
+    markQuestAsModified(&quest, sendNotification);
+}
+
+void CharacterComponent::setQuestlogState(unsigned id,
+                                          QuestState state,
+                                          bool sendNotification)
+{
+    auto &quest = mQuestlog[id];
+    quest.id = id;
+    quest.state = state;
+
+    markQuestAsModified(&quest, sendNotification);
+}
+
+void CharacterComponent::setQuestlogTitle(unsigned id,
+                                          const std::string &title,
+                                          bool sendNotification)
+{
+    auto &quest = mQuestlog[id];
+    quest.id = id;
+    quest.title = title;
+
+    markQuestAsModified(&quest, sendNotification);
+}
+
+void CharacterComponent::setQuestlogDescription(unsigned id,
+                                                const std::string &description,
+                                                bool sendNotification)
+{
+    auto &quest = mQuestlog[id];
+    quest.id = id;
+    quest.description = description;
+
+    markQuestAsModified(&quest, sendNotification);
 }

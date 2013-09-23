@@ -47,6 +47,26 @@ class MessageOut;
 class Point;
 class Trade;
 
+enum QuestState
+{
+    QUEST_OPEN = 0,
+    QUEST_FINISHED,
+    QUEST_FAILED,
+};
+
+struct QuestInfo
+{
+    QuestInfo()
+        : id(0)
+        , state(QUEST_OPEN)
+    {}
+
+    unsigned id;
+    QuestState state;
+    std::string title;
+    std::string description;
+};
+
 /**
  * The representation of a player's character in the game world.
  */
@@ -278,6 +298,19 @@ class CharacterComponent : public Component
 
         void markAllInfoAsChanged(Entity &entity);
 
+        void setQuestlog(unsigned id, QuestState state,
+                         const std::string &title,
+                         const std::string &description,
+                         bool sendNotification = false);
+        void setQuestlogState(unsigned id, QuestState state,
+                              bool sendNotification = false);
+        void setQuestlogTitle(unsigned id,
+                              const std::string &title,
+                              bool sendNotification = false);
+        void setQuestlogDescription(unsigned id,
+                                    const std::string &description,
+                                    bool sendNotification = false);
+
         sigc::signal<void, Entity &> signal_disconnected;
 
         void serialize(Entity &entity, MessageOut &msg);
@@ -294,6 +327,10 @@ class CharacterComponent : public Component
         void sendAbilityUpdate(Entity &entity);
         void sendAbilityCooldownUpdate(Entity &entity);
         void sendAttributePointsStatus(Entity &entity);
+        void sendQuestUpdate();
+
+        void markQuestAsModified(const QuestInfo *quest, bool sendNotification);
+        void markAllQuestsAsModified();
 
         enum TransactionType
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
@@ -313,8 +350,8 @@ class CharacterComponent : public Component
 
         /** Attributes modified since last update. */
         std::set<AttributeInfo *> mModifiedAttributes;
-
         std::set<unsigned> mModifiedAbilities;
+        std::map<const QuestInfo *, bool> mModifiedQuests;
 
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */
@@ -334,6 +371,8 @@ class CharacterComponent : public Component
         Script::Thread *mNpcThread;  /**< Script thread executing NPC interaction, if any */
 
         Timeout mMuteTimeout;        /**< Time until the character is no longer muted  */
+
+        std::map<unsigned, QuestInfo> mQuestlog;
 
         Entity *mBaseEntity;        /**< The entity this component is part of
                                          this is ONLY required to allow using

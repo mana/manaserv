@@ -402,11 +402,26 @@ CREATE TABLE IF NOT EXISTS `mana_transactions` (
 )
 AUTO_INCREMENT=0 ;
 
+CREATE TABLE IF NOT EXISTS `mana_questlog` (
+    `char_id`           int(10)     unsigned NOT NULL,
+    `quest_id`          INTEGER     NOT NULL,
+    `quest_state`       INTEGER     NOT NULL,
+    `quest_title`       TEXT        NOT NULL,
+    `quest_description` TEXT        NOT NULL,
+    --
+
+   PRIMARY KEY (`char_id`, `quest_id`)
+    FOREIGN KEY (`char_id`)
+        REFERENCES `mana_characters` (`id`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8 ;
+
 -- initial world states and database version
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', NOW());
-INSERT INTO mana_world_states VALUES('database_version',     -1,'25', NOW());
+INSERT INTO mana_world_states VALUES('database_version',     -1,'26', NOW());
 
 -- all known transaction codes
 

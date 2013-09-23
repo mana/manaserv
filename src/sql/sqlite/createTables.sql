@@ -110,7 +110,7 @@ CREATE TABLE mana_char_abilities
 (
     char_id                 INTEGER     NOT NULL,
     ability_id              INTEGER     NOT NULL,
-	PRIMARY KEY (char_id, ability_id),
+    PRIMARY KEY (char_id, ability_id),
     FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
 
@@ -348,6 +348,21 @@ CREATE TABLE mana_online_list
 );
 
 -----------------------------------------------------------------------------
+
+CREATE TABLE mana_questlog
+(
+    char_id           INTEGER     NOT NULL,
+    quest_id          INTEGER     NOT NULL,
+    quest_state       INTEGER     NOT NULL,
+    quest_title       TEXT        NOT NULL,
+    quest_description TEXT        NOT NULL,
+    --
+    FOREIGN KEY (char_id) REFERENCES mana_characters(id)
+);
+CREATE INDEX mana_questlog_char_id ON mana_questlog ( char_id );
+CREATE INDEX mana_questlog_quest_id ON mana_questlog ( quest_id );
+
+-----------------------------------------------------------------------------
 -- Views
 -----------------------------------------------------------------------------
 
@@ -396,7 +411,7 @@ AS
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', strftime('%s','now'));
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', strftime('%s','now'));
-INSERT INTO mana_world_states VALUES('database_version',     -1,'25', strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     -1,'26', strftime('%s','now'));
 
 -- all known transaction codes
 

@@ -30,7 +30,7 @@ namespace ManaServ {
 
 enum {
     PROTOCOL_VERSION = 8,
-    SUPPORTED_DB_VERSION = 25
+    SUPPORTED_DB_VERSION = 26
 };
 
 /**
@@ -255,7 +255,7 @@ enum {
     PCMSG_KICK_USER                   = 0x0466, // W channel id, S name
 
     // -- Questlog
-    GPMSG_QUESTLOG_STATUS       = 0x0470, // W quest id, B flags, [B status], [S questname], [S questdescription]
+    GPMSG_QUESTLOG_STATUS       = 0x0470, // {W quest id, B flags, [B status], [S questname], [S questdescription]}*
 
     // Inter-server
     GAMSG_REGISTER              = 0x0500, // S address, W port, S password, D items db revision

@@ -64,6 +64,14 @@ struct Status
     unsigned time;
 };
 
+struct QuestInfo
+{
+    int id;
+    int state;
+    std::string title;
+    std::string description;
+};
+
 /**
  * Stores attributes by their id.
  */
@@ -263,6 +271,8 @@ class CharacterData
 
         std::vector<std::string> mGuilds;        //!< All the guilds the player
                                                  //!< belongs to.
+        std::vector<QuestInfo> mQuests;
+
         friend class AccountHandler;
         friend class Storage;
 };

@@ -91,6 +91,16 @@ void CharacterData::serialize(MessageOut &msg)
         msg.writeInt32(abilityId);
     }
 
+
+    // questlog
+    msg.writeInt16(mQuests.size());
+    for (QuestInfo &quest : mQuests) {
+        msg.writeInt16(quest.id);
+        msg.writeInt8(quest.state);
+        msg.writeString(quest.title);
+        msg.writeString(quest.description);
+    }
+
     // inventory - must be last because size isn't transmitted
     const Possessions &poss = getPossessions();
     const EquipData &equipData = poss.getEquipment();
@@ -164,6 +174,18 @@ void CharacterData::deserialize(MessageIn &msg)
     {
         const int id = msg.readInt32();
         giveAbility(id);
+    }
+
+    // questlog
+    int questlogSize = msg.readInt16();
+    mQuests.clear();
+    for (int i = 0; i < questlogSize; ++i) {
+        QuestInfo quest;
+        quest.id = msg.readInt16();
+        quest.state = msg.readInt8();
+        quest.title = msg.readString();
+        quest.description = msg.readString();
+        mQuests.push_back(quest);
     }
 
     // inventory - must be last because size isn't transmitted
