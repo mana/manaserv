@@ -401,13 +401,12 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
         std::ostringstream s;
 
         // Load attributes.
-        s << "SELECT attr_id, attr_base, attr_mod "
-          << "FROM " << CHAR_ATTR_TBL_NAME << " "
-          << "WHERE char_id = " << character->getDatabaseID();
-
-        const dal::RecordSet &attrInfo = mDb->execSql(s.str());
-        if (!attrInfo.isEmpty())
         {
+            s << "SELECT attr_id, attr_base, attr_mod "
+              << "FROM " << CHAR_ATTR_TBL_NAME << " "
+              << "WHERE char_id = " << character->getDatabaseID();
+
+            const dal::RecordSet &attrInfo = mDb->execSql(s.str());
             const unsigned nRows = attrInfo.rows();
             for (unsigned row = 0; row < nRows; ++row)
             {
@@ -417,16 +416,14 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
             }
         }
 
-        s.clear();
-        s.str("");
-
         // Load the status effects
-        s << "select status_id, status_time FROM "
-          << CHAR_STATUS_EFFECTS_TBL_NAME
-          << " WHERE char_id = " << character->getDatabaseID();
-        const dal::RecordSet &statusInfo = mDb->execSql(s.str());
-        if (!statusInfo.isEmpty())
         {
+            s.clear();
+            s.str("");
+            s << "select status_id, status_time FROM "
+              << CHAR_STATUS_EFFECTS_TBL_NAME
+              << " WHERE char_id = " << character->getDatabaseID();
+            const dal::RecordSet &statusInfo = mDb->execSql(s.str());
             const unsigned nRows = statusInfo.rows();
             for (unsigned row = 0; row < nRows; row++)
             {
@@ -437,13 +434,12 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
         }
 
         // Load the kill stats
-        s.clear();
-        s.str("");
-        s << "select monster_id, kills FROM " << CHAR_KILL_COUNT_TBL_NAME
-          << " WHERE char_id = " << character->getDatabaseID();
-        const dal::RecordSet &killsInfo = mDb->execSql(s.str());
-        if (!killsInfo.isEmpty())
         {
+            s.clear();
+            s.str("");
+            s << "select monster_id, kills FROM " << CHAR_KILL_COUNT_TBL_NAME
+              << " WHERE char_id = " << character->getDatabaseID();
+            const dal::RecordSet &killsInfo = mDb->execSql(s.str());
             const unsigned nRows = killsInfo.rows();
             for (unsigned row = 0; row < nRows; row++)
             {
@@ -454,14 +450,13 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
         }
 
         // Load the ability status
-        s.clear();
-        s.str("");
-        s << "SELECT ability_id FROM "
-          << CHAR_ABILITIES_TBL_NAME
-          << " WHERE char_id = " << character->getDatabaseID();
-        const dal::RecordSet &abilitiesInfo = mDb->execSql(s.str());
-        if (!abilitiesInfo.isEmpty())
         {
+            s.clear();
+            s.str("");
+            s << "SELECT ability_id FROM "
+              << CHAR_ABILITIES_TBL_NAME
+              << " WHERE char_id = " << character->getDatabaseID();
+            const dal::RecordSet &abilitiesInfo = mDb->execSql(s.str());
             const unsigned nRows = abilitiesInfo.rows();
             for (unsigned row = 0; row < nRows; row++)
             {
@@ -470,14 +465,13 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
         }
 
         // Load the questlog
-        s.clear();
-        s.str("");
-        s << "SELECT quest_id, quest_state, quest_title, quest_description "
-          << "FROM " << QUESTLOG_TBL_NAME
-          << " WHERE char_id = " << character->getDatabaseID();
-        const dal::RecordSet &quests = mDb->execSql(s.str());
-        if (!quests.isEmpty())
         {
+            s.clear();
+            s.str("");
+            s << "SELECT quest_id, quest_state, quest_title, quest_description "
+              << "FROM " << QUESTLOG_TBL_NAME
+              << " WHERE char_id = " << character->getDatabaseID();
+            const dal::RecordSet &quests = mDb->execSql(s.str());
             const unsigned nRows = quests.rows();
             for (unsigned row = 0; row < nRows; row++)
             {
