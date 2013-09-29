@@ -1312,7 +1312,7 @@ static int entity_get_ability_cooldown(lua_State *s)
 static int entity_set_global_ability_cooldown(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    const int ticks = luaL_checkint(s, 3);
+    const int ticks = luaL_checkint(s, 2);
     c->getComponent<AbilityComponent>()->setGlobalCooldown(ticks);
     return 0;
 }
