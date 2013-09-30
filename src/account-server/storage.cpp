@@ -510,18 +510,14 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
                 unsigned short slot = toUint(itemInfo(k, 2));
                 item.itemId   = toUint(itemInfo(k, 3));
                 item.amount   = toUint(itemInfo(k, 4));
+                item.equipmentSlot = toUint(itemInfo(k, 5));
                 inventoryData[slot] = item;
 
-                if (toUint(itemInfo(k, 5)) != 0)
+                if (item.equipmentSlot != 0)
                 {
                     // The game server will set the right slot anyway,
                     // but this speeds up checking if the item is equipped
-                    item.equipmentSlot = 1;
                     equipmentData.insert(slot);
-                }
-                else
-                {
-                    item.equipmentSlot = 0;
                 }
             }
         }
@@ -850,10 +846,9 @@ bool Storage::updateCharacter(CharacterData *character)
             unsigned short slot = itemIt->first;
             unsigned itemId = itemIt->second.itemId;
             unsigned amount = itemIt->second.amount;
-            bool equipped = itemIt->second.equipmentSlot != 0;
             assert(itemId);
             sql << base << slot << ", " << itemId << ", " << amount << ", "
-                << (equipped ? 1 : 0) << ");";
+                << itemIt->second.equipmentSlot << ");";
             mDb->execSql(sql.str());
         }
 

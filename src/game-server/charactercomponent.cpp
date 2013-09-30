@@ -278,19 +278,15 @@ void CharacterComponent::serialize(Entity &entity, MessageOut &msg)
 
     // inventory - must be last because size isn't transmitted
     const Possessions &poss = getPossessions();
-    const EquipData &equipData = poss.getEquipment();
 
     const InventoryData &inventoryData = poss.getInventory();
     for (InventoryData::const_iterator itemIt = inventoryData.begin(),
          itemIt_end = inventoryData.end(); itemIt != itemIt_end; ++itemIt)
     {
         msg.writeInt16(itemIt->first);           // slot id
-        msg.writeInt16(itemIt->second.itemId);   // item id
-        msg.writeInt16(itemIt->second.amount);   // amount
-        if (equipData.find(itemIt->first) != equipData.end())
-            msg.writeInt8(1); // equipped
-        else
-            msg.writeInt8(0); // not equipped
+        msg.writeInt16(itemIt->second.itemId);
+        msg.writeInt16(itemIt->second.amount);
+        msg.writeInt8(itemIt->second.equipmentSlot);
     }
 }
 
