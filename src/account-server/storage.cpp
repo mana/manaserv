@@ -514,11 +514,7 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
                 inventoryData[slot] = item;
 
                 if (item.equipmentSlot != 0)
-                {
-                    // The game server will set the right slot anyway,
-                    // but this speeds up checking if the item is equipped
                     equipmentData.insert(slot);
-                }
             }
         }
         poss.setInventory(inventoryData);
