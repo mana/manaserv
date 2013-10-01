@@ -29,7 +29,7 @@
 namespace ManaServ {
 
 enum {
-    PROTOCOL_VERSION = 8,
+    PROTOCOL_VERSION = 9,
     SUPPORTED_DB_VERSION = 26
 };
 
@@ -79,14 +79,14 @@ enum {
     PAMSG_LOGIN_RNDTRGR            = 0x0015, // S username
     APMSG_LOGIN_RNDTRGR_RESPONSE   = 0x0016, // S random seed
     PAMSG_CHAR_CREATE              = 0x0020, // S name, B hair style, B hair color, B gender, B slot, {W stats}*
-    APMSG_CHAR_CREATE_RESPONSE     = 0x0021, // B error
+    APMSG_CHAR_CREATE_RESPONSE     = 0x0021, // B error, on success: B slot, S name, B gender, B hair style, B hair color,
+                                             // W character points, W correction points, B amount of items equipped,
+                                             // { W slot, W itemId }*
+                                             // B attributeCount,
+                                             // {D attr id, D base value (in 1/256ths) D mod value (in 256ths) }*
     PAMSG_CHAR_DELETE              = 0x0022, // B slot
     APMSG_CHAR_DELETE_RESPONSE     = 0x0023, // B error
-    // B slot, S name, B gender, B hair style, B hair color,
-    // W character points, W correction points, B amount of items equipped,
-    // { W slot, W itemId }*
-    // {D attr id, D base value (in 1/256ths) D mod value (in 256ths) }*
-    APMSG_CHAR_INFO                = 0x0024, // ^
+    APMSG_CHAR_INFO                = 0x0024, // {content of APMSG_CHAR_CREATE_RESPONSE (without error code)}*
     PAMSG_CHAR_SELECT              = 0x0026, // B slot
     APMSG_CHAR_SELECT_RESPONSE     = 0x0027, // B error, B*32 token, S game address, W game port, S chat address, W chat port
     PAMSG_EMAIL_CHANGE             = 0x0030, // S email

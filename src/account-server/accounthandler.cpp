@@ -73,12 +73,6 @@ public:
      */
     TokenCollector<AccountHandler, AccountClient *, int> mTokenCollector;
 
-    /**
-     * Send the character data to the client.
-     */
-    static void sendCharacterData(AccountClient &client,
-                                  const CharacterData &ch);
-
 protected:
     /**
      * Processes account related messages.
@@ -271,19 +265,17 @@ void AccountHandler::computerDisconnected(NetComputer *comp)
     delete client; // ~AccountClient unsets the account
 }
 
-void AccountHandler::sendCharacterData(AccountClient &client,
-                                       const CharacterData &ch)
+static void sendCharacterData(MessageOut &charInfo, const CharacterData *ch)
 {
-    MessageOut charInfo(APMSG_CHAR_INFO);
-    charInfo.writeInt8(ch.getCharacterSlot());
-    charInfo.writeString(ch.getName());
-    charInfo.writeInt8(ch.getGender());
-    charInfo.writeInt8(ch.getHairStyle());
-    charInfo.writeInt8(ch.getHairColor());
-    charInfo.writeInt16(ch.getAttributePoints());
-    charInfo.writeInt16(ch.getCorrectionPoints());
+    charInfo.writeInt8(ch->getCharacterSlot());
+    charInfo.writeString(ch->getName());
+    charInfo.writeInt8(ch->getGender());
+    charInfo.writeInt8(ch->getHairStyle());
+    charInfo.writeInt8(ch->getHairColor());
+    charInfo.writeInt16(ch->getAttributePoints());
+    charInfo.writeInt16(ch->getCorrectionPoints());
 
-    auto &possessions = ch.getPossessions();
+    auto &possessions = ch->getPossessions();
     auto &equipData = possessions.getEquipment();
     auto &inventoryData = possessions.getInventory();
     charInfo.writeInt8(equipData.size());
@@ -295,15 +287,22 @@ void AccountHandler::sendCharacterData(AccountClient &client,
         charInfo.writeInt16(it->second.itemId);
     }
 
-    for (auto &it : ch.getAttributes())
+    charInfo.writeInt8(ch->getAttributes().size());
+    for (auto &it : ch->getAttributes())
     {
         // {id, base value in 256ths, modified value in 256ths }*
         charInfo.writeInt32(it.first);
         charInfo.writeInt32((int) (it.second.base * 256));
         charInfo.writeInt32((int) (it.second.modified * 256));
     }
+}
 
-    client.send(charInfo);
+static void sendFullCharacterData(AccountClient *client, Characters &chars)
+{
+    MessageOut msg(APMSG_CHAR_INFO);
+    for (auto &charIt : chars)
+        sendCharacterData(msg, charIt.second);
+    client->send(msg);
 }
 
 std::string getRandomString(int length)
@@ -431,9 +430,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     Characters &chars = acc->getCharacters();
 
     // Send characters list
-    for (Characters::const_iterator i = chars.begin(), i_end = chars.end();
-         i != i_end; ++i)
-        sendCharacterData(client, *(*i).second);
+    sendFullCharacterData(&client, chars);
 }
 
 void AccountHandler::handleLogoutMessage(AccountClient &client)
@@ -831,10 +828,9 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             storage->addTransaction(trans);
 
             reply.writeInt8(ERRMSG_OK);
-            client.send(reply);
 
-            // Send new characters infos back to client
-            sendCharacterData(client, *chars[slot]);
+            sendCharacterData(reply, newCharacter);
+            client.send(reply);
             return;
         }
     }
@@ -990,9 +986,7 @@ void AccountHandler::tokenMatched(AccountClient *client, int accountID)
     Characters &chars = acc->getCharacters();
 
     // Send characters list
-    for (Characters::const_iterator i = chars.begin(), i_end = chars.end();
-         i != i_end; ++i)
-        sendCharacterData(*client, *(*i).second);
+    sendFullCharacterData(client, chars);
 }
 
 void AccountHandler::deletePendingClient(AccountClient *client)
