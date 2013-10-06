@@ -305,7 +305,7 @@ static void sendFullCharacterData(AccountClient *client, Characters &chars)
     client->send(msg);
 }
 
-std::string getRandomString(int length)
+static std::string getRandomString(int length)
 {
     char s[length];
     // No need to care about zeros. They can be handled.
