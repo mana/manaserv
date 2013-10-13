@@ -297,7 +297,8 @@ static void sendCharacterData(MessageOut &charInfo, const CharacterData *ch)
     }
 }
 
-static void sendFullCharacterData(AccountClient *client, Characters &chars)
+static void sendFullCharacterData(AccountClient *client,
+                                  const Characters &chars)
 {
     MessageOut msg(APMSG_CHAR_INFO);
     for (auto &charIt : chars)
