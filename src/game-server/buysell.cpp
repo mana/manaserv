@@ -155,33 +155,36 @@ bool BuySell::start(Entity *actor)
 
 void BuySell::perform(unsigned id, int amount)
 {
-    Inventory inv(mChar);
+    MessageOut msg(GPMSG_NPC_BUYSELL_RESPONSE);
+
     for (TradedItems::iterator i = mItems.begin(),
          i_end = mItems.end(); i != i_end; ++i)
     {
-        auto *beingComponent = mChar->getComponent<BeingComponent>();
-
         if (i->itemId != id)
             continue;
+
+        Inventory inv(mChar);
+
+        auto *beingComponent = mChar->getComponent<BeingComponent>();
+        const double currentMoney = beingComponent->getAttributeBase(mCurrency);
+
         if (i->amount && i->amount <= amount)
             amount = i->amount;
+
         if (mSell)
         {
             amount -= inv.remove(id, amount);
-            const double currentMoney =
-                    beingComponent->getAttributeBase(mCurrency);
             beingComponent->setAttribute(*mChar, mCurrency,
                                          currentMoney + amount * i->cost);
         }
         else
         {
-            const double currentMoney =
-                    beingComponent->getAttributeBase(mCurrency);
             amount = std::min(amount, ((int)currentMoney) / i->cost);
             amount -= inv.insert(id, amount);
             beingComponent->setAttribute(*mChar, mCurrency,
                                          currentMoney - amount * i->cost);
         }
+
         if (i->amount)
         {
             i->amount -= amount;
@@ -190,6 +193,14 @@ void BuySell::perform(unsigned id, int amount)
                 mItems.erase(i);
             }
         }
+
+        msg.writeInt8(ERRMSG_OK);
+        msg.writeInt16(id);
+        msg.writeInt16(amount);
+        mChar->getComponent<CharacterComponent>()->getClient()->send(msg);
         return;
     }
+
+    msg.writeInt8(ERRMSG_FAILURE);
+    mChar->getComponent<CharacterComponent>()->getClient()->send(msg);
 }

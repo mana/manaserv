@@ -172,6 +172,7 @@ enum {
     PGMSG_NPC_STRING               = 0x02D4, // W being id, S string
     GPMSG_NPC_NUMBER               = 0x02D5, // W being id, D max, D min, D default
     GPMSG_NPC_STRING               = 0x02D6, // W being id
+    GPMSG_NPC_BUYSELL_RESPONSE     = 0x02D7, // B error, W item id, W amount
     PGMSG_TRADE_REQUEST            = 0x02E0, // W being id
     GPMSG_TRADE_REQUEST            = 0x02E1, // W being id
     GPMSG_TRADE_START              = 0x02E2, // -
