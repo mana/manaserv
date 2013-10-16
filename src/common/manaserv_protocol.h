@@ -170,7 +170,7 @@ enum {
     GPMSG_NPC_POST_GET             = 0x02D2, // W being id, { S name, S text, W item id }
     PGMSG_NPC_NUMBER               = 0x02D3, // W being id, D number
     PGMSG_NPC_STRING               = 0x02D4, // W being id, S string
-    GPMSG_NPC_NUMBER               = 0x02D5, // W being id, D max, D min, D default
+    GPMSG_NPC_NUMBER               = 0x02D5, // W being id, D min, D max, D default
     GPMSG_NPC_STRING               = 0x02D6, // W being id
     GPMSG_NPC_BUYSELL_RESPONSE     = 0x02D7, // B error, W item id, W amount
     PGMSG_TRADE_REQUEST            = 0x02E0, // W being id
