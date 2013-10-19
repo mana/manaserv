@@ -118,7 +118,7 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
                                                  false);
     attribute->modifiers = std::vector<AttributeModifier>();
     attribute->minimum = XML::getFloatProperty(attributeNode, "minimum",
-                                           std::numeric_limits<double>::min());
+                                           std::numeric_limits<double>::lowest());
     attribute->maximum = XML::getFloatProperty(attributeNode, "maximum",
                                            std::numeric_limits<double>::max());
     attribute->modifiable = XML::getBoolProperty(attributeNode, "modifiable",
