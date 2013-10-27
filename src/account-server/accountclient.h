@@ -50,6 +50,7 @@ class AccountClient : public NetComputer
         Account *getAccount() const;
 
         AccountClientStatus status;
+        int version;
 
     private:
         std::unique_ptr<Account> mAccount;

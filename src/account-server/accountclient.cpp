@@ -22,6 +22,7 @@
 
 AccountClient::AccountClient(ENetPeer *peer):
     NetComputer(peer),
-    status(CLIENT_LOGIN)
+    status(CLIENT_LOGIN),
+    version(0)
 {
 }

@@ -343,9 +343,9 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
         return;
     }
 
-    const int clientVersion = msg.readInt32();
+    client.version = msg.readInt32();
 
-    if (clientVersion < PROTOCOL_VERSION)
+    if (client.version < MIN_PROTOCOL_VERSION)
     {
         reply.writeInt8(LOGIN_INVALID_VERSION);
         client.send(reply);
@@ -425,13 +425,17 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     reply.writeInt8(ERRMSG_OK);
     addServerInfo(&reply);
-    client.send(reply); // Acknowledge login
 
-    // Return information about available characters
     Characters &chars = acc->getCharacters();
 
-    // Send characters list
-    sendFullCharacterData(&client, chars);
+    if (client.version < 10) {
+        client.send(reply);
+        sendFullCharacterData(&client, chars);
+    } else {
+        for (auto &charIt : chars)
+            sendCharacterData(reply, charIt.second);
+        client.send(reply);
+    }
 }
 
 void AccountHandler::handleLogoutMessage(AccountClient &client)
@@ -498,7 +502,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
     {
         reply.writeInt8(ERRMSG_FAILURE);
     }
-    else if (clientVersion < PROTOCOL_VERSION)
+    else if (clientVersion < MIN_PROTOCOL_VERSION)
     {
         reply.writeInt8(REGISTER_INVALID_VERSION);
     }
@@ -963,10 +967,6 @@ void AccountHandler::handleCharacterDeleteMessage(AccountClient &client,
 void AccountHandler::addServerInfo(MessageOut *msg)
 {
     msg->writeString(mUpdateHost);
-    /*
-     * This is for developing/testing an experimental new resource manager that
-     * downloads only the files it needs on demand.
-     */
     msg->writeString(mDataUrl);
     msg->writeInt8(mMaxCharacters);
 }
