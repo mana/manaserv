@@ -217,7 +217,7 @@ static int on_map_initialize(lua_State *s)
 /** LUA on_craft (callbacks)
  * on_craft(function ref)
  **
- * Will make sure that the function `ref` gets called with the the crafting
+ * Will make sure that the function `ref` gets called with the crafting
  * character and a table with the recipes {(id, amount}) when a character
  * performs crafting.
  */
@@ -231,7 +231,7 @@ static int on_craft(lua_State *s)
 /** LUA on_mapupdate (callbacks)
  * on_mapupdate(function ref)
  **
- * Will make sure that the function `ref` gets called with the the map id
+ * Will make sure that the function `ref` gets called with the map id
  * as argument for each game tick and map.
  */
 static int on_mapupdate(lua_State *s)
