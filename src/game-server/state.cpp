@@ -196,7 +196,7 @@ static void informPlayer(MapComposite *map, Entity *p)
             }
 
             // Send direction change messages.
-            if (oflags & UPDATEFLAG_DIRCHANGE)
+            if (oflags & UPDATEFLAG_DIRCHANGE && o != p)
             {
                 MessageOut dirMsg(GPMSG_BEING_DIR_CHANGE);
                 dirMsg.writeInt16(oid);
