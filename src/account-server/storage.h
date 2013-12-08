@@ -440,9 +440,8 @@ class Storage
         { return mDb; }
 
     private:
-        // Prevent copying
-        Storage(const Storage &rhs);
-        Storage &operator=(const Storage &rhs);
+        Storage(const Storage &rhs) = delete;
+        Storage &operator=(const Storage &rhs) = delete;
 
         /**
          * Gets an account from a prepared SQL statement

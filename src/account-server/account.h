@@ -220,8 +220,8 @@ class Account
         void setLastLogin(time_t time);
 
     private:
-        Account(const Account &rhs);
-        Account &operator=(const Account &rhs);
+        Account(const Account &rhs) = delete;
+        Account &operator=(const Account &rhs) = delete;
 
         std::string mName;        /**< User name */
         std::string mPassword;    /**< User password (hashed with salt) */

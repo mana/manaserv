@@ -239,11 +239,9 @@ class CharacterData
         int getCorrectionPoints() const
         { return mCorrectionPoints; }
 
-
     private:
-
-        CharacterData(const CharacterData &);
-        CharacterData &operator=(const CharacterData &);
+        CharacterData(const CharacterData &) = delete;
+        CharacterData &operator=(const CharacterData &) = delete;
 
         double getAttrBase(AttributeMap::const_iterator &it) const
         { return it->second.base; }
