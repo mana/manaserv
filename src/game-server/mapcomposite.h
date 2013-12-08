@@ -132,8 +132,6 @@ class MapComposite
 {
     public:
         MapComposite(int id, const std::string &name);
-        MapComposite(const MapComposite &) = delete;
-
         ~MapComposite();
 
         bool readMap();

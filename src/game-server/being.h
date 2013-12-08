@@ -298,9 +298,6 @@ class BeingComponent : public Component
         BeingGender mGender;        /**< Gender of the being. */
 
     private:
-        BeingComponent(const BeingComponent &rhs) = delete;
-        BeingComponent &operator=(const BeingComponent &rhs) = delete;
-
         /**
          * Connected to signal_inserted to reset the old position.
          */

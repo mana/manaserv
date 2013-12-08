@@ -47,14 +47,17 @@ enum ComponentType
  */
 class Component : public sigc::trackable
 {
-    public:
-        virtual ~Component() {}
+public:
+    Component() {}
+    Component(const Component &rhs) = delete;
+    Component &operator=(const Component &rhs) = delete;
+    virtual ~Component() {}
 
-        /**
-         * Updates the internal status. The \a entity is the owner of this
-         * component.
-         */
-        virtual void update(Entity &entity) = 0;
+    /**
+     * Updates the internal status. The \a entity is the owner of this
+     * component.
+     */
+    virtual void update(Entity &entity) = 0;
 };
 
 #endif // COMPONENT_H

@@ -318,9 +318,6 @@ class CharacterComponent : public Component
     private:
         void deserialize(Entity &entity, MessageIn &msg);
 
-        CharacterComponent(const CharacterComponent &) = delete;
-        CharacterComponent &operator=(const CharacterComponent &) = delete;
-
         void abilityStatusChanged(int id);
         void abilityCooldownActivated();
 
