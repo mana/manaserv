@@ -2258,17 +2258,14 @@ static int entity_show_text_particle(lua_State *s)
  **
  * Valid only for character and monster entities.
  *
- * Enables a ability for a character.
+ * Enables an ability for a character.
  */
 static int entity_give_ability(lua_State *s)
 {
-    // cost_type is ignored until we have more than one cost type
     Entity *b = checkBeing(s, 1);
     auto *abilityInfo = checkAbility(s, 2);
-    const int currentMana = luaL_optint(s, 3, 0);
 
-    b->getComponent<AbilityComponent>()->giveAbility(abilityInfo->id,
-                                                     currentMana);
+    b->getComponent<AbilityComponent>()->giveAbility(abilityInfo->id);
     return 0;
 }
 

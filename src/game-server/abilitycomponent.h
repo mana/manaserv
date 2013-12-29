@@ -61,9 +61,8 @@ public:
     bool useAbilityOnDirection(Entity &user, int id,
                                ManaServ::BeingDirection direction);
 
-    bool giveAbility(int id, int currentMana = 0);
-    bool giveAbility(const AbilityManager::AbilityInfo *info,
-                     int currentMana = 0);
+    bool giveAbility(int id);
+    bool giveAbility(const AbilityManager::AbilityInfo *info);
     bool hasAbility(int id) const;
     bool takeAbility(int id);
     AbilityMap::iterator findAbility(int id);

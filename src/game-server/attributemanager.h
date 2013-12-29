@@ -29,7 +29,7 @@
 #include "utils/string.h"
 #include "utils/xml.h"
 
-class AttributeInfo;
+struct AttributeInfo;
 
 enum ScopeType
 {

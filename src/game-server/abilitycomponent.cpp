@@ -194,7 +194,7 @@ bool AbilityComponent::useAbilityOnDirection(Entity &user, int id,
 /**
  * Allows a character to perform a ability
  */
-bool AbilityComponent::giveAbility(int id, int currentPoints)
+bool AbilityComponent::giveAbility(int id)
 {
     if (mAbilities.find(id) == mAbilities.end())
     {
@@ -204,13 +204,12 @@ bool AbilityComponent::giveAbility(int id, int currentPoints)
             LOG_ERROR("Tried to give not existing ability id " << id << ".");
             return false;
         }
-        return giveAbility(abilityInfo, currentPoints);
+        return giveAbility(abilityInfo);
     }
     return false;
 }
 
-bool AbilityComponent::giveAbility(const AbilityManager::AbilityInfo *info,
-                                   int currentPoints)
+bool AbilityComponent::giveAbility(const AbilityManager::AbilityInfo *info)
 {
     bool added = mAbilities.insert(std::pair<int, AbilityValue>(info->id,
                                    AbilityValue(info))).second;

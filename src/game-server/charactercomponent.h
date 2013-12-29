@@ -41,7 +41,7 @@
 #include <vector>
 
 class BuySell;
-class GameClient;
+struct GameClient;
 class MessageIn;
 class MessageOut;
 class Point;
