@@ -468,16 +468,6 @@ class Storage
          */
         void fixCharactersSlot(int accountId);
 
-        /**
-         * Synchronizes the base data in the connected SQL database with the xml
-         * files like items.xml.
-         * This method is called once after initialization of DALStorage.
-         * Probably this function should be called if a gm requests an online
-         * reload of the xml files to load new items or monsters without server
-         * restart.
-         */
-        void syncDatabase();
-
         dal::DataProvider *mDb;         /**< the data provider */
         unsigned mItemDbVersion;        /**< Version of the item database. */
 };
