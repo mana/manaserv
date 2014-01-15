@@ -184,13 +184,6 @@ SET(SRCS_MANASERVACCOUNT
     chat-server/partyhandler.cpp
     chat-server/post.cpp
     chat-server/post.h
-    dal/dalexcept.h
-    dal/dataprovider.h
-    dal/dataprovider.cpp
-    dal/dataproviderfactory.h
-    dal/dataproviderfactory.cpp
-    dal/recordset.h
-    dal/recordset.cpp
     utils/functors.h
     utils/sha256.h
     utils/sha256.cpp
@@ -290,24 +283,6 @@ IF (WIN32)
     SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT} manaserv-account.rc)
     SET(SRCS_MANASERVGAME ${SRCS_MANASERVGAME} manaserv-game.rc)
 ENDIF ()
-
-IF (WITH_MYSQL)
-    SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT}
-    dal/mysqldataprovider.h
-    dal/mysqldataprovider.cpp)
-ENDIF()
-
-IF (WITH_POSTGRESQL)
-    SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT}
-    dal/pqdataprovider.h
-    dal/pqdataprovider.cpp)
-ENDIF()
-
-IF (WITH_SQLITE)
-    SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT}
-    dal/sqlitedataprovider.h
-    dal/sqlitedataprovider.cpp)
-ENDIF()
 
 IF (ENABLE_LUA)
     SET(SRCS_MANASERVGAME ${SRCS_MANASERVGAME}

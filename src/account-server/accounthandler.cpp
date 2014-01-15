@@ -320,7 +320,7 @@ static std::string getRandomString(int length)
 void AccountHandler::handleLoginRandTriggerMessage(AccountClient &client, MessageIn &msg)
 {
     std::string salt = getRandomString(4);
-    std::string username = msg.readString();
+    QString username = QString::fromStdString(msg.readString());
 
     if (Account *acc = storage->getAccount(username))
     {
@@ -570,10 +570,10 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client,
         return;
     }
 
-    std::string username = msg.readString();
+    QString username = QString::fromStdString(msg.readString());
     std::string password = msg.readString();
 
-    if (stringFilter->findDoubleQuotes(username))
+    if (stringFilter->findDoubleQuotes(username.toStdString()))
     {
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
@@ -592,7 +592,7 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client,
     }
 
     // Delete account and associated characters
-    LOG_INFO("Unregistered \"" << username
+    LOG_INFO("Unregistered \"" << username.toStdString()
              << "\", AccountID: " << acc->getID());
     storage->delAccount(acc);
     reply.writeInt8(ERRMSG_OK);

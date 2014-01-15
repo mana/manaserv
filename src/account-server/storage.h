@@ -24,8 +24,7 @@
 #include <list>
 #include <map>
 #include <vector>
-
-#include "dal/dataprovider.h"
+#include <QSqlDatabase>
 
 #include "common/transaction.h"
 
@@ -64,7 +63,7 @@ class Storage
          *
          * @return the account associated to the user name.
          */
-        Account *getAccount(const std::string &userName);
+        Account *getAccount(const QString &userName);
 
         /**
          * Get an account by Id.
@@ -177,7 +176,7 @@ class Storage
          *
          * @param charId character identifier.
          */
-        void delCharacter(int charId) const;
+        void delCharacter(int charId);
 
         /**
          * Delete a character in the database. The object itself is not touched
@@ -185,7 +184,7 @@ class Storage
          *
          * @param character character object.
          */
-        void delCharacter(CharacterData *character) const;
+        void delCharacter(CharacterData *character);
 
         /**
          * Removes expired bans from accounts
@@ -229,7 +228,7 @@ class Storage
          *
          * @return true on success
          */
-        bool updateCharacter(CharacterData *ptr);
+        void updateCharacter(CharacterData *ptr);
 
         /**
          * Add a new guild.
@@ -431,14 +430,6 @@ class Storage
          */
         std::vector<Transaction> getTransactions(time_t date);
 
-        /**
-         * Provides direct access to the database. Use with care!
-         *
-         * @return a database provider object.
-         */
-        dal::DataProvider *database() const
-        { return mDb; }
-
     private:
         Storage(const Storage &rhs) = delete;
         Storage &operator=(const Storage &rhs) = delete;
@@ -448,7 +439,7 @@ class Storage
          *
          * @return the account found
          */
-        Account *getAccountBySQL();
+        Account *getAccountBySQL(QSqlQuery &query);
 
         /**
          * Gets a character from a prepared SQL statement
@@ -457,7 +448,7 @@ class Storage
          *
          * @return the character found by the query.
          */
-        CharacterData *getCharacterBySQL(Account *owner);
+        CharacterData *getCharacterBySQL(QSqlQuery &sqlQuery, Account *owner);
 
         /**
          * Fix improper character slots
@@ -468,8 +459,8 @@ class Storage
          */
         void fixCharactersSlot(int accountId);
 
-        dal::DataProvider *mDb;         /**< the data provider */
-        unsigned mItemDbVersion;        /**< Version of the item database. */
+        QSqlDatabase mDb;
+        unsigned mItemDbVersion;
 };
 
 extern Storage *storage;
