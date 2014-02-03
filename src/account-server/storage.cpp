@@ -988,8 +988,7 @@ void Storage::flush(Account *account)
                      << " (user_id, name, gender, hair_style, hair_color,"
                      << " char_pts, correct_pts,"
                      << " x, y, map_id, slot) values ("
-                     << account->getID() << ", \""
-                     << character->getName() << "\", "
+                     << account->getID() << ", ?, "
                      << character->getGender() << ", "
                      << (int)character->getHairStyle() << ", "
                      << (int)character->getHairColor() << ", "
@@ -1001,7 +1000,9 @@ void Storage::flush(Account *account)
                      << character->getCharacterSlot()
                      << ");";
 
-                mDb->execSql(sqlInsertCharactersTable.str());
+                mDb->prepareSql(sqlInsertCharactersTable.str());
+                mDb->bindValue(1, character->getName());
+                mDb->processSql();
 
                 // Update the character ID.
                 character->setDatabaseID(mDb->getLastId());
