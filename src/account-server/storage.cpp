@@ -176,9 +176,11 @@ void Storage::close()
 
 Account *Storage::getAccountBySQL(QSqlQuery &query)
 {
+    tryExecutePrepared(query);
+
     // If the account is not even in the database then
     // we have no choice but to return nothing.
-    if (!query.isValid())
+    if (!query.next())
         return 0;
 
     unsigned id = query.value(0).toUInt();
@@ -209,24 +211,24 @@ Account *Storage::getAccountBySQL(QSqlQuery &query)
 
     // Load the characters associated with the account.
     QString sql = "select id from " + CHARACTERS_TBL_NAME + " where user_id = '"
-            + id + "';";
+            + QString::number(id) + "';";
 
     QSqlQuery charInfoQuery(mDb);
     tryExecuteSql(charInfoQuery, sql);
-    if (!charInfoQuery.isValid())
+    if (!charInfoQuery.next())
     {
-        int size = charInfoQuery.size();
         Characters characters;
 
-        LOG_DEBUG("Account " << id << " has " << size
+        LOG_DEBUG("Account " << id << " has " << charInfoQuery.size()
                   << " character(s) in database.");
 
         // Two steps: it seems like multiple requests cannot be alive
         // at the same time.
         std::vector< unsigned > characterIDs;
-        for (int k = 0; k < size; ++k)
+        while(charInfoQuery.next())
             characterIDs.push_back(charInfoQuery.value(0).toUInt());
 
+        int size = charInfoQuery.size();
         for (int k = 0; k < size; ++k)
         {
             if (CharacterData *ptr =
@@ -250,33 +252,35 @@ Account *Storage::getAccountBySQL(QSqlQuery &query)
 void Storage::fixCharactersSlot(int accountId)
 {
     QString sql = "SELECT id, slot FROM " + CHARACTERS_TBL_NAME
-            + " where user_id = " + accountId;
+            + " where user_id = " + QString::number(accountId);
     QSqlQuery sqlQuery(mDb);
     tryExecuteSql(sqlQuery, sql);
 
     // If the account is not even in the database then
     // we can quit now.
-    if (!sqlQuery.isValid())
+    if (!sqlQuery.next())
         return;
 
     std::map<unsigned, unsigned> slotsToUpdate;
 
-    int characterNumber = sqlQuery.size();
     unsigned currentSlot = 1;
 
     // We parse all the characters slots to see how many are to be
     // corrected.
-    for (int k = 0; k < characterNumber; ++k)
+    while (sqlQuery.next())
     {
         // If the slot found is equal to 0.
         if (sqlQuery.value(1).toInt() == 0)
         {
+            int currentIndex = sqlQuery.at();
+            sqlQuery.seek(-1);
             // Find the new slot number to assign.
-            for (int l = 0; l < characterNumber; ++l)
+            while(sqlQuery.next())
             {
                 if (sqlQuery.value(1).toUInt() == currentSlot)
                     currentSlot++;
             }
+            sqlQuery.seek(currentIndex);
             slotsToUpdate.insert(std::make_pair(sqlQuery.value(0).toUInt(),
                                                 currentSlot));
         }
@@ -324,11 +328,13 @@ Account *Storage::getAccount(int accountID)
 
 CharacterData *Storage::getCharacterBySQL(QSqlQuery &sqlQuery, Account *owner)
 {
+    tryExecutePrepared(sqlQuery);
+
     CharacterData *character = 0;
 
     // If the character is not even in the database then
     // we have no choice but to return nothing.
-    if (!sqlQuery.isValid())
+    if (!sqlQuery.next())
         return 0;
 
     character = new CharacterData(sqlQuery.value(2).toString().toStdString(), sqlQuery.value(0).toInt());
@@ -365,7 +371,7 @@ CharacterData *Storage::getCharacterBySQL(QSqlQuery &sqlQuery, Account *owner)
         int id = sqlQuery.value(1).toInt();
         character->setAccountID(id);
         QString sql = "select level from " + ACCOUNTS_TBL_NAME
-                + " where id = '" + id + "';";
+                + " where id = '" + QString::number(id) + "';";
         QSqlQuery query(mDb);
         tryExecuteSql(query, sql);
         character->setAccountLevel(query.value(0).toInt(), true);
@@ -375,11 +381,10 @@ CharacterData *Storage::getCharacterBySQL(QSqlQuery &sqlQuery, Account *owner)
     {
         QString sql = "SELECT attr_id, attr_base, attr_mod "
                 "FROM " + CHAR_ATTR_TBL_NAME + " "
-                "WHERE char_id = " + character->getDatabaseID();
+                "WHERE char_id = " + QString::number(character->getDatabaseID());
 
         QSqlQuery query(mDb);
-        const unsigned nRows = query.size();
-        for (unsigned row = 0; row < nRows; ++row)
+        while(query.next())
         {
             unsigned id = query.value(0).toUInt();
             character->setAttribute(id,    query.value(1).toDouble());
@@ -392,11 +397,10 @@ CharacterData *Storage::getCharacterBySQL(QSqlQuery &sqlQuery, Account *owner)
     {
         QString sql = "select status_id, status_time FROM "
                 + CHAR_STATUS_EFFECTS_TBL_NAME
-                + " WHERE char_id = " + character->getDatabaseID();
+                + " WHERE char_id = " + QString::number(character->getDatabaseID());
 
         QSqlQuery query(mDb);
-        const unsigned nRows = query.size();
-        for (unsigned row = 0; row < nRows; row++)
+        while(query.next())
         {
             character->applyStatusEffect(
                         query.value(0).toUInt(), // Status Id
@@ -408,11 +412,10 @@ CharacterData *Storage::getCharacterBySQL(QSqlQuery &sqlQuery, Account *owner)
     // Load the kill stats
     {
         QString sql = "select monster_id, kills FROM " + CHAR_KILL_COUNT_TBL_NAME
-                + " WHERE char_id = " + character->getDatabaseID();
+                + " WHERE char_id = " + QString::number(character->getDatabaseID());
 
         QSqlQuery query(mDb);
-        const unsigned nRows = query.size();
-        for (unsigned row = 0; row < nRows; row++)
+        while(query.next());
         {
             character->setKillCount(
                         query.value(0).toUInt(), // MonsterID
@@ -425,11 +428,10 @@ CharacterData *Storage::getCharacterBySQL(QSqlQuery &sqlQuery, Account *owner)
     {
         QString sql = "SELECT ability_id FROM "
                 + CHAR_ABILITIES_TBL_NAME
-                + " WHERE char_id = " + character->getDatabaseID();
+                + " WHERE char_id = " + QString::number(character->getDatabaseID());
 
         QSqlQuery query(mDb);
-        const unsigned nRows = query.size();
-        for (unsigned row = 0; row < nRows; row++)
+        while(query.next());
         {
             character->giveAbility(query.value(0).toUInt());
             query.next();
@@ -440,12 +442,11 @@ CharacterData *Storage::getCharacterBySQL(QSqlQuery &sqlQuery, Account *owner)
     {
         QString sql = "SELECT quest_id, quest_state, quest_title, quest_description "
                 "FROM " + QUESTLOG_TBL_NAME
-                + " WHERE char_id = " + character->getDatabaseID();
+                + " WHERE char_id = " + QString::number(character->getDatabaseID());
 
         QSqlQuery query(mDb);
         tryExecuteSql(query, sql);
-        const unsigned nRows = query.size();
-        for (unsigned row = 0; row < nRows; row++)
+        while(query.next());
         {
             QuestInfo quest;
             quest.id = query.value(0).toUInt();
@@ -461,27 +462,23 @@ CharacterData *Storage::getCharacterBySQL(QSqlQuery &sqlQuery, Account *owner)
 
     QString sql = " select id, owner_id, slot, class_id, amount, equipped from "
             + INVENTORIES_TBL_NAME + " where owner_id = '"
-            + character->getDatabaseID() + "' order by slot asc;";
+            + QString::number(character->getDatabaseID()) + "' order by slot asc;";
 
     QSqlQuery query(mDb);
     tryExecuteSql(query, sql);
     InventoryData inventoryData;
     EquipData equipmentData;
-    if (query.isValid())
+    while(query.next());
     {
-        for (int k = 0, size = query.size(); k < size; ++k)
-        {
-            InventoryItem item;
-            unsigned short slot = query.value(2).toUInt();
-            item.itemId   = query.value(3).toUInt();
-            item.amount   = query.value(4).toUInt();
-            item.equipmentSlot = query.value(5).toUInt();
-            inventoryData[slot] = item;
+        InventoryItem item;
+        unsigned short slot = query.value(2).toUInt();
+        item.itemId   = query.value(3).toUInt();
+        item.amount   = query.value(4).toUInt();
+        item.equipmentSlot = query.value(5).toUInt();
+        inventoryData[slot] = item;
 
-            if (item.equipmentSlot != 0)
-                equipmentData.insert(slot);
-            query.next();
-        }
+        if (item.equipmentSlot != 0)
+            equipmentData.insert(slot);
     }
     poss.setInventory(inventoryData);
     poss.setEquipment(equipmentData);
@@ -529,7 +526,7 @@ bool Storage::doesUserNameExist(const std::string &name)
 
     tryPrepare(query, sql);
     query.bindValue(":username", QString::fromStdString(name));
-    tryExecuteSql(query, sql);
+    tryExecutePrepared(query);
     query.next();
     return query.value(0).toInt();
 }
@@ -568,16 +565,16 @@ void Storage::updateCharacter(CharacterData *character)
         QString sql =
                 "update "         + CHARACTERS_TBL_NAME + " "
                 "set "
-                "gender = '"      + character->getGender() + "', "
-                "hair_style = '"  + character->getHairStyle() + "', "
-                "hair_color = '"  + character->getHairColor() + "', "
-                "char_pts = '"    + character->getAttributePoints() + "', "
-                "correct_pts = '" + character->getCorrectionPoints() + "', "
-                "x = '"           + character->getPosition().x + "', "
-                "y = '"           + character->getPosition().y + "', "
-                "map_id = '"      + character->getMapId() + "', "
-                "slot = '"        + character->getCharacterSlot() + "' "
-                "where id = '"    + character->getDatabaseID() + "';";
+                "gender = '"      + QString::number(character->getGender()) + "', "
+                "hair_style = '"  + QString::number(character->getHairStyle()) + "', "
+                "hair_color = '"  + QString::number(character->getHairColor()) + "', "
+                "char_pts = '"    + QString::number(character->getAttributePoints()) + "', "
+                "correct_pts = '" + QString::number(character->getCorrectionPoints()) + "', "
+                "x = '"           + QString::number(character->getPosition().x) + "', "
+                "y = '"           + QString::number(character->getPosition().y) + "', "
+                "map_id = '"      + QString::number(character->getMapId()) + "', "
+                "slot = '"        + QString::number(character->getCharacterSlot()) + "' "
+                "where id = '"    + QString::number(character->getDatabaseID()) + "';";
 
         QSqlQuery query(mDb);
         tryExecuteSql(query, sql);
@@ -606,7 +603,7 @@ void Storage::updateCharacter(CharacterData *character)
     {
         QString sql = "DELETE FROM " + CHAR_ABILITIES_TBL_NAME
                 + " WHERE char_id='"
-                + character->getDatabaseID() + "';";
+                + QString::number(character->getDatabaseID()) + "';";
         QSqlQuery query(mDb);
         tryExecuteSql(query, sql);
 
@@ -615,8 +612,8 @@ void Storage::updateCharacter(CharacterData *character)
             QString insertSql = "INSERT INTO " + CHAR_ABILITIES_TBL_NAME
                     + " (char_id, ability_id)"
                     + " VALUES ("
-                    + " '" + character->getDatabaseID() + "',"
-                    + " '" + abilityId
+                    + " '" + QString::number(character->getDatabaseID()) + "',"
+                    + " '" + QString::number(abilityId)
                     + "');";
 
             QSqlQuery query(mDb);
@@ -628,7 +625,7 @@ void Storage::updateCharacter(CharacterData *character)
     {
         QString sql = "DELETE FROM " + QUESTLOG_TBL_NAME
                 + " WHERE char_id='"
-                + character->getDatabaseID() + "';";
+                + QString::number(character->getDatabaseID()) + "';";
         QSqlQuery query(mDb);
         tryExecuteSql(query, sql);
 
@@ -638,9 +635,9 @@ void Storage::updateCharacter(CharacterData *character)
                     + " (char_id, quest_id, quest_state, "
                     + "quest_title, quest_description)"
                     + " VALUES ("
-                    + character->getDatabaseID() + ","
-                    + " " + quest.id + ","
-                    + " " + quest.state + ","
+                    + QString::number(character->getDatabaseID()) + ","
+                    + " " + QString::number(quest.id) + ","
+                    + " " + QString::number(quest.state) + ","
                     + " :title,"
                     + " :description"
                     + ")";
@@ -657,7 +654,7 @@ void Storage::updateCharacter(CharacterData *character)
     // Delete the old inventory and equipment table first
     {
         QString sql = "delete from " + INVENTORIES_TBL_NAME
-                + " where owner_id = '" + character->getDatabaseID() + "';";
+                + " where owner_id = '" + QString::number(character->getDatabaseID()) + "';";
         mDb.exec(sql);
     }
 
@@ -665,7 +662,7 @@ void Storage::updateCharacter(CharacterData *character)
     {
         QString sqlPrefix = "insert into " + INVENTORIES_TBL_NAME
                 + " (owner_id, slot, class_id, amount, equipped) values ("
-                + character->getDatabaseID() + ", ";
+                + QString::number(character->getDatabaseID()) + ", ";
 
         const Possessions &poss = character->getPossessions();
         const InventoryData &inventoryData = poss.getInventory();
@@ -689,7 +686,7 @@ void Storage::updateCharacter(CharacterData *character)
     {
         // Delete the old status effects first
         QString sql = "delete from " + CHAR_STATUS_EFFECTS_TBL_NAME
-                + " where char_id = '" + character->getDatabaseID() + "';";
+                + " where char_id = '" + QString::number(character->getDatabaseID()) + "';";
 
         mDb.exec(sql);
     }
@@ -716,9 +713,9 @@ void Storage::addAccount(Account *account)
             + " (username, password, email, level, "
             + "banned, registration, lastlogin)"
             + " VALUES (:name, :password, :email, "
-            + account->getLevel() + ", 0, "
-            + account->getRegistrationDate() + ", "
-            + account->getLastLogin() + ");";
+            + QString::number(account->getLevel()) + ", 0, "
+            + QString::number(account->getRegistrationDate()) + ", "
+            + QString::number(account->getLastLogin()) + ");";
     QSqlQuery query(mDb);
     tryPrepare(query, sql);
     query.bindValue(":name", QString::fromStdString(account->getName()));
@@ -815,7 +812,7 @@ void Storage::flush(Account *account)
     {
         QString sqlSelectNameIdCharactersTable =
                 "select name, id from " + CHARACTERS_TBL_NAME
-                + " where user_id = '" + account->getID() + "';";
+                + " where user_id = '" + QString::number(account->getID()) + "';";
 
         QSqlQuery query(mDb);
         tryExecuteSql(query, sqlSelectNameIdCharactersTable);
@@ -823,9 +820,8 @@ void Storage::flush(Account *account)
         // We compare chars from memory and those existing in db,
         // and delete those not in mem but existing in db.
         bool charFound;
-        for (unsigned i = 0; i < query.size(); ++i) // In database
+        while(query.next()) // In database
         {
-            query.next();
             charFound = false;
             for (Characters::const_iterator it = characters.begin(),
                  it_end = characters.end(); it != it_end; ++it) // In memory
@@ -859,7 +855,7 @@ void Storage::delAccount(Account *account)
 
     // Delete the account.
     QString sql = "delete from " + ACCOUNTS_TBL_NAME
-            + " where id = '" + account->getID() + "';";
+            + " where id = '" + QString::number(account->getID()) + "';";
     mDb.exec(sql);
 
     // Remove the account's characters.
@@ -869,8 +865,8 @@ void Storage::delAccount(Account *account)
 void Storage::updateLastLogin(const Account *account)
 {
     QString sql = "UPDATE " + ACCOUNTS_TBL_NAME
-            + "   SET lastlogin = '" + account->getLastLogin() + "'"
-            + " WHERE id = '" + account->getID() + "';";
+            + "   SET lastlogin = '" + QString::number(account->getLastLogin()) + "'"
+            + " WHERE id = '" + QString::number(account->getID()) + "';";
     mDb.exec(sql);
 }
 
@@ -878,9 +874,9 @@ void Storage::updateCharacterPoints(int charId,
                                     int charPoints, int corrPoints)
 {
     QString sql = "UPDATE " + CHARACTERS_TBL_NAME
-            + " SET char_pts = " + charPoints + ", "
-            + " correct_pts = " + corrPoints
-            + " WHERE id = " + charId;
+            + " SET char_pts = " + QString::number(charPoints) + ", "
+            + " correct_pts = " + QString::number(corrPoints)
+            + " WHERE id = " + QString::number(charId);
 
     mDb.exec(sql);
 }
@@ -890,10 +886,10 @@ void Storage::updateAttribute(int charId, unsigned attrId,
 {
     {
         QString sql = "UPDATE " + CHAR_ATTR_TBL_NAME
-                + " SET attr_base = '" + base + "', "
-                + "attr_mod = '" + mod + "' "
-                + "WHERE char_id = '" + charId + "' "
-                + "AND attr_id = '" + attrId + "';";
+                + " SET attr_base = '" + QString::number(base) + "', "
+                + "attr_mod = '" + QString::number(mod) + "' "
+                + "WHERE char_id = '" + QString::number(charId) + "' "
+                + "AND attr_id = '" + QString::number(attrId) + "';";
         QSqlQuery query(mDb);
         tryExecuteSql(query, sql);
 
@@ -906,8 +902,8 @@ void Storage::updateAttribute(int charId, unsigned attrId,
     // then the record didn't previously exist. Create it.
     QString sql = "INSERT INTO " + CHAR_ATTR_TBL_NAME
             + " (char_id, attr_id, attr_base, attr_mod) VALUES ( "
-            + charId + ", " + attrId + ", " + base + ", "
-            + mod + ")";
+            + QString::number(charId) + ", " + QString::number(attrId) + ", " + QString::number(base) + ", "
+            + QString::number(mod) + ")";
     mDb.exec(sql);
 }
 
@@ -916,9 +912,9 @@ void Storage::updateKillCount(int charId, int monsterId, int kills)
     {
         // Try to update the kill count
         QString sql = "UPDATE " + CHAR_KILL_COUNT_TBL_NAME
-                + " SET kills = " + kills
-                + " WHERE char_id = " + charId
-                + " AND monster_id = " + monsterId;
+                + " SET kills = " + QString::number(kills)
+                + " WHERE char_id = " + QString::number(charId)
+                + " AND monster_id = " + QString::number(monsterId);
         QSqlQuery query(mDb);
         tryExecuteSql(query, sql);
 
@@ -940,9 +936,9 @@ void Storage::insertStatusEffect(int charId, int statusId, int time)
 {
     QString sql = "insert into " + CHAR_STATUS_EFFECTS_TBL_NAME
             + " (char_id, status_id, status_time) VALUES ( "
-            + charId + ", "
-            + statusId + ", "
-            + time + ")";
+            + QString::number(charId) + ", "
+            + QString::number(statusId) + ", "
+            + QString::number(time) + ")";
     mDb.exec(sql);
 }
 
@@ -975,7 +971,7 @@ void Storage::removeGuild(Guild *guild)
 {
     QString sql = "delete from " + GUILDS_TBL_NAME
             + " where id = '"
-            + guild->getId() + "';";
+            + QString::number(guild->getId()) + "';";
     mDb.exec(sql);
 }
 
@@ -984,8 +980,8 @@ void Storage::addGuildMember(int guildId, int memberId)
     QString sql = "insert into " + GUILD_MEMBERS_TBL_NAME
             + " (guild_id, member_id, rights)"
             + " values ("
-            + guildId + ", \""
-            + memberId + "\", "
+            + QString::number(guildId) + ", \""
+            + QString::number(memberId) + "\", "
             + "0" + ");";
     mDb.exec(sql);
 }
@@ -994,8 +990,8 @@ void Storage::removeGuildMember(int guildId, int memberId)
 {
     QString sql = "delete from " + GUILD_MEMBERS_TBL_NAME
             + " where member_id = \""
-            + memberId + "\" and guild_id = '"
-            + guildId + "';";
+            + QString::number(memberId) + "\" and guild_id = '"
+            + QString::number(guildId) + "';";
     mDb.exec(sql);
 }
 
@@ -1005,11 +1001,11 @@ void Storage::addFloorItem(int mapId, int itemId, int amount,
     QString sql = "INSERT INTO " + FLOOR_ITEMS_TBL_NAME
             + " (map_id, item_id, amount, pos_x, pos_y)"
             + " VALUES ("
-            + mapId + ", "
-            + itemId + ", "
-            + amount + ", "
-            + posX + ", "
-            + posY + ");";
+            + QString::number(mapId) + ", "
+            + QString::number(itemId) + ", "
+            + QString::number(amount) + ", "
+            + QString::number(posX) + ", "
+            + QString::number(posY) + ");";
     mDb.exec(sql);
 }
 
@@ -1018,11 +1014,11 @@ void Storage::removeFloorItem(int mapId, int itemId, int amount,
 {
     QString sql = "DELETE FROM " + FLOOR_ITEMS_TBL_NAME
             + " WHERE map_id = "
-            + mapId + " AND item_id = "
-            + itemId + " AND amount = "
-            + amount + " AND pos_x = "
-            + posX + " AND pos_y = "
-            + posY + ";";
+            + QString::number(mapId) + " AND item_id = "
+            + QString::number(itemId) + " AND amount = "
+            + QString::number(amount) + " AND pos_x = "
+            + QString::number(posX) + " AND pos_y = "
+            + QString::number(posY) + ";";
     mDb.exec(sql);
 }
 
@@ -1031,20 +1027,16 @@ std::list<FloorItem> Storage::getFloorItemsFromMap(int mapId)
     std::list<FloorItem> floorItems;
 
     QString sql = "SELECT * FROM " + FLOOR_ITEMS_TBL_NAME
-            + " WHERE map_id = " + mapId;
+            + " WHERE map_id = " + QString::number(mapId);
     QSqlQuery query(mDb);
     tryExecuteSql(query, sql);
 
-    if (query.next())
+    while(query.next())
     {
-        for (int k = 0, size = query.size(); k < size; ++k)
-        {
-            floorItems.push_back(FloorItem(query.value(2).toInt(),
-                                           query.value(3).toInt(),
-                                           query.value(4).toInt(),
-                                           query.value(5).toInt()));
-            query.next();
-        }
+        floorItems.push_back(FloorItem(query.value(2).toInt(),
+                                       query.value(3).toInt(),
+                                       query.value(4).toInt(),
+                                       query.value(5).toInt()));
     }
 
     return floorItems;
@@ -1053,9 +1045,9 @@ std::list<FloorItem> Storage::getFloorItemsFromMap(int mapId)
 void Storage::setMemberRights(int guildId, int memberId, int rights)
 {
     QString sql = "UPDATE " + GUILD_MEMBERS_TBL_NAME
-            + " SET rights = " + rights
-            + " WHERE member_id = " + memberId
-            + "  AND guild_id = " + guildId + ";";
+            + " SET rights = " + QString::number(rights)
+            + " WHERE member_id = " + QString::number(memberId)
+            + "  AND guild_id = " + QString::number(guildId) + ";";
     mDb.exec(sql);
 }
 
@@ -1070,11 +1062,11 @@ std::map<int, Guild*> Storage::getGuildList()
     tryExecuteSql(query, sql);
 
     // Check that at least 1 guild was returned
-    if (query.next())
+    if (query.size() == 0)
         return guilds;
 
     // Loop through every row in the table and assign it to a guild
-    for (unsigned i = 0; i < query.size(); ++i)
+    while (query.next())
     {
         Guild *guild = new Guild(query.value(1).toString().toStdString());
         guild->setId(query.value(0).toInt());
@@ -1087,7 +1079,7 @@ std::map<int, Guild*> Storage::getGuildList()
     {
         QString membersql = "select member_id, rights from "
                 + GUILD_MEMBERS_TBL_NAME
-                + " where guild_id = '" + it->second->getId() + "';";
+                + " where guild_id = '" + QString::number(it->second->getId()) + "';";
         QSqlQuery query(mDb);
         tryExecuteSql(query, membersql);
 
@@ -1193,7 +1185,7 @@ void Storage::setWorldStateVar(const std::string &name,
     {
         QString deleteStateVar = "DELETE FROM " + WORLD_STATES_TBL_NAME
                 + " WHERE state_name = '" + QString::fromStdString(name) + "'"
-                + " AND map_id = '" + mapId + "';";
+                + " AND map_id = '" + QString::number(mapId) + "';";
         mDb.exec(deleteStateVar);
         return;
     }
@@ -1201,9 +1193,9 @@ void Storage::setWorldStateVar(const std::string &name,
     // Try to update the variable in the database
     QString updateStateVar = "UPDATE " + WORLD_STATES_TBL_NAME
             + "   SET value = '" + QString::fromStdString(value) + "', "
-            + "       moddate = '" + time(0) + "' "
+            + "       moddate = '" + QString::number(time(0)) + "' "
             + " WHERE state_name = '" + QString::fromStdString(name) + "'"
-            + " AND map_id = '" + mapId + "';";
+            + " AND map_id = '" + QString::number(mapId) + "';";
     QSqlQuery query(mDb);
     tryExecuteSql(query, updateStateVar);
 
@@ -1215,9 +1207,9 @@ void Storage::setWorldStateVar(const std::string &name,
     QString insertStateVar = "INSERT INTO " + WORLD_STATES_TBL_NAME
             + " (state_name, map_id, value , moddate) VALUES ("
             + "'" + QString::fromStdString(name) + "', "
-            + "'" + mapId + "', "
+            + "'" + QString::number(mapId) + "', "
             + "'" + QString::fromStdString(value) + "', "
-            + "'" + time(0) + "');";
+            + "'" + QString::number(time(0)) + "');";
     mDb.exec(insertStateVar);
 }
 
@@ -1225,7 +1217,7 @@ void Storage::setQuestVar(int id, const std::string &name,
                           const std::string &value)
 {
     QString query1 = "delete from " + QUESTS_TBL_NAME
-            + " where owner_id = '" + id + "' and name = :name;";
+            + " where owner_id = '" + QString::number(id) + "' and name = :name;";
     QSqlQuery query(mDb);
     tryPrepare(query, query1);
     query.bindValue(":name", QString::fromStdString(name));
@@ -1236,7 +1228,7 @@ void Storage::setQuestVar(int id, const std::string &name,
 
     QString query2 = "insert into " + QUESTS_TBL_NAME
             + " (owner_id, name, value) values ('"
-            + id + "', :name, :value);";
+            + QString::number(id) + "', :name, :value);";
     QSqlQuery insertQuery(mDb);
     tryPrepare(insertQuery, query2);
     insertQuery.bindValue(":name", QString::fromStdString(name));
@@ -1249,7 +1241,7 @@ void Storage::banCharacter(int id, int duration)
     {
         // check the account of the character
         QString sql = "select user_id from " + CHARACTERS_TBL_NAME
-                + " where id = '" + id + "';";
+                + " where id = '" + QString::number(id) + "';";
         QSqlQuery query(mDb);
         tryExecuteSql(query, sql);
         if (!query.next())
@@ -1263,8 +1255,8 @@ void Storage::banCharacter(int id, int duration)
         // ban the character
         QString sql = "update " + ACCOUNTS_TBL_NAME
                 + " set level = '" + AL_BANNED + "', banned = '"
-                + bantime
-                + "' where id = '" + id + "';";
+                + QString::number(bantime)
+                + "' where id = '" + QString::number(id) + "';";
         mDb.exec(sql);
     }
 }
@@ -1275,32 +1267,32 @@ void Storage::delCharacter(int charId)
 
     // Delete the inventory of the character
     QString sql = "DELETE FROM " + INVENTORIES_TBL_NAME
-            + " WHERE owner_id = '" + charId + "';";
+            + " WHERE owner_id = '" + QString::number(charId) + "';";
     mDb.exec(sql);
 
     // Delete from the quests table
     sql = "DELETE FROM " + QUESTS_TBL_NAME
-            + " WHERE owner_id = '" + charId + "';";
+            + " WHERE owner_id = '" + QString::number(charId) + "';";
     mDb.exec(sql);
 
     // Delete from the guilds table
     sql = "DELETE FROM " + GUILD_MEMBERS_TBL_NAME
-            + " WHERE member_id = '" + charId + "';";
+            + " WHERE member_id = '" + QString::number(charId) + "';";
     mDb.exec(sql);
 
     // Delete auctions of the character
     sql = "DELETE FROM " + AUCTION_TBL_NAME
-            + " WHERE char_id = '" + charId + "';";
+            + " WHERE char_id = '" + QString::number(charId) + "';";
     mDb.exec(sql);
 
     // Delete bids made on auctions made by the character
     sql = "DELETE FROM " + AUCTION_BIDS_TBL_NAME
-            + " WHERE char_id = '" + charId + "';";
+            + " WHERE char_id = '" + QString::number(charId) + "';";
     mDb.exec(sql);
 
     // Now delete the character itself.
     sql = "DELETE FROM " + CHARACTERS_TBL_NAME
-            + " WHERE id = '" + charId + "';";
+            + " WHERE id = '" + QString::number(charId) + "';";
     mDb.exec(sql);
 
     mDb.commit();
@@ -1315,17 +1307,17 @@ void Storage::checkBannedAccounts()
 {
     // Update expired bans
     QString sql = "update " + ACCOUNTS_TBL_NAME
-            + " set level = " + AL_PLAYER + ", banned = 0"
-            + " where level = " + AL_BANNED
-            + " AND banned <= " + time(0) + ";";
+            + " set level = " + QString::number(AL_PLAYER) + ", banned = 0"
+            + " where level = " + QString::number(AL_BANNED)
+            + " AND banned <= " + QString::number(time(0)) + ";";
     mDb.exec(sql);
 }
 
 void Storage::setAccountLevel(int id, int level)
 {
     QString sql = "update " + ACCOUNTS_TBL_NAME
-            + " set level = " + level
-            + " where id = " + id + ";";
+            + " set level = " + QString::number(level)
+            + " where id = " + QString::number(id) + ";";
     mDb.exec(sql);
 }
 
@@ -1337,10 +1329,10 @@ void Storage::storeLetter(Letter *letter)
         // The letter was never saved before
         QString sql = "INSERT INTO " + POST_TBL_NAME + " VALUES ( "
                 + "NULL, "
-                + letter->getSender()->getDatabaseID() + ", "
-                + letter->getReceiver()->getDatabaseID() + ", "
-                + letter->getExpiry() + ", "
-                + time(0) + ", "
+                + QString::number(letter->getSender()->getDatabaseID()) + ", "
+                + QString::number(letter->getReceiver()->getDatabaseID()) + ", "
+                + QString::number(letter->getExpiry()) + ", "
+                + QString::number(time(0)) + ", "
                 + ":content)";
         QSqlQuery query(mDb);
         tryPrepare(query, sql);
@@ -1358,14 +1350,14 @@ void Storage::storeLetter(Letter *letter)
         // The letter has a unique id, update the record in the db
         QString sql = "UPDATE " + POST_TBL_NAME
                 + "   SET sender_id       = '"
-                + letter->getSender()->getDatabaseID() + "', "
+                + QString::number(letter->getSender()->getDatabaseID()) + "', "
                 + "       receiver_id     = '"
-                + letter->getReceiver()->getDatabaseID() + "', "
-                + "       letter_type     = '" + letter->getType() + "', "
-                + "       expiration_date = '" + letter->getExpiry() + "', "
-                + "       sending_date    = '" + time(0) + "', "
+                + QString::number(letter->getReceiver()->getDatabaseID()) + "', "
+                + "       letter_type     = '" + QString::number(letter->getType()) + "', "
+                + "       expiration_date = '" + QString::number(letter->getExpiry()) + "', "
+                + "       sending_date    = '" + QString::number(time(0)) + "', "
                 + "       letter_text = :content "
-                + " WHERE letter_id       = '" + letter->getId() + "'";
+                + " WHERE letter_id       = '" + QString::number(letter->getId()) + "'";
 
         QSqlQuery query(mDb);
         tryPrepare(query, sql);
@@ -1387,7 +1379,7 @@ Post *Storage::getStoredPost(int playerId)
     Post *p = new Post();
 
     QString sql = "SELECT * FROM " + POST_TBL_NAME
-            + " WHERE receiver_id = " + playerId;
+            + " WHERE receiver_id = " + QString::number(playerId);
     QSqlQuery query(mDb);
     tryExecuteSql(query, sql);
 
@@ -1419,12 +1411,12 @@ void Storage::deletePost(Letter *letter)
     // First delete all attachments of the letter
     // This could leave "dead" items in the item_instances table
     QString sql = "DELETE FROM " + POST_ATTACHMENTS_TBL_NAME
-            + " WHERE letter_id = " + letter->getId();
+            + " WHERE letter_id = " + QString::number(letter->getId());
     mDb.exec(sql);
 
     // Delete the letter itself
     sql = "DELETE FROM " + POST_TBL_NAME
-            + " WHERE letter_id = " + letter->getId();
+            + " WHERE letter_id = " + QString::number(letter->getId());
     mDb.exec(sql);
 
     mDb.commit();
@@ -1438,7 +1430,7 @@ void Storage::setOnlineStatus(int charId, bool online)
         // First we try to update the online status. this prevents errors
         // in case we get the online status twice
         QString sql = "SELECT COUNT(*) FROM " + ONLINE_USERS_TBL_NAME
-                + " WHERE char_id = " + charId;
+                + " WHERE char_id = " + QString::number(charId);
         QSqlQuery query(mDb);
         tryExecuteSql(query, sql);
         query.next();
@@ -1447,13 +1439,13 @@ void Storage::setOnlineStatus(int charId, bool online)
             return;
 
         sql = "INSERT INTO " + ONLINE_USERS_TBL_NAME
-                + " VALUES (" + charId + ", " + time(0) + ")";
+                + " VALUES (" + QString::number(charId) + ", " + QString::number(time(0)) + ")";
         mDb.exec(sql);
     }
     else
     {
         QString sql = "DELETE FROM " + ONLINE_USERS_TBL_NAME
-                + " WHERE char_id = " + charId;
+                + " WHERE char_id = " + QString::number(charId);
         mDb.exec(sql);
     }
 }
@@ -1461,10 +1453,10 @@ void Storage::setOnlineStatus(int charId, bool online)
 void Storage::addTransaction(const Transaction &trans)
 {
     QString sql = "INSERT INTO " + TRANSACTION_TBL_NAME
-            + " VALUES (NULL, " + trans.mCharacterId + ", "
-            + trans.mAction + ", "
+            + " VALUES (NULL, " + QString::number(trans.mCharacterId) + ", "
+            + QString::number(trans.mAction) + ", "
             + ":message, "
-            + time(0) + ")";
+            + QString::number(time(0)) + ")";
     QSqlQuery query(mDb);
     tryPrepare(query, sql);
     query.bindValue(":message", QString::fromStdString(trans.mMessage));
@@ -1497,7 +1489,7 @@ std::vector<Transaction> Storage::getTransactions(time_t date)
     std::vector<Transaction> transactions;
 
     QString sql = "SELECT * FROM " + TRANSACTION_TBL_NAME + " WHERE time > "
-            + date;
+            + QString::number(date);
     QSqlQuery query(mDb);
     tryExecuteSql(query, sql);
 
