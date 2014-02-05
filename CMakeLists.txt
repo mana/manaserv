@@ -10,27 +10,8 @@ ENDIF()
 # where to look for cmake modules
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 
-OPTION(WITH_SQLITE "Enable Sqlite support (used by default)" ON)
-OPTION(WITH_MYSQL "Enable MySQL support" OFF)
 OPTION(ENABLE_LUA "Enable Lua scripting support" ON)
 OPTION(ENABLE_EXTERNAL_ENET "Enable external ENet support" OFF)
-
-# Exclude Sqlite support if the MySQL support was asked.
-IF(WITH_MYSQL)
-    SET(WITH_SQLITE OFF)
-    SET(WITH_POSTGRESQL OFF)
-ENDIF()
-
-IF(WITH_POSTGRESQL)
-    MESSAGE(STATUS "Warning: PostgreSQL support will likely not work...")
-    SET(WITH_SQLITE OFF)
-    SET(WITH_MYSQL OFF)
-ENDIF()
-
-IF(WITH_SQLITE)
-    SET(WITH_MYSQL OFF)
-    SET(WITH_POSTGRESQL OFF)
-ENDIF()
 
 IF (WIN32)
     SET(PKG_DATADIR ".")
