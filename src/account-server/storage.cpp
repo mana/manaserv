@@ -47,31 +47,6 @@ static const char *DEFAULT_ITEM_FILE = "items.xml";
 // Defines the supported db version
 static const char *DB_VERSION_PARAMETER = "database_version";
 
-/*
- * MySQL specificities:
- *     - TINYINT is an integer (1 byte) type defined as an extension to
- *       the SQL standard.
- *     - all integer types can have an optional (non-standard) attribute
- *       UNSIGNED (http://dev.mysql.com/doc/mysql/en/numeric-types.html)
- *
- * SQLite3 specificities:
- *     - any column (but only one for each table) with the exact type of
- *       'INTEGER PRIMARY KEY' is taken as auto-increment.
- *     - the supported data types are: NULL, INTEGER, REAL, TEXT and BLOB
- *       (http://www.sqlite.org/datatype3.html)
- *     - the size of TEXT cannot be set, it is just ignored by the engine.
- *     - IMPORTANT: foreign key constraints are not yet supported
- *       (http://www.sqlite.org/omitted.html). Included in case of future
- *       support.
- *
- * Notes:
- *     - the SQL queries will take advantage of the most appropriate data
- *       types supported by a particular database engine in order to
- *       optimize the server database size.
- *
- * TODO: Fix problem with PostgreSQL null primary key's.
- */
-
 // Table names
 static const QString ACCOUNTS_TBL_NAME            =   "mana_accounts";
 static const QString CHARACTERS_TBL_NAME          =   "mana_characters";
