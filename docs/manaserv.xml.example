@@ -21,42 +21,32 @@
  would like to use.
 -->
 
-<!--
-	SQLite specific configuration.
-
-	sqlite_database:	name and path to the sqlite database file
-						optional, default="mana.db"
+<!-- Possible values:
+    * sqlite
+    * mysql
 -->
-<!-- <option name="sqlite_database" value="mana.db"/> -->
+<option name="db_backend" value="sqlite" />
 
+<!-- Database name (or file for sqlite) -->
+<option name="db_database" value="mana.db" />
 
 <!--
 	mySQL specific configuration.
 
-	mysql_hostname:		ip or hostname of the database server
+	db_hostname:		ip or hostname of the database server
 						optional, default="localhost"
-	mysql_port:			the port where the mysql server listens to
+	db_port:			the port where the mysql server listens to
 						optional, default=3306
-	mysql_database:		name of the installed database
+	db_username:		name of the user to connect to the database server
 						optional, default="mana"
-	mysql_username:		name of the user to connect to the database server
-						optional, default="mana"
-	mysql_password:		password to use whith the mysql_username
+	db_password:		password to use whith the mysql_username
 						optional, default="mana"
 -->
 <!--
-<option name="mysql_hostname" value="localhost"/>
-<option name="mysql_port" value="3306"/>
-<option name="mysql_database" value="mana"/>
-<option name="mysql_username" value="mana"/>
-<option name="mysql_password" value="mana"/>
--->
-
-
-<!--
-	PostgreSQL specific configuration.
-
-	TODO!
+<option name="db_hostname" value="localhost"/>
+<option name="db_port" value="3306"/>
+<option name="db_username" value="mana"/>
+<option name="db_password" value="mana"/>
 -->
 
 <!-- end of database configuration **************************************** -->
