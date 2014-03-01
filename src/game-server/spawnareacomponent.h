@@ -34,6 +34,8 @@ class MonsterClass;
  */
 class SpawnAreaComponent : public Component
 {
+    Q_OBJECT
+
     public:
         static const ComponentType type = CT_SpawnArea;
 
@@ -43,10 +45,8 @@ class SpawnAreaComponent : public Component
 
         void update(Entity &entity);
 
-        /**
-         * Keeps track of the number of spawned being.
-         */
-        void decrease(Entity *);
+    private slots:
+        void beingRemoved(Entity*);
 
     private:
         MonsterClass *mSpecy; /**< Specy of monster that spawns in this area. */

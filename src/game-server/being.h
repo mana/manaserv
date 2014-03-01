@@ -59,6 +59,8 @@ typedef std::vector<unsigned> Hits;
  */
 class BeingComponent : public Component
 {
+    Q_OBJECT
+
     public:
         static const ComponentType type = CT_Being;
 
@@ -259,9 +261,6 @@ class BeingComponent : public Component
         static void setRecalculateBaseAttributeCallback(Script *script)
         { script->assignCallback(mRecalculateBaseAttributeCallback); }
 
-        sigc::signal<void, Entity *> signal_died;
-        sigc::signal<void, Entity *, AttributeInfo *> signal_attribute_changed;
-
         /**
          * Activate an emote flag on the being.
          */
@@ -285,6 +284,10 @@ class BeingComponent : public Component
         const Hits &getHitsTaken() const;
         void clearHitsTaken();
 
+    signals:
+        void died(Entity *);
+        void attributeChanged(Entity *, AttributeInfo *);
+
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
 
@@ -297,12 +300,10 @@ class BeingComponent : public Component
         Point mDst;                 /**< Target coordinates. */
         BeingGender mGender;        /**< Gender of the being. */
 
-    private:
-        /**
-         * Connected to signal_inserted to reset the old position.
-         */
+    private slots:
         void inserted(Entity *);
 
+    private:
         Path mPath;
         BeingDirection mDirection;   /**< Facing direction. */
 

@@ -1,7 +1,6 @@
 FIND_PACKAGE(LibXml2 REQUIRED)
 FIND_PACKAGE(PhysFS REQUIRED)
 FIND_PACKAGE(ZLIB REQUIRED)
-FIND_PACKAGE(SigC++ REQUIRED)
 FIND_PACKAGE(Qt4 REQUIRED)
 SET(QT_USE_QTSQL TRUE)
 
@@ -85,8 +84,6 @@ INCLUDE_DIRECTORIES(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${PHYSFS_INCLUDE_DIR}
     ${LIBXML2_INCLUDE_DIR}
-    ${SIGC++_INCLUDE_DIR}
-    ${SIGC++Config_INCLUDE_DIR}
     )
 
 # Fix some stuff that gets not hidden by mainline modules
@@ -173,97 +170,100 @@ SET(SRCS_MANASERVACCOUNT
     utils/time.h
     )
 
-SET(SRCS_MANASERVGAME
+SET(SRCS_MANASERVGAME_CPP
     game-server/main-game.cpp
-    common/permissionmanager.h
     common/permissionmanager.cpp
     game-server/abilitycomponent.cpp
-    game-server/abilitycomponent.h
     game-server/abilitymanager.cpp
-    game-server/abilitymanager.h
-    game-server/accountconnection.h
     game-server/accountconnection.cpp
-    game-server/actorcomponent.h
     game-server/actorcomponent.cpp
-    game-server/attribute.h
     game-server/attribute.cpp
-    game-server/attributemanager.h
     game-server/attributemanager.cpp
-    game-server/being.h
     game-server/being.cpp
-    game-server/buysell.h
     game-server/buysell.cpp
-    game-server/charactercomponent.h
     game-server/charactercomponent.cpp
-    game-server/collisiondetection.h
     game-server/collisiondetection.cpp
     game-server/commandhandler.cpp
-    game-server/commandhandler.h
-    game-server/component.h
-    game-server/effect.h
     game-server/effect.cpp
-    game-server/emotemanager.h
     game-server/emotemanager.cpp
-    game-server/entity.h
     game-server/entity.cpp
-    game-server/gamehandler.h
     game-server/gamehandler.cpp
-    game-server/inventory.h
     game-server/inventory.cpp
-    game-server/item.h
     game-server/item.cpp
-    game-server/itemmanager.h
     game-server/itemmanager.cpp
-    game-server/map.h
     game-server/map.cpp
-    game-server/mapcomposite.h
     game-server/mapcomposite.cpp
-    game-server/mapmanager.h
     game-server/mapmanager.cpp
-    game-server/mapreader.h
     game-server/mapreader.cpp
-    game-server/monster.h
     game-server/monster.cpp
-    game-server/monstermanager.h
     game-server/monstermanager.cpp
-    game-server/npc.h
     game-server/npc.cpp
-    game-server/postman.h
-    game-server/quest.h
     game-server/quest.cpp
-    game-server/settingsmanager.h
     game-server/settingsmanager.cpp
-    game-server/spawnareacomponent.h
     game-server/spawnareacomponent.cpp
-    game-server/state.h
     game-server/state.cpp
-    game-server/statuseffect.h
     game-server/statuseffect.cpp
-    game-server/statusmanager.h
     game-server/statusmanager.cpp
-    game-server/timeout.h
     game-server/timeout.cpp
-    game-server/trade.h
     game-server/trade.cpp
-    game-server/triggerareacomponent.h
     game-server/triggerareacomponent.cpp
-    scripting/script.h
     scripting/script.cpp
-    scripting/scriptmanager.h
     scripting/scriptmanager.cpp
-    utils/base64.h
     utils/base64.cpp
-    utils/mathutils.h
     utils/mathutils.cpp
-    utils/speedconv.h
     utils/speedconv.cpp
-    utils/zlib.h
     utils/zlib.cpp
     )
 
+SET(SRCS_MANASERVGAME_HEADER
+    common/permissionmanager.h
+    game-server/abilitycomponent.h
+    game-server/abilitymanager.h
+    game-server/accountconnection.h
+    game-server/actorcomponent.h
+    game-server/attribute.h
+    game-server/attributemanager.h
+    game-server/being.h
+    game-server/buysell.h
+    game-server/charactercomponent.h
+    game-server/collisiondetection.h
+    game-server/commandhandler.h
+    game-server/component.h
+    game-server/effect.h
+    game-server/emotemanager.h
+    game-server/entity.h
+    game-server/gamehandler.h
+    game-server/inventory.h
+    game-server/item.h
+    game-server/itemmanager.h
+    game-server/map.h
+    game-server/mapcomposite.h
+    game-server/mapmanager.h
+    game-server/mapreader.h
+    game-server/monster.h
+    game-server/monstermanager.h
+    game-server/npc.h
+    game-server/postman.h
+    game-server/quest.h
+    game-server/settingsmanager.h
+    game-server/spawnareacomponent.h
+    game-server/state.h
+    game-server/statuseffect.h
+    game-server/statusmanager.h
+    game-server/timeout.h
+    game-server/trade.h
+    game-server/triggerareacomponent.h
+    scripting/script.h
+    scripting/scriptmanager.h
+    utils/base64.h
+    utils/mathutils.h
+    utils/speedconv.h
+    utils/zlib.h
+    )
+
 IF (WIN32)
-    SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT} manaserv-account.rc)
-    SET(SRCS_MANASERVGAME ${SRCS_MANASERVGAME} manaserv-game.rc)
+    SET(SRCS_MANASERVACCOUNT_CPP ${SRCS_MANASERVACCOUNT} manaserv-account.rc)
+    SET(SRCS_MANASERVGAME_CPP ${SRCS_MANASERVGAME} manaserv-game.rc)
 ENDIF ()
 
 IF (ENABLE_LUA)
@@ -278,7 +278,8 @@ ENDIF()
 
 SET (PROGRAMS manaserv-account manaserv-game)
 
-ADD_EXECUTABLE(manaserv-game WIN32 ${SRCS} ${SRCS_MANASERVGAME})
+QT4_WRAP_CPP(SRCS_HEADERS_MOC ${SRCS_MANASERVGAME_HEADER})
+ADD_EXECUTABLE(manaserv-game WIN32 ${SRCS} ${SRCS_MANASERVGAME_CPP} ${SRCS_MANASERVGAME_HEADER} ${SRCS_HEADERS_MOC})
 ADD_EXECUTABLE(manaserv-account WIN32 ${SRCS} ${SRCS_MANASERVACCOUNT})
 
 FOREACH(program ${PROGRAMS})
@@ -286,7 +287,6 @@ FOREACH(program ${PROGRAMS})
         ${PHYSFS_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
-        ${SIGC++_LIBRARIES}
         ${OPTIONAL_LIBRARIES}
         ${EXTRA_LIBRARIES}
         ${QT_LIBRARIES})

@@ -94,8 +94,7 @@ void SpawnAreaComponent::update(Entity &entity)
 
             if (triesLeft)
             {
-                being->signal_removed.connect(
-                            sigc::mem_fun(this, &SpawnAreaComponent::decrease));
+                connect(being, SIGNAL(removed(Entity*)), this, SLOT(beingRemoved(Entity*)));
 
                 being->setMap(map);
                 actorComponent->setPosition(*being, position);
@@ -119,7 +118,7 @@ void SpawnAreaComponent::update(Entity &entity)
     }
 }
 
-void SpawnAreaComponent::decrease(Entity *)
+void SpawnAreaComponent::beingRemoved(Entity *)
 {
     --mNumBeings;
 }

@@ -27,8 +27,6 @@
 
 #include "utils/point.h"
 
-#include <sigc++/signal.h>
-
 struct AbilityValue
 {
     AbilityValue(const AbilityManager::AbilityInfo *abilityInfo)
@@ -49,6 +47,8 @@ typedef std::map<unsigned, AbilityValue> AbilityMap;
 
 class AbilityComponent: public Component
 {
+    Q_OBJECT
+
 public:
     static const ComponentType type = CT_Ability;
 
@@ -75,16 +75,17 @@ public:
     void setGlobalCooldown(int ticks);
     int globalCooldown() const;
 
-    sigc::signal<void, int> signal_ability_changed;
-    sigc::signal<void, int> signal_ability_took;
-    sigc::signal<void> signal_global_cooldown_activated;
-
     // For informing clients
     int getLastUsedAbilityId() const;
 
     int getLastTargetBeingId() const;
     const Point &getLastTargetPoint() const;
     ManaServ::BeingDirection getLastTargetDirection() const;
+
+signals:
+    void abilityChanged(int id);
+    void abilityTook(int id);
+    void globalCooldownActivated();
 
 private:
     bool abilityUseCheck(AbilityMap::iterator it);

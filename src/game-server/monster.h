@@ -35,8 +35,6 @@
 #include <string>
 #include <vector>
 
-#include <sigc++/connection.h>
-
 class CharacterComponent;
 class ItemClass;
 class Script;
@@ -159,6 +157,8 @@ class MonsterClass
  */
 class MonsterComponent : public Component
 {
+    Q_OBJECT
+
     public:
         static const ComponentType type = CT_Monster;
 
@@ -175,9 +175,7 @@ class MonsterComponent : public Component
          */
         void update(Entity &entity);
 
-        /**
-         * Signal handler
-         */
+    private slots:
         void monsterDied(Entity *monster);
 
     private:

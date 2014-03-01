@@ -63,7 +63,7 @@ bool AbilityComponent::takeAbility(int id)
     if (i != mAbilities.end())
     {
         mAbilities.erase(i);
-        signal_ability_took.emit(id);
+        emit abilityTook(id);
         return true;
     }
     return false;
@@ -214,7 +214,7 @@ bool AbilityComponent::giveAbility(const AbilityManager::AbilityInfo *info)
     bool added = mAbilities.insert(std::pair<int, AbilityValue>(info->id,
                                    AbilityValue(info))).second;
 
-    signal_ability_changed.emit(info->id);
+    emit abilityChanged(info->id);
     return added;
 }
 
@@ -228,7 +228,7 @@ void AbilityComponent::setAbilityCooldown(int id, int ticks)
     {
         it->second.recharged = false;
         it->second.rechargeTimeout.set(ticks);
-        signal_ability_changed.emit(id);
+        emit abilityChanged(id);
     }
 }
 
@@ -246,6 +246,6 @@ void AbilityComponent::setGlobalCooldown(int ticks)
     // Enforce a minimum cooldown of 1 tick to prevent syncing issues
     ticks = std::max(ticks, 1);
     mGlobalCooldown.set(ticks);
-    signal_global_cooldown_activated.emit();
+    emit globalCooldownActivated();
 }
 

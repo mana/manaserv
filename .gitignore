@@ -9,6 +9,7 @@ accountserver.exe
 accountserver.depend
 gameserver.exe
 gameserver.depend
+moc_*
 
 # included static libraries
 *.a
