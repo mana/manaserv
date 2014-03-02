@@ -53,7 +53,7 @@ inline unsigned IdManager<Value>::allocate(Value *t)
        ++mLastId;
     } while (mIdMap.find(mLastId) != mIdMap.end());
 
-    mIdMap.insert(std::make_pair(mLastId, t));
+    mIdMap.emplace(mLastId, t);
     return mLastId;
 }
 
@@ -67,9 +67,7 @@ template <typename Value>
 inline Value *IdManager<Value>::find(unsigned id) const
 {
     auto it = mIdMap.find(id);
-    if (it != mIdMap.end())
-        return it->second;
-    return nullptr;
+    return it != mIdMap.end() ? it->second : nullptr;
 }
 
 #endif // IDMANAGER_H
