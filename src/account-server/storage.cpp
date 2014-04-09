@@ -103,6 +103,11 @@ Storage::Storage()
         mDb.setUserName(QString::fromStdString(Configuration::getValue("mysql_username", std::string())));
         mDb.setPassword(QString::fromStdString(Configuration::getValue("mysql_password", std::string())));
     }
+
+    if (!mDb.open())
+    {
+        throw std::string(mDb.lastError().text().toStdString());
+    }
 }
 
 Storage::~Storage()
