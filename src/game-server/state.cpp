@@ -553,7 +553,7 @@ bool GameState::insert(Entity *ptr)
     if (!ptr->isVisible())
     {
         map->insert(ptr);
-        ptr->signal_inserted.emit(ptr);
+        ptr->emitInserted();
         return true;
     }
 
@@ -578,7 +578,7 @@ bool GameState::insert(Entity *ptr)
         return false;
     }
 
-    obj->signal_inserted.emit(obj);
+    obj->emitInserted();
 
     // DEBUG INFO
     switch (obj->getType())
@@ -655,7 +655,7 @@ void GameState::remove(Entity *ptr)
     MapComposite *map = ptr->getMap();
     int visualRange = Configuration::getValue("game_visualRange", 448);
 
-    ptr->signal_removed.emit(ptr);
+    ptr->emitRemoved();
 
     // DEBUG INFO
     switch (ptr->getType())

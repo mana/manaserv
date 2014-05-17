@@ -85,8 +85,8 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
         abilityComponent->giveAbility(abilitiyInfo);
     }
 
-    beingComponent->signal_died.connect(sigc::mem_fun(this,
-                                            &MonsterComponent::monsterDied));
+    connect(beingComponent, SIGNAL(died(Entity*)),
+            this, SLOT(monsterDied(Entity*)));
 }
 void MonsterComponent::update(Entity &entity)
 {

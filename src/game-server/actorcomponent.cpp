@@ -33,10 +33,8 @@ ActorComponent::ActorComponent(Entity &entity):
     mWalkMask(0),
     mBlockType(BLOCKTYPE_NONE)
 {
-    entity.signal_removed.connect(
-            sigc::mem_fun(this, &ActorComponent::removed));
-    entity.signal_map_changed.connect(
-            sigc::mem_fun(this, &ActorComponent::mapChanged));
+    connect(&entity, SIGNAL(removed(Entity*)), this, SLOT(removed(Entity*)));
+    connect(&entity, SIGNAL(mapChanged(Entity*)), this, SLOT(mapChanged(Entity*)));
 }
 
 void ActorComponent::removed(Entity *entity)

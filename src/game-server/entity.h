@@ -27,9 +27,6 @@
 #include "game-server/component.h"
 #include "game-server/idmanager.h"
 
-#include <sigc++/signal.h>
-#include <sigc++/trackable.h>
-
 #include <cassert>
 
 using namespace ManaServ;
@@ -42,8 +39,10 @@ class MapComposite;
  * Knows its type, the map it resides on and is host to a number of optional
  * components.
  */
-class Entity : public sigc::trackable
+class Entity : public QObject
 {
+    Q_OBJECT
+
     public:
         Entity(EntityType type, MapComposite *map = nullptr);
 
@@ -66,9 +65,13 @@ class Entity : public sigc::trackable
         MapComposite *getMap() const;
         void setMap(MapComposite *map);
 
-        sigc::signal<void, Entity *> signal_inserted;
-        sigc::signal<void, Entity *> signal_removed;
-        sigc::signal<void, Entity *> signal_map_changed;
+        void emitInserted(); // TODO: emit insert at mapChange (different commit)
+        void emitRemoved(); // TODO: emit removed at mapChange (different commit)
+
+    signals:
+        void inserted(Entity *);
+        void removed(Entity *);
+        void mapChanged(Entity *);
 
     private:
         Component *getComponent(ComponentType type) const;
@@ -199,7 +202,17 @@ inline MapComposite *Entity::getMap() const
 inline void Entity::setMap(MapComposite *map)
 {
     mMap = map;
-    signal_map_changed.emit(this);
+    emit mapChanged(this);
+}
+
+inline void Entity::emitInserted()
+{
+    emit inserted(this);
+}
+
+inline void Entity::emitRemoved()
+{
+    emit inserted(this);
 }
 
 #endif // ENTITY_H

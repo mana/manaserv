@@ -49,6 +49,8 @@ enum
  */
 class ActorComponent : public Component
 {
+    Q_OBJECT
+
     public:
         static const ComponentType type = CT_Actor;
 
@@ -56,8 +58,6 @@ class ActorComponent : public Component
 
         void update(Entity &entity)
         {}
-
-        void removed(Entity *entity);
 
         /**
          * Sets the coordinates. Also updates the walkmap of the map the actor
@@ -134,10 +134,10 @@ class ActorComponent : public Component
         void setBlockType(BlockType blockType)
         { mBlockType = blockType; }
 
-        /**
-         * Overridden in order to update the walkmap.
-         */
-        virtual void mapChanged(Entity *entity);
+    public slots:
+        void removed(Entity *entity);
+
+        void mapChanged(Entity *entity);
 
     protected:
 

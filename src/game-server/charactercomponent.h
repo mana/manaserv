@@ -72,6 +72,8 @@ struct QuestInfo
  */
 class CharacterComponent : public Component
 {
+    Q_OBJECT
+
     public:
         static const ComponentType type = CT_Character;
 
@@ -186,14 +188,6 @@ class CharacterComponent : public Component
 
         void modifiedAllAbilities(Entity &entity);
         void modifiedAllAttributes(Entity &entity);
-
-        /**
-         * Signal handler for attribute changed event
-         * Flags the attribute as modified.
-         * @param being th being of which the attribute was changed
-         * @param attributeId the changed id
-         */
-        void attributeChanged(Entity *being, AttributeInfo *);
 
         /**
          * Calls all the "disconnected" listener.
@@ -311,15 +305,19 @@ class CharacterComponent : public Component
                                     const std::string &description,
                                     bool sendNotification = false);
 
-        sigc::signal<void, Entity &> signal_disconnected;
-
         void serialize(Entity &entity, MessageOut &msg);
+
+    signals:
+        void clientDisconnected(Entity &entity);
+
+    private slots:
+        void abilityStatusChanged(int id);
+        void abilityCooldownActivated();
+
+        void attributeChanged(Entity *being, AttributeInfo *);
 
     private:
         void deserialize(Entity &entity, MessageIn &msg);
-
-        void abilityStatusChanged(int id);
-        void abilityCooldownActivated();
 
         void sendAbilityUpdate(Entity &entity);
         void sendAbilityCooldownUpdate(Entity &entity);

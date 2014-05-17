@@ -94,11 +94,11 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
 
     auto *abilityComponent = new AbilityComponent();
     entity.addComponent(abilityComponent);
-    abilityComponent->signal_ability_changed.connect(
-            sigc::mem_fun(this, &CharacterComponent::abilityStatusChanged));
-    abilityComponent->signal_global_cooldown_activated.connect(
-            sigc::mem_fun(this,
-                          &CharacterComponent::abilityCooldownActivated));
+
+    connect(abilityComponent, SIGNAL(abilityChanged(int)),
+            this, SLOT(abilityStatusChanged(int)));
+    connect(abilityComponent, SIGNAL(globalCooldownActivated()),
+            this, SLOT(abilityCooldownActivated()));
 
     // Get character data.
     mDatabaseID = msg.readInt32();
@@ -108,8 +108,8 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
 
     Inventory(&entity, mPossessions).initialize();
 
-    beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
-            this, &CharacterComponent::attributeChanged));
+    connect(beingComponent, SIGNAL(attributeChanged(Entity*, AttributeInfo*)),
+            this, SLOT(attributeChanged(Entity*, AttributeInfo*)));
 }
 
 CharacterComponent::~CharacterComponent()
@@ -628,7 +628,7 @@ void CharacterComponent::disconnected(Entity &entity)
     else
         GameState::remove(&entity);
 
-    signal_disconnected.emit(entity);
+    emit clientDisconnected(entity);
 }
 void CharacterComponent::triggerLoginCallback(Entity &entity)
 {

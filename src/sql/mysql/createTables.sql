@@ -410,7 +410,7 @@ CREATE TABLE IF NOT EXISTS `mana_questlog` (
     `quest_description` TEXT        NOT NULL,
     --
 
-   PRIMARY KEY (`char_id`, `quest_id`)
+    PRIMARY KEY (`char_id`, `quest_id`),
     FOREIGN KEY (`char_id`)
         REFERENCES `mana_characters` (`id`)
         ON DELETE CASCADE

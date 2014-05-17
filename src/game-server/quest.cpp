@@ -29,20 +29,33 @@
 #include <map>
 #include <string>
 
-#include <sigc++/connection.h>
-
 typedef std::list< QuestCallback * > QuestCallbacks;
 typedef std::map< std::string, QuestCallbacks > PendingVariables;
 
-struct PendingQuest
+
+
+static void partialRemove(Entity *t);
+static void fullRemove(Entity &ch);
+
+class PendingQuest : public QObject
 {
+public:
     Entity *character;
-    sigc::connection removedConnection;
-    sigc::connection disconnectedConnection;
     PendingVariables variables;
+
+public slots:
+    void removed(Entity *entity)
+    {
+        partialRemove(entity);
+    }
+
+    void disconnected(Entity &entity)
+    {
+        fullRemove(entity);
+    }
 };
 
-typedef std::map< int, PendingQuest > PendingQuests;
+typedef std::map< int, PendingQuest * > PendingQuests;
 
 static PendingQuests pendingQuests;
 
@@ -96,12 +109,11 @@ void QuestRefCallback::triggerCallback(Entity *ch,
 static void partialRemove(Entity *t)
 {
     int id = t->getComponent<CharacterComponent>()->getDatabaseID();
-    PendingVariables &variables = pendingQuests[id].variables;
+    PendingVariables &variables = pendingQuests[id]->variables;
     // Remove all the callbacks, but do not remove the variable names.
-    for (PendingVariables::iterator i = variables.begin(),
-         i_end = variables.end(); i != i_end; ++i)
+    for (auto &it : variables)
     {
-        i->second.clear();
+        it.second.clear();
     }
     // The listener is kept in case a fullRemove is needed later.
 }
@@ -110,14 +122,14 @@ static void fullRemove(Entity &ch)
 {
     int id = ch.getComponent<CharacterComponent>()->getDatabaseID();
 
-    {
-        PendingQuest &pendingQuest = pendingQuests[id];
-        pendingQuest.removedConnection.disconnect();
-        pendingQuest.disconnectedConnection.disconnect();
-    }
-
     // Remove anything related to this character.
-    pendingQuests.erase(id);
+    auto it = pendingQuests.find(id);
+    if (it != pendingQuests.end())
+    {
+        PendingQuest *quest = it->second;
+        pendingQuests.erase(it);
+        delete quest;
+    }
 }
 
 void recoverQuestVar(Entity *ch, const std::string &name,
@@ -132,22 +144,17 @@ void recoverQuestVar(Entity *ch, const std::string &name,
     PendingQuests::iterator i = pendingQuests.lower_bound(id);
     if (i == pendingQuests.end() || i->first != id)
     {
-        PendingQuest pendingQuest;
-        pendingQuest.character = ch;
+        auto *pendingQuest = new PendingQuest();
+        pendingQuest->character = ch;
 
-        /* Connect to removed and disconnected signals, because we cannot
-         * afford to get invalid pointers, when we finally recover the
-         * variable.
-         */
-        pendingQuest.removedConnection =
-                ch->signal_removed.connect(sigc::ptr_fun(partialRemove));
-        pendingQuest.disconnectedConnection =
-                characterComponent->signal_disconnected.connect(
-                        sigc::ptr_fun(fullRemove));
+        QObject::connect(ch, SIGNAL(removed(Entity*)),
+                         pendingQuest, SLOT(removed(Entity*)));
+        QObject::connect(characterComponent, SIGNAL(clientDisconnected(Entity &entity)),
+                         pendingQuest, SLOT(disconnected(Entity&)));
 
         i = pendingQuests.insert(i, std::make_pair(id, pendingQuest));
     }
-    i->second.variables[name].push_back(f);
+    i->second->variables[name].push_back(f);
     accountHandler->requestCharacterVar(ch, name);
 }
 
@@ -159,11 +166,9 @@ void recoveredQuestVar(int id,
     if (i == pendingQuests.end())
         return;
 
-    PendingQuest &pendingQuest = i->second;
-    pendingQuest.removedConnection.disconnect();
-    pendingQuest.disconnectedConnection.disconnect();
+    PendingQuest *pendingQuest = i->second;
 
-    PendingVariables &variables = pendingQuest.variables;
+    PendingVariables &variables = pendingQuest->variables;
     PendingVariables::iterator j = variables.find(name);
     if (j == variables.end())
     {
@@ -171,7 +176,7 @@ void recoveredQuestVar(int id,
         return;
     }
 
-    Entity *ch = pendingQuest.character;
+    Entity *ch = pendingQuest->character;
     auto *characterComponent = ch->getComponent<CharacterComponent>();
     characterComponent->questCache[name] = value;
 
@@ -188,4 +193,6 @@ void recoveredQuestVar(int id,
     {
         pendingQuests.erase(i);
     }
+
+    delete pendingQuest;
 }

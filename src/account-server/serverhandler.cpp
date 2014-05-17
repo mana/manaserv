@@ -291,11 +291,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             if (CharacterData *ptr = storage->getCharacter(id, nullptr))
             {
                 ptr->deserialize(msg);
-                if (!storage->updateCharacter(ptr))
-                {
-                    LOG_ERROR("Failed to update character "
-                              << id << '.');
-                }
+                storage->updateCharacter(ptr);
                 delete ptr;
             }
             else
@@ -659,7 +655,7 @@ void GameServerHandler::sendPartyChange(CharacterData *ptr, int partyId)
 void GameServerHandler::syncDatabase(MessageIn &msg)
 {
     // It is safe to perform the following updates in a transaction
-    dal::PerformTransaction transaction(storage->database());
+    // TODO THIS COMMIT do transaction
 
     while (msg.getUnreadLength() > 0)
     {
@@ -695,5 +691,5 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
         }
     }
 
-    transaction.commit();
+    // TODO THIS COMMIT transaction.commit();
 }

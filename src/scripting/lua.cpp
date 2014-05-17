@@ -2198,10 +2198,11 @@ static int entity_register(lua_State *s)
     Entity *entity = LuaEntity::check(s, 1);
     Script *script = getScript(s);
 
-    entity->signal_removed.connect(sigc::mem_fun(script, &Script::processRemoveEvent));
+    QObject::connect(entity, SIGNAL(removed(Entity*)),
+                     script, SLOT(processRemoveEvent(Entity*)));
 
     if (BeingComponent *bc = entity->findComponent<BeingComponent>())
-        bc->signal_died.connect(sigc::mem_fun(script, &Script::processDeathEvent));
+        QObject::connect(bc, SIGNAL(died(Entity*)), script, SLOT(processDeathEvent(Entity*)));
 
     return 0;
 }

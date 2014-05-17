@@ -31,7 +31,7 @@
 #include <vector>
 #include <stack>
 
-#include <sigc++/trackable.h>
+#include <QObject>
 
 class MapComposite;
 class Entity;
@@ -39,8 +39,10 @@ class Entity;
 /**
  * Abstract interface for calling functions written in an external language.
  */
-class Script : public sigc::trackable
+class Script : public QObject
 {
+    Q_OBJECT
+
     public:
         struct Context
         {
@@ -245,15 +247,15 @@ class Script : public sigc::trackable
         const Context *getContext() const
         { return mContext; }
 
-        virtual void processDeathEvent(Entity *entity) = 0;
-
-        virtual void processRemoveEvent(Entity *entity) = 0;
-
         static void setCreateNpcDelayedCallback(Script *script)
         { script->assignCallback(mCreateNpcDelayedCallback); }
 
         static void setUpdateCallback(Script *script)
         { script->assignCallback(mUpdateCallback); }
+
+    public slots:
+        virtual void processRemoveEvent(Entity *entity) = 0;
+        virtual void processDeathEvent(Entity *entity) = 0;
 
     protected:
         std::string mScriptFile;

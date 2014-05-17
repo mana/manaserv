@@ -58,8 +58,8 @@ BeingComponent::BeingComponent(Entity &entity):
 
     clearDestination(entity);
 
-    entity.signal_inserted.connect(sigc::mem_fun(this,
-                                                 &BeingComponent::inserted));
+    connect(&entity, SIGNAL(inserted(Entity*)),
+            this, SLOT(inserted(Entity*)));
 
     // TODO: Way to define default base values?
     // Should this be handled by the virtual modifiedAttribute?
@@ -123,7 +123,7 @@ void BeingComponent::died(Entity &entity)
     // dead beings stay where they are
     clearDestination(entity);
 
-    signal_died.emit(&entity);
+    emit died(&entity);
 }
 
 void BeingComponent::setDestination(Entity &entity, const Point &dst)
@@ -439,7 +439,7 @@ void BeingComponent::recalculateBaseAttribute(Entity &entity,
 void BeingComponent::updateDerivedAttributes(Entity &entity,
                                              AttributeInfo *attribute)
 {
-    signal_attribute_changed.emit(&entity, attribute);
+    emit attributeChanged(&entity, attribute);
 
     LOG_DEBUG("Being: Updating derived attribute(s) of: " << attribute);
 

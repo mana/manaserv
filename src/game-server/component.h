@@ -21,7 +21,7 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include <sigc++/trackable.h>
+#include <QObject>
 
 class Entity;
 
@@ -45,8 +45,10 @@ enum ComponentType
 /**
  * A component of an entity.
  */
-class Component : public sigc::trackable
+class Component : public QObject
 {
+    Q_OBJECT
+
 public:
     Component() {}
     Component(const Component &rhs) = delete;
