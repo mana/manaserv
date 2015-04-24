@@ -403,12 +403,16 @@ void MapContent::deallocate(Entity *obj)
  */
 Entity *MapContent::findEntityById(int publicId) const
 {
+    if (publicId < 0) {
+        return nullptr;
+    }
+
     if (ObjectBucket *b = buckets[publicId / 256]) {
         const int bucketIndex = publicId % 256;
         if (b->isAllocated(bucketIndex))
             return b->objects[bucketIndex];
     }
-    return 0;
+    return nullptr;
 }
 
 static void addZone(MapRegion &r, unsigned z)
