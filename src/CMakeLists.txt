@@ -50,6 +50,9 @@ SET(FLAGS "${FLAGS} -DLOCALEDIR=\\\"${LOCALEDIR}/\\\"")
 SET(FLAGS "${FLAGS} -std=c++0x")
 SET(FLAGS "${FLAGS} -Woverloaded-virtual")
 
+# Prevent clashes with icu namespace
+SET(FLAGS "${FLAGS} -DU_USING_ICU_NAMESPACE=0")
+
 # If the Sqlite option is enabled...
 IF (WITH_SQLITE)
     FIND_PACKAGE(Sqlite3 REQUIRED)
