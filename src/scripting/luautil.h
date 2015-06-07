@@ -24,6 +24,9 @@
 #include "scripting/script.h"
 
 extern "C" {
+// Quick and dirty compatibility with Lua 5.3
+#define LUA_COMPAT_APIINTCASTS
+
 #include <lualib.h>
 #include <lauxlib.h>
 }

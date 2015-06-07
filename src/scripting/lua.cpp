@@ -22,11 +22,6 @@
 
 #include <cassert>
 
-extern "C" {
-#include <lualib.h>
-#include <lauxlib.h>
-}
-
 #include "common/defines.h"
 #include "common/resourcemanager.h"
 #include "game-server/accountconnection.h"
