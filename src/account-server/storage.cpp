@@ -1948,7 +1948,7 @@ void Storage::syncDatabase()
         std::ostringstream errMsg;
         errMsg << "Item Manager: Error while loading item database"
                << "(" << DEFAULT_ITEM_FILE << ")!";
-        LOG_ERROR(errMsg);
+        LOG_ERROR(errMsg.str());
         return;
     }
 

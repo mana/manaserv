@@ -232,7 +232,7 @@ void SqLiteDataProvider::beginTransaction()
     {
         std::ostringstream error;
         error << "SQL ERROR while trying to start a transaction: " << e.what();
-        LOG_ERROR(error);
+        LOG_ERROR(error.str());
         throw std::runtime_error(error.str());
     }
 }
@@ -266,7 +266,7 @@ void SqLiteDataProvider::commitTransaction()
     {
         std::ostringstream error;
         error << "SQL ERROR while trying to commit a transaction: " << e.what();
-        LOG_ERROR(error);
+        LOG_ERROR(error.str());
         throw std::runtime_error(error.str());
     }
 }
@@ -300,7 +300,7 @@ void SqLiteDataProvider::rollbackTransaction()
     {
         std::ostringstream error;
         error << "SQL ERROR while trying to rollback a transaction: " << e.what();
-        LOG_ERROR(error);
+        LOG_ERROR(error.str());
         throw std::runtime_error(error.str());
     }
 }
