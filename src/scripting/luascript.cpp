@@ -254,6 +254,7 @@ void LuaScript::processDeathEvent(Entity *entity)
 {
     if (mDeathNotificationCallback.isValid())
     {
+        setMap(entity->getMap());
         prepare(mDeathNotificationCallback);
         push(entity);
         //TODO: get and push a list of creatures who contributed to killing the
@@ -266,6 +267,7 @@ void LuaScript::processRemoveEvent(Entity *entity)
 {
     if (mRemoveNotificationCallback.isValid())
     {
+        setMap(entity->getMap());
         prepare(mRemoveNotificationCallback);
         push(entity);
         //TODO: get and push a list of creatures who contributed to killing the
