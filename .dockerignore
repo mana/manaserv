@@ -1,0 +1,4 @@
+*.db
+Dockerfile
+CMakeFiles/
+CMakeCache.txt
